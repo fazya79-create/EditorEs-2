@@ -17,8 +17,10 @@
 
 package com.itsaky.androidide.handlers
 
+import com.itsaky.androidide.app.BaseApplication
 import com.itsaky.androidide.lsp.api.ILanguageClient
 import com.itsaky.androidide.lsp.api.ILanguageServerRegistry
+import com.itsaky.androidide.lsp.cpp.CppLanguageServer
 import com.itsaky.androidide.lsp.xml.XMLLanguageServer
 
 /**
@@ -30,6 +32,8 @@ object LspHandler {
   fun registerLanguageServers() {
     ILanguageServerRegistry.getDefault().apply {
       getServer(XMLLanguageServer.SERVER_ID) ?: register(XMLLanguageServer())
+      getServer(CppLanguageServer.SERVER_ID)
+        ?: register(CppLanguageServer(BaseApplication.getBaseInstance()))
     }
   }
   
