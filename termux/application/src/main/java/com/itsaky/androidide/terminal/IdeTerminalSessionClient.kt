@@ -18,6 +18,7 @@
 package com.itsaky.androidide.terminal
 
 import com.itsaky.androidide.activities.TerminalActivity
+import com.itsaky.androidide.backend.proot.ProotConfig
 import com.termux.app.terminal.TermuxTerminalSessionActivityClient
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
@@ -30,6 +31,33 @@ import com.termux.terminal.TerminalSessionClient
 class IdeTerminalSessionClient(
   activity: TerminalActivity
 ) : TermuxTerminalSessionActivityClient(activity) {
+
+  override fun addNewSession(isFailSafe: Boolean, sessionName: String?, workingDirectory: String?) {
+    val activity = mActivity
+    val service = activity?.termuxService
+    if (!isFailSafe && activity != null && service != null &&
+      ProotConfig.isInstalled(activity) && ProotConfig.isAvailable(activity)
+    ) {
+      var cwd = workingDirectory
+      if (cwd == null) {
+        val current = activity.currentSession
+        cwd = current?.cwd ?: activity.properties.defaultWorkingDirectory
+      }
+      val fullArgs = ProotConfig.prootArgs(activity)
+      val session = service.createTermuxSession(
+        ProotConfig.prootBinary(activity),
+        fullArgs.drop(1).toTypedArray(),
+        null,
+        cwd,
+        false,
+        sessionName
+      ) ?: return
+      setCurrentSession(session.terminalSession)
+      activity.drawer.closeDrawers()
+      return
+    }
+    super.addNewSession(isFailSafe, sessionName, workingDirectory)
+  }
 
   override fun onSessionFinished(finishedSession: TerminalSession) {
     val termuxSession = mActivity?.termuxService?.getTermuxSessionForTerminalSession(

@@ -117,8 +117,6 @@ dependencies {
   implementation(libs.google.auto.service.annotations)
   implementation(libs.google.gson)
   implementation(libs.google.guava)
-  implementation(libs.apache.commons.compress)
-  implementation(libs.tukaani.xz)
 
   // Git
   implementation(libs.git.jgit)
@@ -155,6 +153,7 @@ dependencies {
 
   // Local projects here
   implementation(projects.core.actions)
+  implementation(projects.core.backend)
   implementation(projects.core.common)
   implementation(projects.core.indexingApi)
   implementation(projects.core.indexingCore)

@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.common.markwon.linkify)
     implementation(libs.common.markwon.recycler)
 
+    implementation(projects.core.backend)
     implementation(projects.core.common)
     implementation(projects.core.resources)
     implementation(projects.termux.view)
