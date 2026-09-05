@@ -41,6 +41,5 @@ dependencies {
   api(projects.event.eventbusAndroid)
   api(projects.testing.commonTest)
   api(projects.testing.androidTest)
-  api(projects.testing.gradleToolingTest)
   api(projects.testing.unitTest)
 }

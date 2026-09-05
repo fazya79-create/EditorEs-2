@@ -46,7 +46,6 @@ dependencies {
 
   testImplementation(projects.core.lspApi)
   testImplementation(projects.testing.unitTest)
-  testImplementation(projects.testing.gradleToolingTest)
   testImplementation(projects.utilities.templatesApi)
   testImplementation(projects.utilities.preferences)
 }
