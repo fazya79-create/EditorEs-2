@@ -35,7 +35,7 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.withType
 import java.io.File
 
-private val projectsRequiringMavenLocalForTests = arrayOf(":tooling:plugin")
+private val projectsRequiringMavenLocalForTests = arrayOf<String>()
 private val mavenLocalRepos = hashMapOf<String, String>()
 
 @Suppress("UnstableApiUsage")
