@@ -90,9 +90,6 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
 
   override fun preDestroy() {
 
-    syncNotificationFlashbar?.dismiss()
-    syncNotificationFlashbar = null
-
     if (isDestroying) {
       closeProject(false)
     }
