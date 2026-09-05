@@ -99,7 +99,6 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    mBuildEventListener.setActivity(this)
     super.onCreate(savedInstanceState)
 
     editorViewModel._displayedFile.observe(
