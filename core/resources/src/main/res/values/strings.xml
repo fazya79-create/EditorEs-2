@@ -559,4 +559,25 @@
   <string name="summary_open_source_licenses">View open source licenses.</string>
   <string name="idepref_jdkVersion_title">JDK version</string>
   <string name="idepref_jdkVersion_summary">Currently selected: %1$s (requires restart if changed)</string>
+  <string name="idepref_backend_title">Native backend</string>
+  <string name="idepref_backend_summary">Ubuntu environment, toolchains and CMake build options.</string>
+  <string name="idepref_backend_env">Environment</string>
+  <string name="idepref_backend_install_ubuntu">Install Ubuntu</string>
+  <string name="idepref_backend_install_ndk">Install NDK</string>
+  <string name="idepref_backend_install_cmake">Install CMake</string>
+  <string name="idepref_backend_installed">Installed (%1$s)</string>
+  <string name="idepref_backend_missing">Not installed</string>
+  <string name="idepref_backend_install_started">Installation started in background</string>
+  <string name="idepref_backend_install_done">Installation finished</string>
+  <string name="idepref_backend_install_failed_simple">Installation failed</string>
+  <string name="idepref_backend_build_options">Build options</string>
+  <string name="idepref_backend_abi">Target ABI</string>
+  <string name="idepref_backend_api">API level</string>
+  <string name="idepref_backend_buildtype">Build type</string>
+  <string name="idepref_backend_current">Current: %1$s</string>
+  <string name="action_build_cmake">Build</string>
+  <string name="msg_build_no_project">No project is open</string>
+  <string name="msg_build_no_presets">No CMake presets. Configure them first.</string>
+  <string name="msg_build_finished">Build finished with exit code %1$d</string>
+  <string name="template_cpp_executable">C++ Executable</string>
 </resources>

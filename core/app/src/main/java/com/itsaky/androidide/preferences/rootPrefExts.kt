@@ -38,6 +38,7 @@ class ConfigurationPreferences(
     addPreference(GeneralPreferencesScreen())
     addPreference(EditorPreferencesScreen())
     addPreference(BuildAndRunPreferences())
+    addPreference(BackendPreferencesScreen())
     addPreference(TermuxPreferences())
   }
 }
