@@ -41,6 +41,7 @@ dependencies {
     kapt(projects.annotation.processors)
     
     implementation(libs.common.editor)
+    implementation(libs.common.jsonrpc)
     implementation(libs.common.utilcode)
     implementation(libs.androidide.ts)
     implementation(libs.androidide.ts.xml)
