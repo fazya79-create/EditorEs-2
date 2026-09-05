@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.common.kotlin)
     implementation(libs.common.utilcode)
+    implementation(libs.google.gson)
     implementation(libs.google.material)
     
     api(projects.core.projects)
