@@ -21,21 +21,8 @@ import com.google.auto.service.AutoService
 import com.google.common.collect.ImmutableList
 import com.itsaky.androidide.templates.ITemplateProvider
 import com.itsaky.androidide.templates.Template
-import com.itsaky.androidide.templates.impl.basicActivity.basicActivityProject
-import com.itsaky.androidide.templates.impl.bottomNavActivity.bottomNavActivityProject
-import com.itsaky.androidide.templates.impl.composeActivity.composeActivityProject
 import com.itsaky.androidide.templates.impl.cppExecutable.cppExecutableProject
-import com.itsaky.androidide.templates.impl.emptyActivity.emptyActivityProject
-import com.itsaky.androidide.templates.impl.navDrawerActivity.navDrawerActivityProject
-import com.itsaky.androidide.templates.impl.noActivity.noActivityProjectTemplate
-import com.itsaky.androidide.templates.impl.noAndroidXActivity.noAndroidXActivityProject
-import com.itsaky.androidide.templates.impl.tabbedActivity.tabbedActivityProject
 
-/**
- * Default implementation of the [ITemplateProvider].
- *
- * @author Akash Yadav
- */
 @Suppress("unused")
 @AutoService(ITemplateProvider::class)
 class TemplateProviderImpl : ITemplateProvider {
@@ -47,17 +34,8 @@ class TemplateProviderImpl : ITemplateProvider {
   }
 
   private fun templates() =
-    //@formatter:off
     arrayOf(
-      cppExecutableProject(),
-      noActivityProjectTemplate(),
-      emptyActivityProject(),
-      basicActivityProject(),
-      navDrawerActivityProject(),
-      bottomNavActivityProject(),
-      tabbedActivityProject(),
-      noAndroidXActivityProject(),
-      composeActivityProject()
+      cppExecutableProject()
     )
 
   private fun initializeTemplates() {
@@ -65,7 +43,6 @@ class TemplateProviderImpl : ITemplateProvider {
       templates[template.templateId] = template
     }
   }
-  //@formatter:on
 
   override fun getTemplates(): List<Template<*>> {
     return ImmutableList.copyOf(templates.values)
@@ -81,7 +58,7 @@ class TemplateProviderImpl : ITemplateProvider {
   }
 
   override fun release() {
-    templates.forEach { it.value.release() }
+    templates.values.forEach { it.release() }
     templates.clear()
   }
 }

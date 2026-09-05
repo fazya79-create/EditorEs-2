@@ -19,10 +19,7 @@ package com.itsaky.androidide.templates
 
 import android.view.View
 import androidx.annotation.StringRes
-import com.itsaky.androidide.templates.Language.Java
-import com.itsaky.androidide.templates.Language.Kotlin
 import com.itsaky.androidide.templates.ParameterConstraint.NONEMPTY
-import com.itsaky.androidide.templates.ParameterConstraint.PACKAGE
 import com.itsaky.androidide.templates.R.string
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -364,51 +361,9 @@ inline fun <T : Enum<*>> enumParameter(crossinline block: EnumParameterBuilder<T
 inline fun projectNameParameter(crossinline configure: StringParameterBuilder.() -> Unit = {}) =
   stringParameter {
     name = string.project_app_name
-    default = "My Application"
-    startIcon = { R.drawable.ic_android }
+    default = "Cpp Project"
+    startIcon = { R.drawable.ic_language_cpp }
     constraints = listOf(NONEMPTY)
-
-    configure()
-  }
-
-inline fun packageNameParameter(crossinline configure: StringParameterBuilder.() -> Unit = {}) =
-  stringParameter {
-    name = string.package_name
-    default = "com.example.myapplication"
-    startIcon = { R.drawable.ic_package }
-    constraints = listOf(NONEMPTY, PACKAGE)
-
-    configure()
-  }
-
-inline fun projectLanguageParameter(
-  crossinline configure: EnumParameterBuilder<Language>.() -> Unit = {}
-) = enumParameter<Language> {
-  name = string.wizard_language
-  default = Java
-  displayName = Language::lang
-  startIcon = {
-    if (it.value == Kotlin) R.drawable.ic_language_kotlin
-    else R.drawable.ic_language_java
-  }
-
-  configure()
-}
-
-inline fun minSdkParameter(crossinline configure: EnumParameterBuilder<Sdk>.() -> Unit = {}) =
-  enumParameter<Sdk> {
-    name = string.minimum_sdk
-    default = Sdk.Lollipop
-    displayName = Sdk::displayName
-    startIcon = { R.drawable.ic_min_sdk }
-
-    configure()
-  }
-
-inline fun useKtsParameter(crossinline configure: BooleanParameterBuilder.() -> Unit = {}) =
-  booleanParameter {
-    name = string.msg_use_kts
-    default = true
 
     configure()
   }

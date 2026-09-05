@@ -19,7 +19,6 @@ package com.itsaky.androidide.templates
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import com.itsaky.androidide.templates.base.util.optonallyKts
 import java.io.File
 import java.util.UUID
 
@@ -50,16 +49,6 @@ interface TemplateRecipeResultWithData<D : TemplateData> : TemplateRecipeResult 
  * Result of recipe execution for a [ProjectTemplate].
  */
 interface ProjectTemplateRecipeResult : TemplateRecipeResultWithData<ProjectTemplateData>
-
-/**
- * Result of recipe execution for a [ModuleTemplate].
- */
-interface ModuleTemplateRecipeResult : TemplateRecipeResultWithData<ModuleTemplateData>
-
-/**
- * Result of recipe execution for a [FileTemplate].
- */
-interface FileTemplateRecipeResult : TemplateRecipeResult
 
 /**
  * Recipe used to configure the execution of [TemplateRecipe].
@@ -98,15 +87,7 @@ typealias TemplateRecipeFinalizer = RecipeExecutor.() -> Unit
  * @property useKts Whether to use Kotlin DSL for Gradle build scripts.
  */
 abstract class BaseTemplateData(val name: String, val projectDir: File, val language: Language,
-  val useKts: Boolean) : TemplateData() {
-
-  /**
-   * Get the `build.gradle[.kts]` file for the project.
-   */
-  fun buildGradleFile(): File {
-    return File(projectDir, optonallyKts("build.gradle"))
-  }
-}
+  val useKts: Boolean) : TemplateData()
 
 /**
  * Language for source files.
@@ -114,39 +95,6 @@ abstract class BaseTemplateData(val name: String, val projectDir: File, val lang
 enum class Language(val lang: String, val ext: String) {
 
   Java("Java", "java"), Kotlin("Kotlin", "kt");
-}
-
-/**
- * The type of module.
- *
- * @property typeName The name of the type.
- */
-enum class ModuleType(val typeName: String) {
-
-  AndroidApp("Android Application"), AndroidLibrary("Android Library"), JavaLibrary("Java library")
-}
-
-/**
- * Type of source folder that can be in a module.
- *
- * @property folder The name of the folder.
- */
-enum class SrcSet(val folder: String) {
-
-  /**
-   * `src/main`.
-   */
-  Main("main"),
-
-  /**
-   * `src/test`.
-   */
-  Test("test"),
-
-  /**
-   * `src/androidTest`.
-   */
-  AndroidTest("androidTest")
 }
 
 /**
@@ -160,56 +108,12 @@ data class ProjectVersionData(val gradlePlugin: String = ANDROID_GRADLE_PLUGIN_V
   val gradle: String = GRADLE_DISTRIBUTION_VERSION, val kotlin: String = KOTLIN_VERSION)
 
 /**
- * Version information about a module.
- *
- * @property targetSdk The target SDK version for modules.
- * @property buildTools The build tools version for modules.
- */
-data class ModuleVersionData(val minSdk: Sdk, val targetSdk: Sdk = TARGET_SDK_VERSION,
-  val compileSdk: Sdk = COMPILE_SDK_VERSION, val javaSource: String = JAVA_SOURCE_VERSION,
-  val javaTarget: String = JAVA_TARGET_VERSION) {
-
-  /**
-   * Get the Java source version string representation in the `JavaVersion.VERSION_${version}` format.
-   */
-  fun javaSource() = javaVersionPrefix(javaSource)
-
-  /**
-   * Get the Java target version string representation in the `JavaVersion.VERSION_${version}` format.
-   */
-  fun javaTarget() = javaVersionPrefix(javaTarget)
-
-  private fun javaVersionPrefix(version: String): String = "JavaVersion.VERSION_${version}"
-}
-
-/**
  * Data for creating root projects.
  *
  * @property version The version information for this project.
  */
 class ProjectTemplateData(name: String, projectDir: File, val version: ProjectVersionData,
   language: Language, useKts: Boolean) : BaseTemplateData(name, projectDir, language, useKts)
-
-/**
- * Data for creating module projects.
- *
- * @property packageName The package name of the module.
- * @property type The type of module.
- * @property versions Version information for the module.
- */
-open class ModuleTemplateData(name: String, val appName: String?, val packageName: String,
-  projectDir: File, val type: ModuleType, language: Language, useKts: Boolean = true, minSdk: Sdk,
-  val versions: ModuleVersionData = ModuleVersionData(minSdk)) :
-  BaseTemplateData(name, projectDir, language, useKts) {
-
-  private val srcDirs = mutableMapOf<SrcSet, File>()
-
-  fun srcFolder(srcSet: SrcSet): File {
-    return srcDirs.computeIfAbsent(srcSet) {
-      File(projectDir, "src/${it.folder}")
-    }.also { it.mkdirs() }
-  }
-}
 
 /**
  * Model for a template.
@@ -272,22 +176,6 @@ open class ProjectTemplate(val moduleTemplates: List<Template<*>>, @StringRes te
     moduleTemplates.forEach { it.release() }
   }
 }
-
-/**
- * Template for a module project.
- *
- * @property name The mdoule name (gradle format, e.g. ':app').
- */
-open class ModuleTemplate(val name: String, @StringRes templateName: Int, @DrawableRes thumb: Int,
-  widgets: List<Widget<*>>,
-  recipe: TemplateRecipe<ModuleTemplateRecipeResult>) :
-  Template<ModuleTemplateRecipeResult>(templateName, thumb, widgets, recipe)
-
-/**
- * Template for creating a file.
- */
-open class FileTemplate<R : FileTemplateRecipeResult>(@StringRes name: Int, @DrawableRes thumb: Int,
-  widgets: List<Widget<*>>, recipe: TemplateRecipe<R>) : Template<R>(name, thumb, widgets, recipe)
 
 /**
  * Base class for template builders.
