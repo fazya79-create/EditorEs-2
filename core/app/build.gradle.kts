@@ -45,6 +45,19 @@ buildscript {
 android {
   namespace = BuildConfig.packageName
 
+  signingConfigs {
+    getByName("debug") {
+      val ciKeystore = System.getenv("DEBUG_KEYSTORE")
+        ?: (findProperty("debugKeystore") as? String)
+      if (!ciKeystore.isNullOrBlank()) {
+        storeFile = file(ciKeystore)
+        storePassword = "android"
+        keyAlias = "androiddebugkey"
+        keyPassword = "android"
+      }
+    }
+  }
+
   defaultConfig {
     applicationId = BuildConfig.packageName
     vectorDrawables.useSupportLibrary = true
