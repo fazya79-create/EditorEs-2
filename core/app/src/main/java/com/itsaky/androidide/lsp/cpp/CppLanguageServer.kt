@@ -161,7 +161,7 @@ class CppLanguageServer(
         TextDocumentIdentifier(uri),
         org.eclipse.lsp4j.Position(params.position.line, params.position.column)
       )
-      val result = server.completion(lspParams).get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+      val result = server.textDocumentService.completion(lspParams).get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
       val items = when {
         result == null -> emptyList()
         result.isLeft -> result.left ?: emptyList()
@@ -185,7 +185,7 @@ class CppLanguageServer(
         org.eclipse.lsp4j.Position(params.position.line, params.position.column),
         ReferenceContext(params.includeDeclaration)
       )
-      val locations = server.references(lspParams).get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+      val locations = server.textDocumentService.references(lspParams).get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
       ReferenceResult((locations ?: emptyList()).mapNotNull { mapLocation(it) })
     } catch (error: Throwable) {
       log.error("clangd references failed", error)
@@ -203,7 +203,7 @@ class CppLanguageServer(
         TextDocumentIdentifier(uri),
         org.eclipse.lsp4j.Position(params.position.line, params.position.column)
       )
-      val result = server.definition(lspParams).get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+      val result = server.textDocumentService.definition(lspParams).get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
       val locations = when {
         result == null -> emptyList()
         result.isLeft -> result.left ?: emptyList()
