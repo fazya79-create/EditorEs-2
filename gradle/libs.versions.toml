@@ -111,6 +111,8 @@ google-auto-service = { module = "com.google.auto.service:auto-service", version
 google-protobuf = { module = "com.google.protobuf:protobuf-javalite", version = "3.25.3" }
 google-java-format = { module = "com.google.googlejavaformat:google-java-format", version = "1.20.0" }
 google-flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
+apache-commons-compress = { module = "org.apache.commons:commons-compress", version = "1.28.0" }
+tukaani-xz = { module = "org.tukaani:xz", version = "1.12" }
 
 # AAPT2
 aapt2-common = { module = "com.android.tools:common", version = "31.4.1" }

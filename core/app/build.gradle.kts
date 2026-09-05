@@ -117,6 +117,8 @@ dependencies {
   implementation(libs.google.auto.service.annotations)
   implementation(libs.google.gson)
   implementation(libs.google.guava)
+  implementation(libs.apache.commons.compress)
+  implementation(libs.tukaani.xz)
 
   // Git
   implementation(libs.git.jgit)
