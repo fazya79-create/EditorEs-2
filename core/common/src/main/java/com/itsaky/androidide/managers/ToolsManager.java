@@ -19,14 +19,11 @@ package com.itsaky.androidide.managers;
 
 import androidx.annotation.NonNull;
 
-import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.ResourceUtils;
 import com.itsaky.androidide.app.BaseApplication;
 import com.itsaky.androidide.app.configuration.IDEBuildConfigProvider;
-import com.itsaky.androidide.app.configuration.IJdkDistributionProvider;
 import com.itsaky.androidide.utils.Environment;
 
-import org.jetbrains.annotations.Contract;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,19 +32,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
-import kotlin.io.ConstantsKt;
-import kotlin.io.FilesKt;
-
 public class ToolsManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(ToolsManager.class);
-
-  public static String COMMON_ASSET_DATA_DIR = "data/common";
 
   public static void init(@NonNull BaseApplication app, Runnable onFinish) {
 
@@ -57,17 +48,8 @@ public class ToolsManager {
     }
 
     CompletableFuture.runAsync(() -> {
-      // Load installed JDK distributions
-      IJdkDistributionProvider.getInstance().loadDistributions();
-
       writeNoMediaFile();
-      extractAapt2();
-      extractToolingApi();
-      extractAndroidJar();
       extractColorScheme(app);
-      writeInitScript();
-
-      deleteIdeenv();
     }).whenComplete((__, error) -> {
       if (error != null) {
         LOG.error("Error extracting tools", error);
@@ -157,68 +139,6 @@ public class ToolsManager {
         LOG.error("Failed to create .nomedia file in projects directory");
       }
     }
-  }
-
-  private static void extractAndroidJar() {
-    if (!Environment.ANDROID_JAR.exists()) {
-      ResourceUtils.copyFileFromAssets(getCommonAsset("android.jar"),
-          Environment.ANDROID_JAR.getAbsolutePath());
-    }
-  }
-
-  private static void deleteIdeenv() {
-    final var file = new File(Environment.BIN_DIR, "ideenv");
-    if (file.exists() && !file.delete()) {
-      LOG.warn("Unable to delete file: {}", file);
-    }
-  }
-
-  @NonNull
-  @Contract(pure = true)
-  public static String getCommonAsset(String name) {
-    return COMMON_ASSET_DATA_DIR + "/" + name;
-  }
-
-  private static void extractAapt2() {
-    if (!Environment.AAPT2.exists()) {
-      final var context = BaseApplication.getBaseInstance();
-      final var nativeLibraryDir = context.getApplicationInfo().nativeLibraryDir;
-      final var sourceAapt2 = new File(nativeLibraryDir, "libaapt2.so");
-      if (sourceAapt2.exists() && sourceAapt2.isFile()) {
-        FilesKt.copyTo(sourceAapt2, Environment.AAPT2, true, ConstantsKt.DEFAULT_BUFFER_SIZE);
-      } else {
-        LOG.error("{} file does not exist! This can be problematic.", sourceAapt2);
-      }
-    }
-
-    if (!Environment.AAPT2.canExecute() && !Environment.AAPT2.setExecutable(true)) {
-      LOG.error("Cannot set executable permissions to AAPT2 binary");
-    }
-  }
-
-  private static void extractToolingApi() {
-    if (Environment.TOOLING_API_JAR.exists()) {
-      FileUtils.delete(Environment.TOOLING_API_JAR);
-    }
-
-    ResourceUtils.copyFileFromAssets(getCommonAsset("tooling-api-all.jar"),
-        Environment.TOOLING_API_JAR.getAbsolutePath());
-  }
-
-  private static void writeInitScript() {
-    final var initScript = Environment.INIT_SCRIPT;
-    final var initScriptBak = new File(initScript.getParentFile(), initScript.getName() + ".bak");
-    final var contents = readInitScript();
-
-    FilesKt.writeText(initScriptBak, contents, StandardCharsets.UTF_8);
-    if (!initScript.exists()) {
-      FilesKt.writeText(initScript, contents, StandardCharsets.UTF_8);
-    }
-  }
-
-  @NonNull
-  private static String readInitScript() {
-    return ResourceUtils.readAssets2String(getCommonAsset("androidide.init.gradle"));
   }
 
 }
