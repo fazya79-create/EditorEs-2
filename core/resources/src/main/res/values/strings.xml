@@ -566,4 +566,6 @@
   <string name="msg_build_no_presets">No CMake presets. Configure them first.</string>
   <string name="msg_build_finished">Build finished with exit code %1$d</string>
   <string name="template_cpp_executable">C++ Executable</string>
+  <string name="title_backend_required">Native backend required</string>
+  <string name="msg_backend_required">Install Ubuntu, the NDK and CMake from Settings → Native backend, then press Done to continue.</string>
 </resources>

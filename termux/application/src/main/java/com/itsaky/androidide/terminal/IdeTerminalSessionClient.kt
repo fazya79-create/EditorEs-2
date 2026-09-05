@@ -20,7 +20,6 @@ package com.itsaky.androidide.terminal
 import com.itsaky.androidide.activities.TerminalActivity
 import com.itsaky.androidide.backend.proot.ProotConfig
 import com.termux.app.terminal.TermuxTerminalSessionActivityClient
-import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
 
 /**
@@ -57,17 +56,5 @@ class IdeTerminalSessionClient(
       return
     }
     super.addNewSession(isFailSafe, sessionName, workingDirectory)
-  }
-
-  override fun onSessionFinished(finishedSession: TerminalSession) {
-    val termuxSession = mActivity?.termuxService?.getTermuxSessionForTerminalSession(
-      finishedSession)
-    if (termuxSession != null && termuxSession is IdesetupSession) {
-      // if the finished session was performing tools installation
-      // then set the result code for the installation process
-      mActivity.setResult(finishedSession.exitStatus)
-    }
-
-    super.onSessionFinished(finishedSession)
   }
 }
