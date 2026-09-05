@@ -34,14 +34,8 @@ import com.itsaky.androidide.lsp.models.CompletionResult
 import com.itsaky.androidide.lsp.models.CompletionResult.Companion.EMPTY
 import com.itsaky.androidide.lsp.xml.providers.completion.AttrValueCompletionProvider
 import com.itsaky.androidide.lsp.xml.providers.completion.IXmlCompletionProvider
-import com.itsaky.androidide.lsp.xml.providers.completion.canCompleteManifest
 import com.itsaky.androidide.lsp.xml.providers.completion.common.CommonAttrCompletionProvider
 import com.itsaky.androidide.lsp.xml.providers.completion.etc.InheritingAttrCompletionProvider
-import com.itsaky.androidide.lsp.xml.providers.completion.layout.LayoutAttrCompletionProvider
-import com.itsaky.androidide.lsp.xml.providers.completion.layout.LayoutTagCompletionProvider
-import com.itsaky.androidide.lsp.xml.providers.completion.manifest.ManifestAttrCompletionProvider
-import com.itsaky.androidide.lsp.xml.providers.completion.manifest.ManifestAttrValueCompletionProvider
-import com.itsaky.androidide.lsp.xml.providers.completion.manifest.ManifestTagCompletionProvider
 import com.itsaky.androidide.lsp.xml.utils.AnimTagTransformer
 import com.itsaky.androidide.lsp.xml.utils.AnimatorTagTransformer
 import com.itsaky.androidide.lsp.xml.utils.DrawableTagTransformer
@@ -139,8 +133,6 @@ class XmlCompletionProvider(settings: IServerSettings) :
 
   private fun getCompleter(pathData: ResourcePathData, type: NodeType): IXmlCompletionProvider? {
     return when (pathData.type) {
-      LAYOUT -> createLayoutCompleter(type)
-      TRANSITION -> createTransitionCompleter(type)
       null -> createNullTypeCompleter(pathData, type)
       else -> createCommonCompleter(pathData, type)
     }
@@ -182,31 +174,8 @@ class XmlCompletionProvider(settings: IServerSettings) :
     type: NodeType
   ): IXmlCompletionProvider? {
 
-    // In test cases
-    if (canCompleteManifest(pathData, type)) {
-      return createManifestCompleter(type)
-    }
-
     return when (pathData.file.name) {
-      ANDROID_MANIFEST_XML -> createManifestCompleter(type)
-      else -> null
-    }
-  }
-
-  private fun createManifestCompleter(type: NodeType): IXmlCompletionProvider? {
-    return when (type) {
-      TAG -> ManifestTagCompletionProvider(this)
-      ATTRIBUTE -> ManifestAttrCompletionProvider(this)
-      ATTRIBUTE_VALUE -> ManifestAttrValueCompletionProvider(this)
-      else -> null
-    }
-  }
-
-  private fun createLayoutCompleter(type: NodeType): IXmlCompletionProvider? {
-    return when (type) {
-      TAG -> LayoutTagCompletionProvider(this)
-      ATTRIBUTE -> LayoutAttrCompletionProvider(this)
-      ATTRIBUTE_VALUE -> AttrValueCompletionProvider(this)
+      ANDROID_MANIFEST_XML -> createCommonCompleter(pathData, type)
       else -> null
     }
   }

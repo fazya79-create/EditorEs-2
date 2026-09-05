@@ -29,12 +29,9 @@ import com.itsaky.androidide.eventbus.events.editor.OnResumeEvent
 import com.itsaky.androidide.eventbus.events.editor.OnStartEvent
 import com.itsaky.androidide.eventbus.events.editor.OnStopEvent
 import com.itsaky.androidide.projects.internal.ProjectManagerImpl
-import com.itsaky.androidide.projects.util.BootClasspathProvider
 import com.itsaky.androidide.utils.EditorActivityActions
 import com.itsaky.androidide.utils.EditorSidebarActions
-import com.itsaky.androidide.utils.Environment
 import org.greenrobot.eventbus.EventBus
-import java.util.concurrent.CompletableFuture
 
 /**
  * Observes lifecycle events if [com.itsaky.androidide.EditorActivityKt].
@@ -52,7 +49,6 @@ class EditorActivityLifecyclerObserver : DefaultLifecycleObserver {
   }
 
   override fun onStart(owner: LifecycleOwner) {
-    CompletableFuture.runAsync(this::initBootclasspathProvider)
     register(fileActionsHandler, ProjectManagerImpl.getInstance())
 
     dispatchEvent(OnStartEvent())
@@ -87,9 +83,5 @@ class EditorActivityLifecyclerObserver : DefaultLifecycleObserver {
 
   private fun dispatchEvent(event: Event) {
     EventBus.getDefault().post(event)
-  }
-
-  private fun initBootclasspathProvider() {
-    BootClasspathProvider.update(listOf(Environment.ANDROID_JAR.absolutePath))
   }
 }

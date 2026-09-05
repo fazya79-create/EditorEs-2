@@ -47,8 +47,8 @@ class FindInProjectAction() : EditorActivityAction() {
         return
       }
 
-    val project = IProjectManager.getInstance().getWorkspace()
-    if (project == null || project.getSubProjects().isEmpty()) {
+    val projectDir = runCatching { IProjectManager.getInstance().projectDir }.getOrNull()
+    if (projectDir == null || !projectDir.isDirectory) {
       markInvisible()
       return
     }

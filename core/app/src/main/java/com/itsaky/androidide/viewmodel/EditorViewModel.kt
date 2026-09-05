@@ -52,7 +52,6 @@ class EditorViewModel : ViewModel() {
   internal val _filesSaving = MutableLiveData(false)
 
   private val _openedFiles = MutableLiveData<OpenedFilesCache>()
-  private val _isBoundToBuildService = MutableLiveData(false)
   private val _files = MutableLiveData<MutableList<File>>(ArrayList())
 
   /**
@@ -77,12 +76,6 @@ class EditorViewModel : ViewModel() {
     get() = _openedFiles.value
     set(value) {
       this._openedFiles.value = value
-    }
-
-  var isBoundToBuildSerice: Boolean
-    get() = _isBoundToBuildService.value ?: false
-    set(value) {
-      _isBoundToBuildService.value = value
     }
 
   var isBuildInProgress: Boolean

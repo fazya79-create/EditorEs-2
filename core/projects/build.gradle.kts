@@ -44,7 +44,6 @@ dependencies {
 
   api(projects.event.eventbus)
   api(projects.event.eventbusEvents)
-  api(projects.tooling.api)
 
   implementation(projects.core.common)
   implementation(projects.logging.logger)

@@ -58,7 +58,7 @@ class TerminalSidebarAction(context: Context, override val order: Int) : Abstrac
         )
         putExtra(
           TERMUX_ACTIVITY.EXTRA_SESSION_NAME,
-          IProjectManager.getInstance().getWorkspace()?.getRootProject()?.name
+          IProjectManager.getInstance().projectDir.name
         )
         putExtra(TERMUX_ACTIVITY.EXTRA_FAILSAFE_SESSION, isFailsafe)
       }

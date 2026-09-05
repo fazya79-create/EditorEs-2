@@ -170,7 +170,6 @@ dependencies {
   implementation(projects.termux.view)
   implementation(projects.termux.emulator)
   implementation(projects.termux.shared)
-  implementation(projects.tooling.api)
   implementation(projects.utilities.buildInfo)
   implementation(projects.utilities.lookup)
   implementation(projects.utilities.preferences)
