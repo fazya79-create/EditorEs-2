@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.tracing)
     implementation(libs.androidx.tracing.ktx)
+    implementation(libs.google.gson)
 
     implementation(libs.common.utilcode)
     implementation(libs.composite.jdt)
