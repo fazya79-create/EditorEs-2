@@ -47,6 +47,7 @@ include(
   ":fuzzysearch",
   ":javapoet",
   ":jaxp",
+  ":java-compiler",
   ":jdt",
   ":layoutlib-api",
   ":logback-core",

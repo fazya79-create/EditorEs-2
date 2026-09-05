@@ -36,6 +36,7 @@ dependencyResolutionManagement {
     "build-deps" to arrayOf(
       "appintro",
       "fuzzysearch",
+      "java-compiler",
       "javapoet",
       "jaxp",
       "jdt",
