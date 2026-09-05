@@ -74,24 +74,6 @@ class AndroidIDEAssetsPlugin : Plugin<Project> {
 
         variant.sources.assets?.addGeneratedSourceDirectory(generateInitScript,
           GenerateInitScriptTask::outputDir)
-
-        // Tooling API JAR copier
-        val copyToolingApiJar = tasks.register("copy${variantNameCapitalized}ToolingApiJar",
-          AddFileToAssetsTask::class.java) {
-          val implPath = ":tooling:impl"
-          val toolingApi = checkNotNull(rootProject.findProject(implPath)) {
-            "Cannot find the Tooling Impl module with project path: '$implPath'"
-          }
-          dependsOn(toolingApi.tasks.getByName("copyJar"))
-
-          val toolingApiJar = toolingApi.layout.buildDirectory.file("libs/tooling-api-all.jar")
-
-          inputFile.set(toolingApiJar)
-          baseAssetsPath.set("data/common")
-        }
-
-        variant.sources.assets?.addGeneratedSourceDirectory(copyToolingApiJar,
-          AddFileToAssetsTask::outputDirectory)
       }
     }
   }
