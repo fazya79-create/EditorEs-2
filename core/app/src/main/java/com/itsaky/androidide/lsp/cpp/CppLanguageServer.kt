@@ -60,7 +60,7 @@ import org.eclipse.lsp4j.DidCloseTextDocumentParams
 import org.eclipse.lsp4j.DidOpenTextDocumentParams
 import org.eclipse.lsp4j.InitializeParams
 import org.eclipse.lsp4j.InitializedParams
-import org.eclipse.lsp4j.LanguageClient
+import org.eclipse.lsp4j.services.LanguageClient
 import org.eclipse.lsp4j.MessageActionItem
 import org.eclipse.lsp4j.MessageParams
 import org.eclipse.lsp4j.PublishDiagnosticsParams
@@ -139,7 +139,7 @@ class CppLanguageServer(
   override fun applySettings(settings: IServerSettings?) {}
 
   override fun setupWorkspace(workspace: IWorkspace) {
-    val dir = workspace.projectDir
+    val dir = workspace.getProjectDir()
     synchronized(lock) {
       if (root == null || root?.absolutePath != dir.absolutePath) {
         shutdown()
