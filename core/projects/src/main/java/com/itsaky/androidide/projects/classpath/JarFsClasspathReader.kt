@@ -19,6 +19,7 @@ package com.itsaky.androidide.projects.classpath
 
 import com.google.common.collect.ImmutableSet
 import java.io.File
+import java.net.URI
 import java.nio.file.FileSystems
 import java.nio.file.FileVisitResult
 import java.nio.file.FileVisitResult.CONTINUE
@@ -38,7 +39,7 @@ class JarFsClasspathReader : IClasspathReader {
         continue
       }
 
-      FileSystems.newFileSystem(path, emptyMap<String, Any>()).use { fs ->
+      FileSystems.newFileSystem(URI("jar:" + path.toUri()), emptyMap<String, Any>()).use { fs ->
         Files.walkFileTree(
           fs.getPath("/"),
           emptySet(),
