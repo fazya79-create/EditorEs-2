@@ -24,6 +24,7 @@ import com.itsaky.androidide.templates.Template
 import com.itsaky.androidide.templates.impl.basicActivity.basicActivityProject
 import com.itsaky.androidide.templates.impl.bottomNavActivity.bottomNavActivityProject
 import com.itsaky.androidide.templates.impl.composeActivity.composeActivityProject
+import com.itsaky.androidide.templates.impl.cppExecutable.cppExecutableProject
 import com.itsaky.androidide.templates.impl.emptyActivity.emptyActivityProject
 import com.itsaky.androidide.templates.impl.navDrawerActivity.navDrawerActivityProject
 import com.itsaky.androidide.templates.impl.noActivity.noActivityProjectTemplate
@@ -48,6 +49,7 @@ class TemplateProviderImpl : ITemplateProvider {
   private fun templates() =
     //@formatter:off
     arrayOf(
+      cppExecutableProject(),
       noActivityProjectTemplate(),
       emptyActivityProject(),
       basicActivityProject(),
