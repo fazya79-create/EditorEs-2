@@ -91,10 +91,6 @@ fun transformToTagName(entryName: String, prefix: String = ""): String {
  * For example: `uses-permission` -> `AndroidManifestUsesPermission`
  */
 fun transformToEntryName(tagName: String, prefix: String = ""): String {
-  if (tagName == "manifest") {
-    return MANIFEST_TAG_PREFIX
-  }
-
   val name = StringBuilder(prefix)
 
   var index = 0
