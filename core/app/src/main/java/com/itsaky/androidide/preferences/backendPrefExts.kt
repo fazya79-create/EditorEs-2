@@ -160,12 +160,12 @@ private class InstallCmakePreference(
   }
 
   override fun onPreferenceClick(preference: Preference): Boolean {
-    installToolchain(preference, ToolchainKind.Cmake)
+    installToolchain(preference, ToolchainKind.CMake)
     return true
   }
 
   private fun updateSummary(context: Context, preference: Preference) {
-    val installed = ToolchainPaths.installedVersion(context.applicationContext, ToolchainKind.Cmake)
+    val installed = ToolchainPaths.installedVersion(context.applicationContext, ToolchainKind.CMake)
     preference.summary = if (installed != null) {
       context.getString(string.idepref_backend_installed, installed)
     } else {
