@@ -47,7 +47,6 @@ import com.itsaky.androidide.editor.R.layout
 import com.itsaky.androidide.editor.databinding.LayoutPopupMenuItemBinding
 import com.itsaky.androidide.editor.ui.EditorActionsMenu.ActionsListAdapter.VH
 import com.itsaky.androidide.lsp.api.ILanguageServerRegistry
-import com.itsaky.androidide.lsp.java.JavaLanguageServer
 import com.itsaky.androidide.lsp.models.DiagnosticItem
 import com.itsaky.androidide.lsp.xml.XMLLanguageServer
 import com.itsaky.androidide.resources.R
@@ -307,11 +306,6 @@ open class EditorActionsMenu(val editor: IDEEditor) :
     data.put(File::class.java, editor.file)
     data.put(DiagnosticItem::class.java, getDiagnosticAtCursor())
     data.put(com.itsaky.androidide.models.Range::class.java, editor.cursorLSPRange)
-    data.put(
-      JavaLanguageServer::class.java,
-      ILanguageServerRegistry.getDefault().getServer(JavaLanguageServer.SERVER_ID)
-          as? JavaLanguageServer?
-    )
     data.put(
       XMLLanguageServer::class.java,
       ILanguageServerRegistry.getDefault().getServer(XMLLanguageServer.SERVER_ID)

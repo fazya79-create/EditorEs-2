@@ -47,7 +47,6 @@ dependencies {
   api(projects.tooling.api)
 
   implementation(projects.core.common)
-  implementation(projects.java.javacServices)
   implementation(projects.logging.logger)
   implementation(projects.utilities.lookup)
   implementation(projects.utilities.shared)

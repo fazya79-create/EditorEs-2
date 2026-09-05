@@ -27,7 +27,6 @@ import android.widget.TextView
 import com.itsaky.androidide.editor.R
 import com.itsaky.androidide.editor.databinding.LayoutCompletionItemBinding
 import com.itsaky.androidide.lookup.Lookup
-import com.itsaky.androidide.lsp.java.utils.JavaType
 import com.itsaky.androidide.lsp.models.ClassCompletionData
 import com.itsaky.androidide.lsp.models.CompletionItemKind.CLASS
 import com.itsaky.androidide.lsp.models.CompletionItemKind.CONSTRUCTOR
@@ -203,7 +202,7 @@ class CompletionListAdapter : EditorCompletionAdapter() {
     sb.append(memberName)
     sb.append('(')
     for (type in erasedParameterTypes) {
-      if (type.length == 1 && JavaType.primitiveFor(type[0]) != null) {
+      if (type.length == 1 && type[0] in "BCDFIJSVZ") {
         sb.append(type)
       } else {
         sb.append(Signature.createTypeSignature(type, true))

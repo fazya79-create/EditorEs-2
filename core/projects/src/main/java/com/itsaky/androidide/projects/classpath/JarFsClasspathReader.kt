@@ -18,12 +18,10 @@
 package com.itsaky.androidide.projects.classpath
 
 import com.google.common.collect.ImmutableSet
-import com.itsaky.androidide.javac.services.fs.CachedJarFileSystem
-import com.itsaky.androidide.javac.services.fs.CachingJarFileSystemProvider
 import java.io.File
+import java.nio.file.FileSystems
 import java.nio.file.FileVisitResult
 import java.nio.file.FileVisitResult.CONTINUE
-import java.nio.file.FileVisitResult.SKIP_SUBTREE
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
@@ -40,24 +38,12 @@ class JarFsClasspathReader : IClasspathReader {
         continue
       }
 
-      val fs = CachingJarFileSystemProvider.newFileSystem(path) as CachedJarFileSystem
-      for (rootDirectory in fs.rootDirectories) {
+      FileSystems.newFileSystem(path, emptyMap<String, Any>()).use { fs ->
         Files.walkFileTree(
-          rootDirectory,
+          fs.getPath("/"),
           emptySet(),
           Int.MAX_VALUE,
           object : SimpleFileVisitor<Path>() {
-
-            override fun preVisitDirectory(
-              dir: Path?,
-              attrs: BasicFileAttributes?
-            ): FileVisitResult {
-              return if (fs.storeJARPackageDir(dir)) {
-                CONTINUE
-              } else {
-                SKIP_SUBTREE
-              }
-            }
 
             override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
               var name = file.pathString

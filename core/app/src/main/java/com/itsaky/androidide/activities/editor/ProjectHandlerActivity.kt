@@ -34,7 +34,6 @@ import com.itsaky.androidide.handlers.LspHandler.connectClient
 import com.itsaky.androidide.handlers.LspHandler.destroyLanguageServers
 import com.itsaky.androidide.lookup.Lookup
 import com.itsaky.androidide.lsp.IDELanguageClientImpl
-import com.itsaky.androidide.lsp.java.utils.CancelChecker
 import com.itsaky.androidide.preferences.internal.GeneralPreferences
 import com.itsaky.androidide.projects.GradleProject
 import com.itsaky.androidide.projects.builder.BuildService
@@ -60,6 +59,7 @@ import com.itsaky.androidide.utils.withIcon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.concurrent.CancellationException
 import java.util.concurrent.CompletableFuture
 import java.util.regex.Pattern
 import java.util.stream.Collectors
@@ -322,7 +322,7 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
       releaseServerListener()
 
       if (result == null || !result.isSuccessful || error != null) {
-        if (!CancelChecker.isCancelled(error)) {
+        if (!isCancellation(error)) {
           log.error("An error occurred initializing the project with Tooling API", error)
         }
 
@@ -353,6 +353,13 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
     }
 
     return AndroidInitializationParams(buildVariants)
+  }
+
+  private fun isCancellation(err: Throwable?): Boolean {
+    if (err == null) {
+      return false
+    }
+    return err is CancellationException || isCancellation(err.cause)
   }
 
   private fun releaseServerListener() {

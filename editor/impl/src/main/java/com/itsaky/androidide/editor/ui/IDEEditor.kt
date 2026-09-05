@@ -51,7 +51,6 @@ import com.itsaky.androidide.eventbus.events.editor.DocumentSelectedEvent
 import com.itsaky.androidide.flashbar.Flashbar
 import com.itsaky.androidide.lsp.api.ILanguageClient
 import com.itsaky.androidide.lsp.api.ILanguageServer
-import com.itsaky.androidide.lsp.java.utils.CancelChecker
 import com.itsaky.androidide.lsp.models.Command
 import com.itsaky.androidide.lsp.models.DefinitionParams
 import com.itsaky.androidide.lsp.models.DefinitionResult
@@ -905,11 +904,18 @@ open class IDEEditor @JvmOverloads constructor(
 
   private fun logError(err: Throwable?, action: String) {
     err ?: return
-    if (CancelChecker.isCancelled(err)) {
+    if (isCancellation(err)) {
       log.warn("{} has been cancelled", action)
     } else {
       log.error("{} failed", action)
     }
+  }
+
+  private fun isCancellation(err: Throwable?): Boolean {
+    if (err == null) {
+      return false
+    }
+    return err is java.util.concurrent.CancellationException || isCancellation(err.cause)
   }
 
   override fun setSelectionAround(line: Int, column: Int) {

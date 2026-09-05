@@ -139,8 +139,6 @@ include(
   ":event:eventbus",
   ":event:eventbus-android",
   ":event:eventbus-events",
-  ":java:javac-services",
-  ":java:lsp",
   ":logging:idestats",
   ":logging:logger",
   ":logging:logsender",

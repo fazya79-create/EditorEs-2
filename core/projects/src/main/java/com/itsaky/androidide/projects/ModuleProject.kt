@@ -20,7 +20,6 @@ package com.itsaky.androidide.projects
 import android.text.TextUtils
 import androidx.annotation.RestrictTo
 import com.itsaky.androidide.builder.model.IJavaCompilerSettings
-import com.itsaky.androidide.javac.services.fs.CacheFSInfoSingleton
 import com.itsaky.androidide.lookup.Lookup
 import com.itsaky.androidide.projects.android.AndroidModule
 import com.itsaky.androidide.projects.classpath.JarFsClasspathReader
@@ -135,12 +134,6 @@ abstract class ModuleProject(
 
     val watch = StopWatch("Indexing classpaths")
     val paths = getCompileClasspaths().filter { it.exists() }
-
-    for (path in paths) {
-      // Use 'getCanonicalFile' just to be sure that caches are stored with correct keys
-      // See JavacFileManager.getContainer(Path) for more details
-      CacheFSInfoSingleton.cache(CacheFSInfoSingleton.getCanonicalFile(path.toPath()))
-    }
 
     val topLevelClasses = JarFsClasspathReader().listClasses(paths).filter { it.isTopLevel }
     topLevelClasses.forEach { this.compileClasspathClasses.append(it.name) }
