@@ -3,34 +3,73 @@ name: Build
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
+    paths-ignore:
+      - '**.md'
+      - 'fastlane/**'
+  workflow_dispatch: { }
+
+env:
+  BUILD_JAVA_VERSION: '17'
+  BUILD_JAVA_DIST: 'adopt'
 
 jobs:
-  build:
+  build_apk:
+    strategy:
+      matrix:
+        build_type: ['debug', 'release']
+    name: Build APK
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build lexers and AAR
-        run: ./gradlew :lexers:build :cpp-language:assembleRelease --no-daemon
-
-      - name: Upload AAR
+          access_token: ${{ github.token }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.BUILD_JAVA_VERSION }}
+          distribution: ${{ env.BUILD_JAVA_DIST }}
+      - name: Change Gradle wrapper permissions
+        run: chmod +x ./gradlew
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Assemble ${{ matrix.build_type }} APK
+        run: |
+          build_type=${{ matrix.build_type }}
+          ./gradlew :core:app:assemble${build_type^}
+      - name: Copy ${{ matrix.build_type }} APK
+        run: |
+          cp core/app/build/outputs/apk/${{ matrix.build_type }}/app-*.apk ./
+      - name: Upload arm64-v8a ${{ matrix.build_type }} APK
         uses: actions/upload-artifact@v4
         with:
-          name: cpp-language-aar
-          path: cpp-language/build/outputs/aar/*.aar
+          name: apk-arm64-v8a-${{ matrix.build_type }}
+          path: app-arm64-v8a-${{ matrix.build_type }}.apk
+      - name: Upload armeabi-v7a ${{ matrix.build_type }} APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-armeabi-v7a-${{ matrix.build_type }}
+          path: app-armeabi-v7a-${{ matrix.build_type }}.apk
+      - name: Upload x86_64 ${{ matrix.build_type }} APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-x86_64-${{ matrix.build_type }}
+          path: app-x86_64-${{ matrix.build_type }}.apk
+      - name: Upload ${{ matrix.build_type }} mappings
+        if: ${{ always() && matrix.build_type == 'release' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-mappings
+          path: '**/build/outputs/mapping'
