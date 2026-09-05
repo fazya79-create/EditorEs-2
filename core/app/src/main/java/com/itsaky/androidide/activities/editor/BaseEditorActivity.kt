@@ -32,9 +32,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.annotation.GravityInt
 import androidx.annotation.StringRes
@@ -88,7 +85,6 @@ import com.itsaky.androidide.tasks.cancelIfActive
 import com.itsaky.androidide.ui.CodeEditorView
 import com.itsaky.androidide.ui.ContentTranslatingDrawerLayout
 import com.itsaky.androidide.ui.SwipeRevealLayout
-import com.itsaky.androidide.uidesigner.UIDesignerActivity
 import com.itsaky.androidide.utils.ActionMenuUtils.createMenu
 import com.itsaky.androidide.utils.ApkInstallationSessionCallback
 import com.itsaky.androidide.utils.DialogUtils.newMaterialDialogBuilder
@@ -137,7 +133,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
 
   internal var installationCallback: ApkInstallationSessionCallback? = null
 
-  var uiDesignerResultLauncher: ActivityResultLauncher<Intent>? = null
   val editorViewModel by viewModels<EditorViewModel>()
 
   internal var _binding: ActivityEditorBinding? = null
@@ -340,11 +335,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
 
     setupContainers()
     setupDiagnosticInfo()
-
-    uiDesignerResultLauncher = registerForActivityResult(
-      StartActivityForResult(),
-      this::handleUiDesignerResult
-    )
 
     setupMemUsageChart()
     watchMemory()
@@ -604,28 +594,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
     if (!isDestroying && isFinishing) {
       isDestroying = true
     }
-  }
-
-  private fun handleUiDesignerResult(result: ActivityResult) {
-    if (result.resultCode != RESULT_OK || result.data == null) {
-      log.warn(
-        "UI Designer returned invalid result: resultCode={}, data={}", result.resultCode,
-        result.data
-      )
-      return
-    }
-    val generated = result.data!!.getStringExtra(UIDesignerActivity.RESULT_GENERATED_XML)
-    if (TextUtils.isEmpty(generated)) {
-      log.warn("UI Designer returned blank generated XML code")
-      return
-    }
-    val view = provideCurrentEditor()
-    val text = view?.editor?.text ?: run {
-      log.warn("No file opened to append UI designer result")
-      return
-    }
-    val endLine = text.lineCount - 1
-    text.replace(0, 0, endLine, text.getColumnCount(endLine), generated)
   }
 
   private fun setupDrawers() {

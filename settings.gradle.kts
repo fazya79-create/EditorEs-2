@@ -36,13 +36,8 @@ dependencyResolutionManagement {
     "build-deps" to arrayOf(
       "appintro",
       "fuzzysearch",
-      "google-java-format",
-      "java-compiler",
-      "javac",
       "javapoet",
       "jaxp",
-      "jdk-compiler",
-      "jdk-jdeps",
       "jdt",
       "layoutlib-api",
       "logback-core"
@@ -165,8 +160,6 @@ include(
   ":utilities:templates-api",
   ":utilities:templates-impl",
   ":utilities:treeview",
-  ":utilities:uidesigner",
-  ":utilities:xml-inflater",
   ":xml:aaptcompiler",
   ":xml:dom",
   ":xml:lsp",

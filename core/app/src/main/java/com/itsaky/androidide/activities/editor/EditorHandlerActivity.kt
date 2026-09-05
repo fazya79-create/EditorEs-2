@@ -50,7 +50,6 @@ import com.itsaky.androidide.models.OpenedFile
 import com.itsaky.androidide.models.OpenedFilesCache
 import com.itsaky.androidide.models.Range
 import com.itsaky.androidide.models.SaveResult
-import com.itsaky.androidide.projects.internal.ProjectManagerImpl
 import com.itsaky.androidide.tasks.executeAsync
 import com.itsaky.androidide.ui.CodeEditorView
 import com.itsaky.androidide.utils.DialogUtils.newYesNoDialog
@@ -393,10 +392,6 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
           editorViewModel.isSyncNeeded = true
         }
       }
-    }
-
-    if (processResources) {
-      ProjectManagerImpl.getInstance().generateSources()
     }
 
     return result.gradleSaved

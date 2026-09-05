@@ -22,7 +22,6 @@ import androidx.core.content.ContextCompat
 import com.itsaky.androidide.actions.ActionData
 import com.itsaky.androidide.actions.EditorRelatedAction
 import com.itsaky.androidide.models.SaveResult
-import com.itsaky.androidide.projects.internal.ProjectManagerImpl
 import com.itsaky.androidide.resources.R
 import com.itsaky.androidide.utils.flashError
 import com.itsaky.androidide.utils.flashSuccess
@@ -86,9 +85,6 @@ class SaveFileAction(context: Context, override val order: Int) : EditorRelatedA
       context.flashSuccess(R.string.all_saved)
 
       val saveResult = result.result
-      if (saveResult.xmlSaved) {
-        ProjectManagerImpl.getInstance().generateSources()
-      }
 
       if (saveResult.gradleSaved) {
         context.editorViewModel.isSyncNeeded = true

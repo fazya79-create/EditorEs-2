@@ -177,8 +177,6 @@ dependencies {
   implementation(projects.utilities.templatesApi)
   implementation(projects.utilities.templatesImpl)
   implementation(projects.utilities.treeview)
-  implementation(projects.utilities.uidesigner)
-  implementation(projects.utilities.xmlInflater)
   implementation(projects.xml.aaptcompiler)
   implementation(projects.xml.lsp)
   implementation(projects.xml.utils)
