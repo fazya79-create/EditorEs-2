@@ -57,7 +57,6 @@ dependencies {
 
     testImplementation(projects.core.actions)
     testImplementation(projects.core.projects)
-    testImplementation(projects.tooling.api)
     testImplementation(projects.testing.commonTest)
     testImplementation(projects.testing.lspTest)
 

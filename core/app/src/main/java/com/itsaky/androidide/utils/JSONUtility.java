@@ -19,16 +19,8 @@ package com.itsaky.androidide.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.itsaky.androidide.tooling.api.util.ToolingApiLauncher;
 
 public class JSONUtility {
   public static final Gson gson = new Gson();
-  public static final Gson toolingGson;
   public static final Gson prettyPrinter = new GsonBuilder().setPrettyPrinting().create();
-
-  static {
-    final var builder = new GsonBuilder();
-    ToolingApiLauncher.configureGson(builder);
-    toolingGson = builder.create();
-  }
 }

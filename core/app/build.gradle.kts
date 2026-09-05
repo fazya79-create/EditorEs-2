@@ -173,7 +173,6 @@ dependencies {
   implementation(projects.termux.emulator)
   implementation(projects.termux.shared)
   implementation(projects.tooling.api)
-  implementation(projects.tooling.pluginConfig)
   implementation(projects.utilities.buildInfo)
   implementation(projects.utilities.lookup)
   implementation(projects.utilities.preferences)
@@ -185,10 +184,6 @@ dependencies {
   implementation(projects.xml.aaptcompiler)
   implementation(projects.xml.lsp)
   implementation(projects.xml.utils)
-
-  // This is to build the tooling-api-impl project before the app is built
-  // So we always copy the latest JAR file to assets
-  compileOnly(projects.tooling.impl)
 
   testImplementation(projects.testing.unitTest)
   androidTestImplementation(projects.testing.androidTest)

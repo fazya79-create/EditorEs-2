@@ -17,12 +17,10 @@
 
 package com.itsaky.androidide.activities.editor
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.CheckBox
-import androidx.activity.viewModels
 import androidx.annotation.GravityInt
 import androidx.appcompat.app.AlertDialog
 import com.blankj.utilcode.util.SizeUtils
@@ -32,7 +30,6 @@ import com.itsaky.androidide.R.string
 import com.itsaky.androidide.databinding.LayoutSearchProjectBinding
 import com.itsaky.androidide.flashbar.Flashbar
 import com.itsaky.androidide.fragments.sheets.ProgressSheet
-import com.itsaky.androidide.handlers.EditorBuildEventListener
 import com.itsaky.androidide.handlers.LspHandler.connectClient
 import com.itsaky.androidide.handlers.LspHandler.destroyLanguageServers
 import com.itsaky.androidide.lookup.Lookup
@@ -42,8 +39,6 @@ import com.itsaky.androidide.preferences.internal.GeneralPreferences
 import com.itsaky.androidide.projects.GradleProject
 import com.itsaky.androidide.projects.builder.BuildService
 import com.itsaky.androidide.projects.internal.ProjectManagerImpl
-import com.itsaky.androidide.services.builder.GradleBuildService
-import com.itsaky.androidide.services.builder.GradleBuildServiceConnnection
 import com.itsaky.androidide.services.builder.gradleDistributionParams
 import com.itsaky.androidide.tasks.executeAsyncProvideError
 import com.itsaky.androidide.tasks.executeWithProgress
@@ -54,8 +49,6 @@ import com.itsaky.androidide.tooling.api.messages.result.TaskExecutionResult
 import com.itsaky.androidide.tooling.api.messages.result.TaskExecutionResult.Failure.PROJECT_DIRECTORY_INACCESSIBLE
 import com.itsaky.androidide.tooling.api.messages.result.TaskExecutionResult.Failure.PROJECT_NOT_DIRECTORY
 import com.itsaky.androidide.tooling.api.messages.result.TaskExecutionResult.Failure.PROJECT_NOT_FOUND
-import com.itsaky.androidide.tooling.api.models.BuildVariantInfo
-import com.itsaky.androidide.tooling.api.models.mapToSelectedVariants
 import com.itsaky.androidide.utils.DURATION_INDEFINITE
 import com.itsaky.androidide.utils.DialogUtils.newMaterialDialogBuilder
 import com.itsaky.androidide.utils.RecursiveFileSearcher
@@ -64,7 +57,6 @@ import com.itsaky.androidide.utils.flashbarBuilder
 import com.itsaky.androidide.utils.resolveAttr
 import com.itsaky.androidide.utils.showOnUiThread
 import com.itsaky.androidide.utils.withIcon
-import com.itsaky.androidide.viewmodel.BuildVariantsViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -75,8 +67,6 @@ import java.util.stream.Collectors
 /** @author Akash Yadav */
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class ProjectHandlerActivity : BaseEditorActivity() {
-
-  protected val buildVariantsViewModel by viewModels<BuildVariantsViewModel>()
 
   protected var mSearchingProgress: ProgressSheet? = null
   protected var mFindInProjectDialog: AlertDialog? = null
@@ -94,10 +84,6 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
       }
       return mFindInProjectDialog!!
     }
-
-  protected val mBuildEventListener = EditorBuildEventListener()
-
-  private val buildServiceConnection = GradleBuildServiceConnnection()
 
   companion object {
 
@@ -197,23 +183,11 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
         log.error("Failed to stop editor services.")
       }
 
-      try {
-        unbindService(buildServiceConnection)
-        buildServiceConnection.onConnected = {}
-      } catch (err: Throwable) {
-        log.error("Unable to unbind service")
-      } finally {
-        Lookup.getDefault().apply {
-
-          (lookup(BuildService.KEY_BUILD_SERVICE) as? GradleBuildService?)
-            ?.setEventListener(null)
-
-          unregister(BuildService.KEY_BUILD_SERVICE)
-        }
-
-        mBuildEventListener.release()
-        editorViewModel.isBoundToBuildSerice = false
+      Lookup.getDefault().apply {
+        unregister(BuildService.KEY_BUILD_SERVICE)
       }
+
+      editorViewModel.isBoundToBuildSerice = false
     }
   }
 
@@ -260,29 +234,6 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
   }
 
   fun startServices() {
-    val service = Lookup.getDefault().lookup(BuildService.KEY_BUILD_SERVICE) as GradleBuildService?
-    if (editorViewModel.isBoundToBuildSerice && service != null) {
-      log.info("Reusing already started Gradle build service")
-      onGradleBuildServiceConnected(service)
-      return
-    } else {
-      log.info("Binding to Gradle build service...")
-    }
-
-    buildServiceConnection.onConnected = this::onGradleBuildServiceConnected
-
-    if (
-      bindService(
-        Intent(this, GradleBuildService::class.java),
-        buildServiceConnection,
-        BIND_AUTO_CREATE or BIND_IMPORTANT
-      )
-    ) {
-      log.info("Bind request for Gradle build service was successful...")
-    } else {
-      log.error("Gradle build service doesn't exist or the IDE is not allowed to access it.")
-    }
-
     initLspClient()
   }
 
@@ -314,39 +265,7 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
   }
 
   fun initializeProject() {
-    val currentVariants = buildVariantsViewModel._buildVariants.value
-
-    // no information about the build variants is available
-    // use the default variant selections
-    if (currentVariants == null) {
-      log.debug(
-        "No variant selection information available. Default build variants will be selected."
-      )
-      initializeProject(emptyMap())
-      return
-    }
-
-    // variant selection information is available
-    // but there are updated & unsaved variant selections
-    // use the updated variant selections to initialize the project
-    if (buildVariantsViewModel.updatedBuildVariants.isNotEmpty()) {
-      val newSelections = currentVariants.toMutableMap()
-      newSelections.putAll(buildVariantsViewModel.updatedBuildVariants)
-      initializeProject {
-        newSelections.mapToSelectedVariants().also {
-          log.debug("Initializing project with new build variant selections: {}", it)
-        }
-      }
-      return
-    }
-
-    // variant selection information is available but no variant selections have been updated
-    // the user might be trying to sync the project from options menu
-    // initialize the project with the existing selected variants
-    initializeProject {
-      log.debug("Re-initializing project with existing build variant selections")
-      currentVariants.mapToSelectedVariants()
-    }
+    initializeProject(emptyMap())
   }
 
   /**
@@ -437,9 +356,6 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
   }
 
   private fun releaseServerListener() {
-    // Release reference to server listener in order to prevent memory leak
-    (Lookup.getDefault().lookup(BuildService.KEY_BUILD_SERVICE) as? GradleBuildService?)
-      ?.setServerListener(null)
   }
 
   fun stopLanguageServers() {
@@ -447,42 +363,6 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
       destroyLanguageServers(isChangingConfigurations)
     } catch (err: Throwable) {
       log.error("Unable to stop editor services. Please report this issue.", err)
-    }
-  }
-
-  protected fun onGradleBuildServiceConnected(service: GradleBuildService) {
-    log.info("Connected to Gradle build service")
-
-    buildServiceConnection.onConnected = null
-    editorViewModel.isBoundToBuildSerice = true
-    Lookup.getDefault().update(BuildService.KEY_BUILD_SERVICE, service)
-    service.setEventListener(mBuildEventListener)
-
-    if (!service.isToolingServerStarted()) {
-      service.startToolingServer { pid ->
-        memoryUsageWatcher.watchProcess(pid, PROC_GRADLE_TOOLING)
-        resetMemUsageChart()
-
-        service.metadata().whenComplete { metadata, err ->
-          if (metadata == null || err != null) {
-            log.error("Failed to get tooling server metadata")
-            return@whenComplete
-          }
-
-          if (pid != metadata.pid) {
-            log.warn(
-              "Tooling server pid mismatch. Expected: {}, Actual: {}. Replacing memory watcher...",
-              pid, metadata.pid
-            )
-            memoryUsageWatcher.watchProcess(metadata.pid, PROC_GRADLE_TOOLING)
-            resetMemUsageChart()
-          }
-        }
-
-        initializeProject()
-      }
-    } else {
-      initializeProject()
     }
   }
 
@@ -497,7 +377,6 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
     editorActivityScope.launch(Dispatchers.IO) {
       manager.setupProject()
       manager.notifyProjectUpdate()
-      updateBuildVariants(manager.requireWorkspace().getAndroidVariantSelections())
 
       com.itsaky.androidide.tasks.runOnUiThread {
         postProjectInit(true, null)
@@ -542,14 +421,6 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
     }
 
     mFindInProjectDialog = null // Create the dialog again if needed
-  }
-
-  private fun updateBuildVariants(buildVariants: Map<String, BuildVariantInfo>) {
-    // avoid using the 'runOnUiThread' method defined in the activity
-    com.itsaky.androidide.tasks.runOnUiThread {
-      buildVariantsViewModel.buildVariants = buildVariants
-      buildVariantsViewModel.resetUpdatedSelections()
-    }
   }
 
   protected open fun createFindInProjectDialog(): AlertDialog? {

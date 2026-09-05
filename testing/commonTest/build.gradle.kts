@@ -31,6 +31,4 @@ dependencies {
 
   api(libs.tests.junit)
   api(projects.logging.logger)
-
-  api(projects.tooling.impl)
 }
