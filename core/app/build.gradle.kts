@@ -96,8 +96,6 @@ desugaring {
 }
 
 dependencies {
-  debugImplementation(libs.common.leakcanary)
-
   // Annotation processors
   kapt(libs.common.glide.ap)
   kapt(libs.google.auto.service)

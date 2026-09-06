@@ -49,6 +49,7 @@ public class ToolsManager {
 
     CompletableFuture.runAsync(() -> {
       writeNoMediaFile();
+      deleteLegacyFiles();
       extractColorScheme(app);
     }).whenComplete((__, error) -> {
       if (error != null) {
@@ -138,6 +139,31 @@ public class ToolsManager {
       } catch (IOException e) {
         LOG.error("Failed to create .nomedia file in projects directory");
       }
+    }
+  }
+
+  private static void deleteLegacyFiles() {
+    deleteRecursively(new File(Environment.ANDROIDIDE_HOME, "android.jar"));
+    deleteRecursively(new File(Environment.ANDROIDIDE_HOME, "tooling-api"));
+    deleteRecursively(new File(Environment.ANDROIDIDE_HOME, "init"));
+    deleteRecursively(new File(Environment.HOME, ".gradle"));
+    deleteRecursively(new File(Environment.BIN_DIR, "ideenv"));
+  }
+
+  private static void deleteRecursively(File file) {
+    if (file == null || !file.exists()) {
+      return;
+    }
+    if (file.isDirectory()) {
+      final var children = file.listFiles();
+      if (children != null) {
+        for (final var child : children) {
+          deleteRecursively(child);
+        }
+      }
+    }
+    if (!file.delete()) {
+      LOG.warn("Unable to delete legacy file: {}", file);
     }
   }
 
