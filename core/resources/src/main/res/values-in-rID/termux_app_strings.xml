@@ -17,11 +17,6 @@
   -->
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="UnusedResources">
   <!-- Termux Bootstrap Packages Installation -->
-  <string name="bootstrap_installer_body">Menginstal paket bootstrap…</string>
-  <string name="bootstrap_error_title">Tidak dapat menginstal bootstrap</string>
-  <string name="bootstrap_error_body">AndroidIDE tidak dapat menginstal paket bootstrap.</string>
-  <string name="bootstrap_error_abort">Menggugurkan</string>
-  <string name="bootstrap_error_try_again">Coba lagi</string>
   <string name="bootstrap_error_not_primary_user_message">AndroidIDE hanya dapat dijalankan sebagai pengguna utama.\nBinari bootstrap yang dikompilasi untuk AndroidIDE memiliki jalur $PREFIX yang di-hardcode dan tidak dapat dipasang di jalur mana pun selain:\n%1$s.</string>
   <string name="bootstrap_error_installed_on_portable_sd">AndroidIDE tidak dapat diinstal pada portabel/eksternal/ kartu sd yang dapat dilepas di perangkat Anda.\nBiner bootstrap yang dikompilasi untuk AndroidIDE memiliki jalur $PREFIX yang di-hardcode dan tidak dapat diinstal pada jalur apa pun selain:\n%1$s.</string>
   <!-- Terminal Sidebar and Shortcuts -->
