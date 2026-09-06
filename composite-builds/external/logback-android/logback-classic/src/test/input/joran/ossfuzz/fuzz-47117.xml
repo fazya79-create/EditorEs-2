@@ -1,6 +1,0 @@
-<configuration>
-  <logger name="ROOT" level="NULL"/>
-  <logger name="ROOT">
-    <level value="NULL"/>
-  </logger>  
-</configuration>
