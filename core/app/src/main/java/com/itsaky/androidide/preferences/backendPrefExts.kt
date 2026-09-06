@@ -31,7 +31,6 @@ import com.itsaky.androidide.preferences.internal.BackendPreferences.buildApiLev
 import com.itsaky.androidide.preferences.internal.BackendPreferences.buildTypeIndex
 import com.itsaky.androidide.preferences.internal.BackendPreferences.cmakeVersion
 import com.itsaky.androidide.preferences.internal.BackendPreferences.ndkVersion
-import com.itsaky.androidide.resources.R.drawable
 import com.itsaky.androidide.resources.R.string
 import com.itsaky.androidide.tasks.executeAsync
 import com.itsaky.androidide.utils.flashError
@@ -45,7 +44,6 @@ class BackendPreferencesScreen(
   override val key: String = "idepref_backend",
   override val title: Int = string.idepref_backend_title,
   override val summary: Int? = string.idepref_backend_summary,
-  override val icon: Int? = drawable.ic_language_cpp,
   override val children: List<IPreference> = mutableListOf(),
 ) : IPreferenceScreen() {
 
@@ -87,7 +85,6 @@ private class BuildOptionsGroup(
 private class InstallUbuntuPreference(
   override val key: String = "idepref_backend_install_ubuntu",
   override val title: Int = string.idepref_backend_install_ubuntu,
-  override val icon: Int? = drawable.ic_terminal,
 ) : SimplePreference() {
 
   override fun onCreatePreference(context: Context): Preference {
@@ -126,7 +123,6 @@ private class InstallUbuntuPreference(
 private class InstallNdkPreference(
   override val key: String = "idepref_backend_install_ndk",
   override val title: Int = string.idepref_backend_install_ndk,
-  override val icon: Int? = drawable.ic_package,
 ) : SimplePreference() {
 
   override fun onCreatePreference(context: Context): Preference {
@@ -152,7 +148,6 @@ private class InstallNdkPreference(
 private class InstallCmakePreference(
   override val key: String = "idepref_backend_install_cmake",
   override val title: Int = string.idepref_backend_install_cmake,
-  override val icon: Int? = drawable.ic_package,
 ) : SimplePreference() {
 
   override fun onCreatePreference(context: Context): Preference {
@@ -210,7 +205,6 @@ private fun installToolchain(preference: Preference, kind: ToolchainKind) {
 private class BuildAbiPreference(
   override val key: String = BackendPreferences.BUILD_ABI,
   override val title: Int = string.idepref_backend_abi,
-  override val icon: Int? = drawable.ic_package,
 ) : SingleChoicePreference() {
 
   override fun getEntries(preference: Preference): Array<PreferenceChoices.Entry> {
@@ -249,7 +243,6 @@ private class BuildAbiPreference(
 private class BuildApiPreference(
   override val key: String = BackendPreferences.BUILD_API_LEVEL,
   override val title: Int = string.idepref_backend_api,
-  override val icon: Int? = drawable.ic_min_sdk,
 ) : SingleChoicePreference() {
 
   private val levels = intArrayOf(24, 26, 28, 29, 30, 33, 34)
@@ -284,7 +277,6 @@ private class BuildApiPreference(
 private class BuildTypePreference(
   override val key: String = BackendPreferences.BUILD_TYPE,
   override val title: Int = string.idepref_backend_buildtype,
-  override val icon: Int? = drawable.ic_run,
 ) : SingleChoicePreference() {
 
   private val types = intArrayOf(

@@ -29,7 +29,7 @@ fun cppExecutableProject() = baseProjectImpl {
     val projectDir = data.projectDir
     val projectName = data.name.replace(Regex("[^A-Za-z0-9_]"), "_")
     save(cmakeListsSrc(projectName), File(projectDir, "CMakeLists.txt"))
-    save(mainCppSrc(projectName), File(projectDir, "src/main.cpp"))
+    save(mainCppSrc(projectName), File(projectDir, "main.cpp"))
     save(readmeSrc(data.name), File(projectDir, "README.md"))
   }
 }
@@ -40,7 +40,7 @@ private fun cmakeListsSrc(projectName: String): String {
     project($projectName LANGUAGES C CXX)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    add_executable(app src/main.cpp)
+    add_executable(app main.cpp)
   """.trimIndent() + "\n"
 }
 

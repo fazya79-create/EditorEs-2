@@ -94,12 +94,7 @@ class OnboardingActivity : AppIntro2() {
     }
 
     if (!checkToolsIsInstalled()) {
-      addSlide(OnboardingInfoFragment.newInstance(
-        getString(string.title_backend_required),
-        getString(string.msg_backend_required),
-        R.drawable.ic_package,
-        ContextCompat.getColor(this, R.color.color_warning)
-      ))
+      addSlide(BackendInstallFragment())
     }
   }
 
@@ -131,7 +126,7 @@ class OnboardingActivity : AppIntro2() {
         && PermissionsFragment.areAllPermissionsGranted(this)
   }
 
-  private fun tryNavigateToMainIfSetupIsCompleted(): Boolean {
+  fun tryNavigateToMainIfSetupIsCompleted(): Boolean {
     if (isSetupCompleted()) {
       startActivity(Intent(this, MainActivity::class.java))
       finish()
