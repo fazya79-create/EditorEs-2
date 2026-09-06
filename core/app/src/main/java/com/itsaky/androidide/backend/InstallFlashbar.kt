@@ -45,6 +45,8 @@ class InstallFlashbar(activity: Activity, title: String) {
         is ToolchainPhase.Extracting -> extracting(phase.count)
         is ToolchainPhase.Done -> done()
         is ToolchainPhase.Failed -> failed(phase.message)
+        is ToolchainPhase.Cancelled -> dismiss()
+        is ToolchainPhase.Idle -> Unit
       }
     }
   }
