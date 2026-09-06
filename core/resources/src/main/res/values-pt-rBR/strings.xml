@@ -428,8 +428,6 @@
   <string name="title_grant">Conceder</string>
   <string name="permission_title_storage">Armazenamento</string>
   <string name="permission_desc_storage">Necessário para acessar os arquivos do projeto.</string>
-  <string name="permission_desc_install_packages">Permitir a instalação de APKs construídos com AndroidIDE.</string>
-  <string name="permission_title_install_packages">Instalar pacotes</string>
   <string name="onboarding_title_permissions">Permissões</string>
   <string name="onboarding_subtitle_permissions">AndroidIDE requer as seguintes permissões</string>
   <string name="msg_grant_permissions">Por favor, conceda as permissões para continuar.</string>

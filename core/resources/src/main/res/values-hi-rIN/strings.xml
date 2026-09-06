@@ -428,8 +428,6 @@
   <string name="title_grant">अनुमति दें</string>
   <string name="permission_title_storage">स्टोरेज</string>
   <string name="permission_desc_storage">प्रोजेक्ट फ़ाइलों को पढ़ने और लिखने के लिए आवश्यक है.</string>
-  <string name="permission_desc_install_packages">AndroidIDE के साथ निर्मित ऐप्स इंस्टॉल करने की अनुमति दें।</string>
-  <string name="permission_title_install_packages">पैकेज इनस्टॉल करने की अनुमति</string>
   <string name="onboarding_title_permissions">अनुमति</string>
   <string name="onboarding_subtitle_permissions">AndroidIDE को निम्नलिखित अनुमतियों की आवश्यकता है</string>
   <string name="msg_grant_permissions">कृपया जारी रखने के लिए अनुमतियाँ प्रदान करें।</string>

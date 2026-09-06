@@ -429,8 +429,6 @@
   <string name="title_grant">প্রদান করুন</string>
   <string name="permission_title_storage">স্টোরেজ</string>
   <string name="permission_desc_storage">প্রজেক্ট ফাইলে কাজ করার জন্য প্রয়োজনীয়।</string>
-  <string name="permission_desc_install_packages">AndroidIDE দিয়ে তৈরি অ্যাপ ইনস্টল করার অনুমতি দিন।</string>
-  <string name="permission_title_install_packages">প্যাকেজ ইনস্টল করুন</string>
   <string name="onboarding_title_permissions">অনুমতি</string>
   <string name="onboarding_subtitle_permissions">AndroidIDE-এর নিম্নলিখিত অনুমতিগুলির প্রয়োজন৷</string>
   <string name="msg_grant_permissions">এগিয়ে যাওয়ার জন্য অনুগ্রহ করে অনুমতি দিন।</string>

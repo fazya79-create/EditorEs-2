@@ -429,8 +429,6 @@ Dernier projet ouvert : \n%s</string>
   <string name="title_grant">Grant</string>
   <string name="permission_title_storage">Storage</string>
   <string name="permission_desc_storage">Required to access project files.</string>
-  <string name="permission_desc_install_packages">Allow installing APKs built with AndroidIDE.</string>
-  <string name="permission_title_install_packages">Install packages</string>
   <string name="onboarding_title_permissions">Permissions</string>
   <string name="onboarding_subtitle_permissions">AndroidIDE requires the following permissions</string>
   <string name="msg_grant_permissions">Please grant the permissions to continue.</string>

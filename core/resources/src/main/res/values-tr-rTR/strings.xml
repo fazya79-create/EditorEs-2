@@ -428,8 +428,6 @@
   <string name="title_grant">İzin ver</string>
   <string name="permission_title_storage">Depolama</string>
   <string name="permission_desc_storage">Proje dosyalarına erişim için gerekli.</string>
-  <string name="permission_desc_install_packages">AndroidIDE ile oluşturulmuş APK\'ların yüklenmesine izin ver.</string>
-  <string name="permission_title_install_packages">Paketleri yükle</string>
   <string name="onboarding_title_permissions">İzinler</string>
   <string name="onboarding_subtitle_permissions">AndroidIDE aşağıdaki izinleri gerektiriyor</string>
   <string name="msg_grant_permissions">Lütfen devam etmek için izinleri verin.</string>

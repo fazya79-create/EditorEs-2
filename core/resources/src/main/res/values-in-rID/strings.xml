@@ -428,8 +428,6 @@
   <string name="title_grant">Izinkan</string>
   <string name="permission_title_storage">Penyimpanan</string>
   <string name="permission_desc_storage">Diperlukan untuk mengakses file proyek.</string>
-  <string name="permission_desc_install_packages">Izinkan pemasangan APK yang dibuat dengan IDE Android.</string>
-  <string name="permission_title_install_packages">Instal paket</string>
   <string name="onboarding_title_permissions">Izin</string>
   <string name="onboarding_subtitle_permissions">AndroidIDE memerlukan izin berikut</string>
   <string name="msg_grant_permissions">Harap berikan izin untuk melanjutkan.</string>

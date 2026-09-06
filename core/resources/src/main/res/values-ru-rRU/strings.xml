@@ -429,8 +429,6 @@
   <string name="title_grant">Предоставить</string>
   <string name="permission_title_storage">Внутреннее хранилище</string>
   <string name="permission_desc_storage">Это разрешение необходимо для доступа к файлам проектов.</string>
-  <string name="permission_desc_install_packages">Разрешите устанавливать APK-файлы, собранные AndroidIDE.</string>
-  <string name="permission_title_install_packages">Установка пакетов</string>
   <string name="onboarding_title_permissions">Разрешения</string>
   <string name="onboarding_subtitle_permissions">AndroidIDE требуются следующие разрешения</string>
   <string name="msg_grant_permissions">Пожалуйста, предоставьте разрешения, чтобы продолжить.</string>

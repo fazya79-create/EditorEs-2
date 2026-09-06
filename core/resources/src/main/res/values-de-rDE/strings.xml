@@ -428,8 +428,6 @@
   <string name="title_grant">Gewähren</string>
   <string name="permission_title_storage">Speicherplatz</string>
   <string name="permission_desc_storage">Erforderlich um auf Projektdateien zuzugreifen.</string>
-  <string name="permission_desc_install_packages">Ermöglicht die Installation von APKs, die mit AndroidIDE erstellt wurden.</string>
-  <string name="permission_title_install_packages">Pakete installieren</string>
   <string name="onboarding_title_permissions">Berechtigungen</string>
   <string name="onboarding_subtitle_permissions">AndroidIDE benötigt folgende Berechtigungen</string>
   <string name="msg_grant_permissions">Bitte erteile die Berechtigung, um fortzufahren.</string>

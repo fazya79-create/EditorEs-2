@@ -27,10 +27,18 @@ import android.os.Environment
 import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.github.appintro.SlidePolicy
 import com.itsaky.androidide.R
 import com.itsaky.androidide.adapters.onboarding.OnboardingPermissionsAdapter
+import com.itsaky.androidide.backend.BackendInstallNotifier
+import com.itsaky.androidide.backend.proot.InstallPhase
+import com.itsaky.androidide.backend.proot.ProotConfig
+import com.itsaky.androidide.backend.proot.UbuntuInstaller
 import com.itsaky.androidide.buildinfo.BuildInfo
 import com.itsaky.androidide.models.OnboardingPermissionItem
 import com.itsaky.androidide.utils.flashError
@@ -59,6 +67,8 @@ class PermissionsFragment : OnboardingMultiActionFragment(), SlidePolicy {
 
   companion object {
 
+    const val ACTION_INSTALL_UBUNTU = "ide.permission.INSTALL_UBUNTU"
+
     @JvmStatic
     fun newInstance(context: Context): PermissionsFragment {
       return PermissionsFragment().apply {
@@ -79,9 +89,9 @@ class PermissionsFragment : OnboardingMultiActionFragment(), SlidePolicy {
         R.string.permission_title_storage, R.string.permission_desc_storage,
         isStoragePermissionGranted(context)))
 
-      permissions.add(OnboardingPermissionItem(Manifest.permission.REQUEST_INSTALL_PACKAGES,
-        R.string.permission_title_install_packages, R.string.permission_desc_install_packages,
-        canRequestPackageInstalls(context)))
+      permissions.add(OnboardingPermissionItem(ACTION_INSTALL_UBUNTU,
+        R.string.permission_title_install_ubuntu, R.string.permission_desc_install_ubuntu,
+        ProotConfig.isInstalled(context.applicationContext)))
 
       return permissions
     }
@@ -101,15 +111,10 @@ class PermissionsFragment : OnboardingMultiActionFragment(), SlidePolicy {
     }
 
     @JvmStatic
-    fun canRequestPackageInstalls(context: Context): Boolean {
-      return context.packageManager.canRequestPackageInstalls()
-    }
-
-    @JvmStatic
     fun isPermissionGranted(context: Context, permission: String): Boolean {
       return when (permission) {
         Manifest.permission_group.STORAGE -> isStoragePermissionGranted(context)
-        Manifest.permission.REQUEST_INSTALL_PACKAGES -> context.packageManager.canRequestPackageInstalls()
+        ACTION_INSTALL_UBUNTU -> ProotConfig.isInstalled(context.applicationContext)
         else -> checkSelfPermission(context, permission)
       }
     }
@@ -133,8 +138,7 @@ class PermissionsFragment : OnboardingMultiActionFragment(), SlidePolicy {
   private fun requestPermission(permission: String) {
     when (permission) {
       Manifest.permission_group.STORAGE -> requestStoragePermission()
-      Manifest.permission.REQUEST_INSTALL_PACKAGES -> requestSettingsTogglePermission(
-        Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+      ACTION_INSTALL_UBUNTU -> installUbuntu()
     }
   }
 
@@ -152,6 +156,37 @@ class PermissionsFragment : OnboardingMultiActionFragment(), SlidePolicy {
     val intent = Intent(action)
     intent.setData(Uri.fromParts("package", BuildInfo.PACKAGE_NAME, null))
     settingsTogglePermissionRequestLauncher.launch(intent)
+  }
+
+  private var installingUbuntu = false
+
+  private fun installUbuntu() {
+    if (installingUbuntu) {
+      return
+    }
+    installingUbuntu = true
+    val appContext = requireContext().applicationContext
+    val notifier = BackendInstallNotifier(requireContext())
+    lifecycleScope.launch {
+      withContext(Dispatchers.IO) {
+        UbuntuInstaller(appContext).install { phase ->
+          when (phase) {
+            is InstallPhase.Downloading ->
+              notifier.showProgress(phase.percent,
+                "Downloading ${phase.percent}% (${"%.1f".format(phase.receivedMb)}/${"%.1f".format(phase.totalMb)} MB)")
+            is InstallPhase.Extracting -> notifier.showIndeterminate("Extracting ${phase.count} files…")
+            is InstallPhase.Finalizing -> notifier.showIndeterminate("Finalizing…")
+            is InstallPhase.Done -> notifier.showDone()
+            is InstallPhase.Failed -> notifier.showFailed(phase.message)
+            else -> Unit
+          }
+        }
+      }
+      installingUbuntu = false
+      if (isAdded) {
+        onPermissionsUpdated()
+      }
+    }
   }
 
   override val isPolicyRespected: Boolean

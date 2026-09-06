@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.itsaky.androidide.activities.OnboardingActivity
+import com.itsaky.androidide.backend.BackendInstallNotifier
 import com.itsaky.androidide.backend.proot.InstallPhase
 import com.itsaky.androidide.backend.proot.ProotConfig
 import com.itsaky.androidide.backend.proot.UbuntuInstaller
@@ -63,16 +64,32 @@ class BackendInstallFragment : Fragment() {
   private fun startInstall() {
     installButton.isEnabled = false
     val appContext = requireContext().applicationContext
+    val notifier = BackendInstallNotifier(requireContext())
     lifecycleScope.launch {
       withContext(Dispatchers.IO) {
         UbuntuInstaller(appContext).install { phase ->
           val text = when (phase) {
-            is InstallPhase.Downloading ->
+            is InstallPhase.Downloading -> {
+              notifier.showProgress(phase.percent,
+                "Downloading ${phase.percent}% (${"%.1f".format(phase.receivedMb)}/${"%.1f".format(phase.totalMb)} MB)")
               "Downloading ${phase.percent}% (${"%.1f".format(phase.receivedMb)}/${"%.1f".format(phase.totalMb)} MB)"
-            is InstallPhase.Extracting -> "Extracting ${phase.count} files…"
-            is InstallPhase.Finalizing -> "Finalizing…"
-            is InstallPhase.Done -> "Installed."
-            is InstallPhase.Failed -> "Failed: ${phase.message}"
+            }
+            is InstallPhase.Extracting -> {
+              notifier.showIndeterminate("Extracting ${phase.count} files…")
+              "Extracting ${phase.count} files…"
+            }
+            is InstallPhase.Finalizing -> {
+              notifier.showIndeterminate("Finalizing…")
+              "Finalizing…"
+            }
+            is InstallPhase.Done -> {
+              notifier.showDone()
+              "Installed."
+            }
+            is InstallPhase.Failed -> {
+              notifier.showFailed(phase.message)
+              "Failed: ${phase.message}"
+            }
             else -> null
           }
           text?.let {
