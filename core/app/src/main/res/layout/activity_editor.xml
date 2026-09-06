@@ -14,6 +14,11 @@
     android:layout_height="match_parent"
     app:dragHandle="@id/editor_toolbar">
 
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:visibility="gone" />
+
     <com.google.android.material.card.MaterialCardView
       android:id="@+id/content_card"
       android:layout_width="match_parent"
