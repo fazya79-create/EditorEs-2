@@ -19,7 +19,6 @@
 
 import com.itsaky.androidide.build.config.BuildConfig
 import com.itsaky.androidide.desugaring.utils.JavaIOReplacements.applyJavaIOReplacements
-import com.itsaky.androidide.plugins.AndroidIDEAssetsPlugin
 
 plugins {
   id("com.itsaky.androidide.core-app")
@@ -29,10 +28,6 @@ plugins {
   id("kotlin-parcelize")
   id("androidx.navigation.safeargs.kotlin")
   id("com.itsaky.androidide.desugaring")
-}
-
-apply {
-  plugin(AndroidIDEAssetsPlugin::class.java)
 }
 
 buildscript {
