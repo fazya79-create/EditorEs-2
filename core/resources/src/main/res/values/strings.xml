@@ -45,12 +45,9 @@
   <string name="title_clear_output">Clear output</string>
   <string name="build_output">Build output</string>
   <string name="quick_run_debug">Quick run</string>
-  <string name="msg_sync_needed">Gradle files have changed. Please rebuild your project to sync dependencies and configurations.</string>
   <string name="preparing">Preparing</string>
   <string name="preparing_first">Preparing. First build may take up to 10–15 minutes!</string>
-  <string name="msg_installing_gradlew">Gradle Wrapper is not available!\nInstalling default one. Gradle v7.4 will be downloaded if necessary.</string>
   <string name="run">Run</string>
-  <string name="gradle" translatable="false">Gradle</string>
 
   <!-- Project -->
   <string name="create_project">Create project</string>
@@ -85,12 +82,10 @@
   <string name="project_creation_failed">Failed to create project</string>
   <string name="msg_folder_creation_failed">Failed to create folder!</string>
   <string name="msg_file_creation_failed">Failed to create file!</string>
-  <string name="msg_layout_file_creation_failed">Failed to create layout file!</string>
   <string name="msg_folder_created">Folder created successfully!</string>
   <string name="msg_file_created">File created successfully!</string>
   <string name="msg_folder_exists">Folder already exists!</string>
   <string name="msg_file_exists">File already exists!</string>
-  <string name="msg_layout_file_exists">Layout file already exists!</string>
   <string name="msg_invalid_name">Invalid Name!</string>
   <string name="text_create">Create</string>
   <string name="msg_can_contain_slashes">If the path contains File separator (\'/\'), then the required (parent) directories will be created if they don\'t exist.</string>
@@ -98,9 +93,6 @@
   <string name="file_name">File Name</string>
   <string name="new_name">New name</string>
   <string name="new_file">New file</string>
-  <string name="create_auto_layout">Create layout file</string>
-  <string name="new_java_class">New Java class</string>
-  <string name="new_xml_resource">New XML resource</string>
   <string name="new_folder">New folder</string>
   <string name="title_confirm_delete">Confirm delete</string>
   <string name="msg_confirm_delete">Are you sure you want to delete:\n%s?</string>
@@ -120,7 +112,6 @@
   <string name="save_failed">Failed to save files</string>
   <string name="msg_newfile_dest">Destination: %s/</string>
   <string name="restype_drawable">Drawable</string>
-  <string name="restype_layout">Layout</string>
   <string name="restype_menu">Menu</string>
   <string name="restype_other">Other</string>
   <string name="classtype_class">Class</string>
@@ -159,18 +150,13 @@
   <string name="msg_preferences">Preferences</string>
   <string name="pref_changelog">Changelog</string>
   <string name="msg_editor_font_size">Please choose default font size of editor :</string>
-  <string name="msg_clear_cache">This will delete caches directory created by Gradle. If you delete it, the next build may take a bit longer than normal as Gradle will download required files again.\n\nAre you sure you want to delete caches?</string>
 
   <!-- Error Messages used while Logging -->
 
   <!-- Layout preview and designer -->
-  <string name="title_preview_layout">Preview Layout</string>
   <string name="title_viewaction_delete">Delete</string>
   <string name="msg_yesno_def_title">Please confirm</string>
   <string name="msg_yesno_def_message">Are you sure?</string>
-  <string name="msg_empty_ui_layout">No views have been added. Click to add.</string>
-  <string name="msg_generate_xml_failed">Failed to generate XML code</string>
-  <string name="title_generating_xml">Generating XML code</string>
   <string name="msg_swipe_up">Swipe up or click for build output, logs and more.</string>
   <string name="msg_ide_crashed">AndroidIDE crashed</string>
   <string name="msg_report_crash">Please open an issue on github with the following stacktrace :</string>
@@ -195,7 +181,6 @@
   <string name="idepref_visiblePassword_title">Visible password flag</string>
   <string name="idepref_visiblePassword_summary">Use for visible password input type flag in editor. This makes sure that no suggestions are proposed by soft keyboard.</string>
   <string name="previous">Previous</string>
-  <string name="title_gradle_service_notification_ticker">Gradle build service started</string>
   <string name="title_gradle_service_notification">Gradle build service</string>
   <string name="title_cancel_build">Cancel build</string>
   <string name="msg_initializing_project">Initializing project</string>
@@ -293,7 +278,6 @@
 
   <string name="replace">Replace</string>
   <string name="replaceAll">Replace all</string>
-  <string name="title_run_tasks">Run tasks</string>
   <string name="hint_search_tasks">Search tasks…</string>
   <string name="msg_err_select_tasks">Please select tasks to run</string>
   <string name="title_confirmation">Confirmation</string>
@@ -301,7 +285,6 @@
   <string name="msg_loading_tasks">Loading tasks...</string>
 
   <string name="ui_category_widgets" translatable="false">Widgets</string>
-  <string name="ui_category_layouts" translatable="false">Layouts</string>
 
   <string name="widget_view" translatable="false">View</string>
   <string name="widget_textview" translatable="false">TextView</string>
@@ -324,11 +307,6 @@
   <string name="widget_textureview" translatable="false">TextureView</string>
   <string name="widget_togglebutton" translatable="false">ToggleButton</string>
   <string name="widget_webview" translatable="false">WebView</string>
-  <string name="widget_frame_layout" translatable="false">FrameLayout</string>
-  <string name="widget_grid_layout" translatable="false">GridLayout</string>
-  <string name="widget_linear_layout_horz" translatable="false">LinearLayout (H)</string>
-  <string name="widget_linear_layout_vert" translatable="false">LinearLayout (V)</string>
-  <string name="widget_relative_layout" translatable="false">RelativeLayout</string>
   <string name="widget_scrollview" translatable="false">ScrollView</string>
   <string name="widget_horizontal_scrollview" translatable="false">HorizontalScrollView</string>
   <string name="widget_text_clock" translatable="false">TextClock</string>
@@ -356,7 +334,6 @@
   <string name="git_clone_success">Git clone successful</string>
   <string name="git_clone_failed">Failed to clone git repository</string>
   <string name="msg_select_attr">Select an attribute from the below list</string>
-  <string name="action_show_hierarchy">Show layout hierarchy</string>
   <string name="idepref_editor_colorScheme">Color Scheme</string>
   <string name="idepref_editor_colorScheme_summary">Choose color scheme to use in editor</string>
   <string name="idepref_general_uiMode">UI Mode</string>
@@ -389,7 +366,6 @@
   <string name="msg_path_must_be_file">Must be path to a file</string>
   <string name="msg_classname_with_keywords">Class name contains keywords</string>
   <string name="msg_path_must_be_dir">Must be path to a directory</string>
-  <string name="msg_invalid_layout_name">Invalid layout file name</string>
   <string name="msg_invalid_project_details">Invalid project details</string>
   <string name="title_privacy">Privacy</string>
   <string name="title_androidide_statistics">AndroidIDE Statistics</string>
@@ -418,12 +394,9 @@
   <string name="msg_codeaction_failed">Failed to perform code action</string>
   <string name="idepref_devOptions_enableLogsender_title">Enable LogSender</string>
   <string name="idepref_devOptions_enableLogsender_summary">When disabled, logs from applications won\'t be shown in AndroidIDE</string>
-  <string name="title_build_variants">Build variants</string>
   <string name="title_apply">Apply</string>
   <string name="title_discard">Discard</string>
-  <string name="msg_build_variants_fetch_failed">Failed to fetch build variants</string>
   <string name="title_choose_application">Choose application</string>
-  <string name="err_selected_variant_not_found">Selected build variant not found</string>
   <string name="title_disconnect_log_senders">Disconnect log senders</string>
   <string name="title_begin_long_select">Begin long select</string>
   <string name="idepref_editor_stickScroll_title">Sticky scroll</string>
@@ -443,8 +416,6 @@
   <string name="msg_file_is_not_dir">Selected file is not a directory</string>
   <string name="msg_project_dir_doesnt_exist">Project directory does not exist</string>
   <string name="msg_files_being_saved">A file save operation is already in progress!</string>
-  <string name="title_install_tools">SDK Installation</string>
-  <string name="subtitle_install_tools">Install the development tools</string>
   <string name="msg_install_tools">The development tools must be installed for the IDE to work. Clicking the done button will open terminal to install the tools. To install, follow the instructions <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">here</a>.<br/><br/>Or read the <a href="https://docs.androidide.com/">documentation</a>]]>.</string>
   <string name="greeting_title">Welcome</string>
   <string name="greeting_subtitle">Learn, build, launch. All on your Android.</string>
@@ -463,8 +434,6 @@
   <string name="msg_cannot_create_terminal_session">Unable to create terminal session</string>
   <string name="action_auto_install">Automatic installation</string>
   <string name="action_manual_install">Manual installation</string>
-  <string name="hint_android_sdk_version">Android SDK version</string>
-  <string name="hin_jdk_version">JDK version</string>
   <string name="action_install_git">Install Git</string>
   <string name="action_install_openssh">Install OpenSSH</string>
   <string name="msg_terminal_new_sessions_disabled">Cannot create session. New sessions are disabled!</string>
@@ -484,9 +453,9 @@
   <string name="idepref_backend_title">Native backend</string>
   <string name="idepref_backend_summary">Ubuntu environment, toolchains and CMake build options.</string>
   <string name="idepref_backend_env">Environment</string>
-  <string name="idepref_backend_install_ubuntu">Install Ubuntu</string>
-  <string name="idepref_backend_install_ndk">Install NDK</string>
-  <string name="idepref_backend_install_cmake">Install CMake</string>
+  <string name="idepref_backend_install_ubuntu">Install Ubuntu (required)</string>
+  <string name="idepref_backend_install_ndk">Install NDK (optional)</string>
+  <string name="idepref_backend_install_cmake">Install CMake (optional)</string>
   <string name="idepref_backend_installed">Installed (%1$s)</string>
   <string name="idepref_backend_missing">Not installed</string>
   <string name="idepref_backend_install_started">Installation started in background</string>
@@ -503,5 +472,5 @@
   <string name="msg_build_finished">Build finished with exit code %1$d</string>
   <string name="template_cpp_executable">C++ Executable</string>
   <string name="title_backend_required">Native backend required</string>
-  <string name="msg_backend_required">Install Ubuntu, the NDK and CMake from Settings → Native backend, then press Done to continue.</string>
+  <string name="msg_backend_required">Install Ubuntu from Settings → Native backend, then press Done to continue. The NDK and CMake toolchains are optional and can be installed later.</string>
 </resources>

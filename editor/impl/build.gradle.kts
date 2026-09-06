@@ -22,7 +22,6 @@ plugins {
     id("com.android.library")
     id("kotlin-android")
     id("kotlin-kapt")
-    id("com.google.devtools.ksp") version libs.versions.ksp
 }
 
 
@@ -38,15 +37,12 @@ kapt {
 }
 
 dependencies {
-    ksp(projects.annotation.processorsKsp)
     kapt(projects.annotation.processors)
     
     api(libs.androidide.ts)
-    api(libs.androidide.ts.java)
     api(libs.androidide.ts.json)
     api(libs.androidide.ts.kotlin)
     api(libs.androidide.ts.log)
-    api(libs.androidide.ts.xml)
     api(libs.androidx.collection)
     api(libs.common.editor)
     

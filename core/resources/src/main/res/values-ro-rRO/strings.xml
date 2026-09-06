@@ -41,10 +41,8 @@
   <string name="title_clear_output">Șterge Log</string>
   <string name="build_output">Log Ieșire</string>
   <string name="quick_run_debug">Rulare rapidă</string>
-  <string name="msg_sync_needed">Fișierele Gradle s-au schimbat. Vă rugăm să reconstruiți proiectul pentru a sincroniza dependențele și configurațiile.</string>
   <string name="preparing">Pregătire</string>
   <string name="preparing_first">Pregătirea. Prima generare poate dura până la 10–15 minute!</string>
-  <string name="msg_installing_gradlew">Gradle Wrapper nu este disponibil!\nSe instalează unul implicit. Gradle v7.4 va fi descărcat dacă este necesar.</string>
   <string name="run">Rulare</string>
   <!-- Project -->
   <string name="title_first_build">Prima compilație</string>
@@ -88,12 +86,10 @@
   <string name="project_creation_failed">Failed to create project</string>
   <string name="msg_folder_creation_failed">Nu s-a putut crea folderul!</string>
   <string name="msg_file_creation_failed">Esuare in crearea fisierului!</string>
-  <string name="msg_layout_file_creation_failed">Failed to create layout file!</string>
   <string name="msg_folder_created">Dosar creat cu succes!</string>
   <string name="msg_file_created">Fișier creat cu succes!</string>
   <string name="msg_folder_exists">Dosarul există deja!</string>
   <string name="msg_file_exists">Fisierul există deja!</string>
-  <string name="msg_layout_file_exists">Layout file already exists!</string>
   <string name="msg_invalid_name">Nume invalid!</string>
   <string name="text_create">crează</string>
   <string name="msg_can_contain_slashes">Dacă calea conține Separator de fișiere (\'/\'), atunci directoarele necesare (părinte) vor fi create dacă nu există.</string>
@@ -101,9 +97,6 @@
   <string name="file_name">Nume de fișier</string>
   <string name="new_name">Nume nou</string>
   <string name="new_file">Fișier nou</string>
-  <string name="create_auto_layout">Create layout file</string>
-  <string name="new_java_class">Noua clasă Java</string>
-  <string name="new_xml_resource">Nouă resursă XML</string>
   <string name="new_folder">Dosar nou</string>
   <string name="title_confirm_delete">Confirmă ștergerea</string>
   <string name="msg_confirm_delete">Ești sigur că vrei să ștergi:\n%s?</string>
@@ -123,7 +116,6 @@
   <string name="save_failed">Failed to save files</string>
   <string name="msg_newfile_dest">Destinație: %s/</string>
   <string name="restype_drawable">Drawable</string>
-  <string name="restype_layout">Layout</string>
   <string name="restype_menu">Meniu</string>
   <string name="restype_other">Altele</string>
   <string name="classtype_class">Class</string>
@@ -164,16 +156,11 @@
   <string name="msg_preferences">Preferințe</string>
   <string name="pref_changelog">Changelog</string>
   <string name="msg_editor_font_size">Vă rugăm să alegeți dimensiunea implicită a fontului editorului :</string>
-  <string name="msg_clear_cache">Acest lucru va șterge directorul cache creat de Gradle. Dacă îl ștergeți, următoarea versiune poate dura un pic mai mult decât în mod normal, deoarece Gradle va descărca din nou fișierele necesare.\n\nSunteți sigur că doriți să ștergeți cache-urile?</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
-  <string name="title_preview_layout">Previzualizare Layout</string>
   <string name="title_viewaction_delete">Ștergere</string>
   <string name="msg_yesno_def_title">Vă rugăm să confirmați</string>
   <string name="msg_yesno_def_message">Eşti sigur?</string>
-  <string name="msg_empty_ui_layout">Nu au fost adăugate View-uri. Faceți clic pentru a adăuga.</string>
-  <string name="msg_generate_xml_failed">Nu s-a reușit să se genereze codul XML</string>
-  <string name="title_generating_xml">Generarea codului XML</string>
   <string name="msg_swipe_up">Trageți cu degetul în sus pentru jurnale și multe altele.</string>
   <string name="msg_ide_crashed">AndroidIDE s-a oprit</string>
   <string name="msg_report_crash">Vă rugăm să deschideți o problemă pe github cu următorul stacktrace :</string>
@@ -201,7 +188,6 @@
   <string name="idepref_visiblePassword_title">Semnalizare parolă vizibilă</string>
   <string name="idepref_visiblePassword_summary">Utilizați pentru semnalizatorul de tip de intrare a parolei vizibile în editor. Acest lucru face ca tastatura moale să nu propună sugestii.</string>
   <string name="previous">Precedent</string>
-  <string name="title_gradle_service_notification_ticker">Serviciul de compilare Gradle a pornit</string>
   <string name="title_gradle_service_notification">Gradle serviciu de compilare</string>
   <string name="title_cancel_build">Anulare compilare</string>
   <string name="msg_initializing_project">Inițializarea proiectului</string>
@@ -332,7 +318,6 @@
   <string name="msg_constructor_available">Un constructor cu aceleași tipuri de parametri este deja disponibil</string>
   <string name="replace">Înlocuire</string>
   <string name="replaceAll">Înlocuiți toate</string>
-  <string name="title_run_tasks">Rularea activităților</string>
   <string name="hint_search_tasks">Activități de căutare…</string>
   <string name="msg_err_select_tasks">Selectați activitățile de rulat</string>
   <string name="title_confirmation">Confirmare</string>
@@ -346,7 +331,6 @@
   <string name="git_clone_success">Clona Git cu succes</string>
   <string name="git_clone_failed">Nu a reușit să cloneze depozitul git</string>
   <string name="msg_select_attr">Selectați un atribut din lista de mai jos</string>
-  <string name="action_show_hierarchy">Arată ierarhia layout-ului</string>
   <string name="idepref_editor_colorScheme">Schema de culori</string>
   <string name="idepref_editor_colorScheme_summary">Alegeți schema de culori de utilizat în editor</string>
   <string name="idepref_general_uiMode">Mod UI</string>
@@ -382,7 +366,6 @@
   <string name="msg_path_must_be_file">Must be path to a file</string>
   <string name="msg_classname_with_keywords">Class name contains keywords</string>
   <string name="msg_path_must_be_dir">Must be path to a directory</string>
-  <string name="msg_invalid_layout_name">Invalid layout file name</string>
   <string name="msg_invalid_project_details">Invalid project details</string>
   <string name="msg_use_kts">Use Kotlin Script (.kts) for Gradle build files</string>
   <string name="title_privacy">Privacy</string>
@@ -412,12 +395,9 @@
   <string name="msg_codeaction_failed">Failed to perform code action</string>
   <string name="idepref_devOptions_enableLogsender_title">Enable LogSender</string>
   <string name="idepref_devOptions_enableLogsender_summary">When disabled, logs from applications won\'t be shown in AndroidIDE</string>
-  <string name="title_build_variants">Build variants</string>
   <string name="title_apply">Apply</string>
   <string name="title_discard">Discard</string>
-  <string name="msg_build_variants_fetch_failed">Failed to fetch build variants</string>
   <string name="title_choose_application">Choose application</string>
-  <string name="err_selected_variant_not_found">Selected build variant not found</string>
   <string name="title_disconnect_log_senders">Disconnect log senders</string>
   <string name="title_begin_long_select">Begin long select</string>
   <string name="idepref_editor_stickScroll_title">Sticky scroll</string>
@@ -442,8 +422,6 @@
   <string name="msg_file_is_not_dir">Selected file is not a directory</string>
   <string name="msg_project_dir_doesnt_exist">Project directory does not exist</string>
   <string name="msg_files_being_saved">A file save operation is already in progress!</string>
-  <string name="title_install_tools">SDK Installation</string>
-  <string name="subtitle_install_tools">Install the development tools</string>
   <string name="msg_install_tools">The development tools must be installed for the IDE to work. Clicking the done button will open terminal to install the tools. To install, follow the instructions <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">here</a>.<br/><br/>Or read the <a href="https://docs.androidide.com/">documentation</a>]]>.</string>
   <string name="greeting_title">Welcome</string>
   <string name="greeting_subtitle">Learn, build, launch. All on your Android.</string>
@@ -462,8 +440,6 @@
   <string name="msg_cannot_create_terminal_session">Unable to create terminal session</string>
   <string name="action_auto_install">Automatic installation</string>
   <string name="action_manual_install">Manual installation</string>
-  <string name="hint_android_sdk_version">Android SDK version</string>
-  <string name="hin_jdk_version">JDK version</string>
   <string name="action_install_git">Install Git</string>
   <string name="action_install_openssh">Install OpenSSH</string>
   <string name="msg_terminal_new_sessions_disabled">Cannot create session. New sessions are disabled!</string>

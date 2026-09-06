@@ -9,11 +9,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import com.itsaky.androidide.app.BaseIDEActivity;
 import com.termux.shared.R;
 import com.termux.shared.data.DataUtils;
@@ -26,10 +25,6 @@ import com.termux.shared.logger.Logger;
 import com.termux.shared.markdown.MarkdownUtils;
 import com.termux.shared.models.ReportInfo;
 import com.termux.shared.termux.TermuxConstants;
-import io.noties.markwon.Markwon;
-import io.noties.markwon.recycler.MarkwonAdapter;
-import io.noties.markwon.recycler.SimpleEntry;
-import org.commonmark.node.FencedCodeBlock;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -169,22 +164,9 @@ public class ReportActivity extends BaseIDEActivity {
         }
     }
 
-    RecyclerView recyclerView = findViewById(R.id.recycler_view);
-
-    final Markwon markwon = MarkdownUtils.getRecyclerMarkwonBuilder(this);
-
-    final MarkwonAdapter adapter = MarkwonAdapter.builderTextViewIsRoot(
-            R.layout.markdown_adapter_node_default)
-        .include(FencedCodeBlock.class,
-            SimpleEntry.create(R.layout.markdown_adapter_node_code_block, R.id.code_text_view))
-        .build();
-
-    recyclerView.setLayoutManager(new LinearLayoutManager(this));
-    recyclerView.setAdapter(adapter);
-
     generateReportActivityMarkdownString();
-    adapter.setMarkdown(markwon, mReportActivityMarkdownString);
-    adapter.notifyDataSetChanged();
+    TextView reportTextView = findViewById(R.id.report_text_view);
+    reportTextView.setText(mReportActivityMarkdownString);
   }
 
 

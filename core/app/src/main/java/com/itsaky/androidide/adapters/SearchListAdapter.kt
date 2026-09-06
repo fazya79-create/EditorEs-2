@@ -27,11 +27,8 @@ import com.itsaky.androidide.databinding.LayoutSearchResultGroupBinding
 import com.itsaky.androidide.databinding.LayoutSearchResultItemBinding
 import com.itsaky.androidide.models.FileExtension
 import com.itsaky.androidide.models.SearchResult
-import com.itsaky.androidide.syntax.colorschemes.SchemeAndroidIDE
-import com.itsaky.androidide.syntax.highlighters.JavaHighlighter
 import com.itsaky.androidide.utils.resolveAttr
 import java.io.File
-import java.util.concurrent.CompletableFuture
 
 class SearchListAdapter(
   private val results: Map<File, List<SearchResult>?>,
@@ -76,15 +73,7 @@ class SearchListAdapter(
     override fun onBindViewHolder(p1: ChildVH, p2: Int) {
       val match = matches[p2]
       val binding = p1.binding
-      CompletableFuture.runAsync {
-        try {
-          val scheme = SchemeAndroidIDE.newInstance(binding.text.context)
-          val sb = JavaHighlighter().highlight(scheme, match.line, match.match)
-          ThreadUtils.runOnUiThread { binding.text.text = sb }
-        } catch (e: Exception) {
-          ThreadUtils.runOnUiThread { binding.text.text = match.match }
-        }
-      }
+      ThreadUtils.runOnUiThread { binding.text.text = match.match }
       binding.root.setOnClickListener { onMatchClick(match) }
     }
 

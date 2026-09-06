@@ -4,28 +4,9 @@
 -dontnote **
 -dontobfuscate
 
--keep class javax.** { *; }
--keep class jdkx.** { *; }
+# lsp4j models are deserialized with Gson
+-keep class org.eclipse.lsp4j.** { *; }
 
-# keep javac classes
--keep class openjdk.** { *; }
-
-# Android builder model interfaces
--keep class com.android.** { *; }
-
-# Tooling API classes
--keep class com.itsaky.androidide.tooling.** { *; }
-
-# Builder model implementations
--keep class com.itsaky.androidide.builder.model.** { *; }
-
-# Eclipse
--keep class org.eclipse.** { *; }
-
-# JAXP
--keep class jaxp.** { *; }
--keep class org.w3c.** { *; }
--keep class org.xml.** { *; }
 
 # Services
 -keep @com.google.auto.service.AutoService class ** {
@@ -54,22 +35,10 @@
 -keep class * implements org.antlr.v4.runtime.Lexer {
     <init>(...);
 }
--keep class * extends com.itsaky.androidide.lsp.java.providers.completion.IJavaCompletionProvider {
-    <init>(...);
-}
 -keep class com.itsaky.androidide.editor.api.IEditor { *; }
--keep class * extends com.itsaky.androidide.inflater.IViewAdapter { *; }
--keep class * extends com.itsaky.androidide.inflater.drawable.IDrawableParser {
-    <init>(...);
-    android.graphics.drawable.Drawable parse();
-    android.graphics.drawable.Drawable parseDrawable();
-}
 -keep class com.itsaky.androidide.utils.DialogUtils {  public <methods>; }
 
 # APK Metadata
--keep class com.itsaky.androidide.models.ApkMetadata { *; }
--keep class com.itsaky.androidide.models.ArtifactType { *; }
--keep class com.itsaky.androidide.models.MetadataElement { *; }
 
 # Parcelable
 -keepclassmembers class * implements android.os.Parcelable {

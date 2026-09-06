@@ -45,11 +45,6 @@ dependencyResolutionManagement {
 include(
   ":appintro",
   ":fuzzysearch",
-  ":javapoet",
-  ":jaxp",
-  ":java-compiler",
-  ":jdt",
-  ":layoutlib-api",
   ":logback-core",
 )
 

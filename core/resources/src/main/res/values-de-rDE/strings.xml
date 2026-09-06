@@ -41,10 +41,8 @@
   <string name="title_clear_output">Ausgabe s&#xE4;ubern</string>
   <string name="build_output">Build-Ausgabe</string>
   <string name="quick_run_debug">Schnelldurchlauf</string>
-  <string name="msg_sync_needed">Die Gradle-Dateien haben sich ver&#xE4;ndert. Bitte starte den Build Prozess um diese zu Synchronisieren.</string>
   <string name="preparing">Vorbereiten</string>
   <string name="preparing_first">Vorbereiten. Der erste Build kann bis zu 10 bis 15 Minuten dauern!</string>
-  <string name="msg_installing_gradlew">Gradle Wrapper ist nicht verf&#xFC;gbar!\nStandard-Wrapper wird installiert. Gradle v7.4 wird bei Bedarf heruntergeladen.</string>
   <string name="run">Ausführen</string>
   <!-- Project -->
   <string name="title_first_build">Erster Build</string>
@@ -88,12 +86,10 @@
   <string name="project_creation_failed">Das Projekt konnte nicht erstellt werden</string>
   <string name="msg_folder_creation_failed">Ordner konnte nicht erstellt werden!</string>
   <string name="msg_file_creation_failed">Erstellen der Datei fehlgeschlagen!</string>
-  <string name="msg_layout_file_creation_failed">Es konnte keine Layout-Datei erstellt werden!</string>
   <string name="msg_folder_created">Ordner erfolgreich erstellt!</string>
   <string name="msg_file_created">Datei erfolgreich erstellt!</string>
   <string name="msg_folder_exists">Ordner existiert bereits!</string>
   <string name="msg_file_exists">Die Datei existiert bereits!</string>
-  <string name="msg_layout_file_exists">Layout-Datei existiert bereits!</string>
   <string name="msg_invalid_name">Ung&#xFC;ltiger Name!</string>
   <string name="text_create">Erstellen</string>
   <string name="msg_can_contain_slashes">Wenn der Pfad Dateitrennzeichen (\'/\') enth&#xE4;lt, werden die erforderlichen (&#xFC;bergeordneten) Verzeichnisse erstellt, falls sie nicht vorhanden sind.</string>
@@ -101,9 +97,6 @@
   <string name="file_name">Dateinamen</string>
   <string name="new_name">Neuer Name</string>
   <string name="new_file">Neue Datei</string>
-  <string name="create_auto_layout">Erstelle eine Layout-Datei</string>
-  <string name="new_java_class">Neue Java-Klasse</string>
-  <string name="new_xml_resource">Neue XML-Ressource</string>
   <string name="new_folder">Neuer Ordner</string>
   <string name="title_confirm_delete">L&#xF6;schen best&#xE4;tigen</string>
   <string name="msg_confirm_delete">Sind Sie sicher, dass Sie Folgendes l&#xF6;schen m&#xF6;chten:\n%s?</string>
@@ -123,7 +116,6 @@
   <string name="save_failed">Die Dateien konnten nicht gespeichert werden</string>
   <string name="msg_newfile_dest">Ziel: %s/</string>
   <string name="restype_drawable">Drawable</string>
-  <string name="restype_layout">Layout</string>
   <string name="restype_menu">Menü</string>
   <string name="restype_other">Andere</string>
   <string name="classtype_class">Klasse</string>
@@ -164,16 +156,11 @@
   <string name="msg_preferences">Einstellungen</string>
   <string name="pref_changelog">&#xC4;nderungsprotokoll</string>
   <string name="msg_editor_font_size">Bitte w&#xE4;hlen Sie die Standardschriftgr&#xF6;&#xDF;e des Editors aus:</string>
-  <string name="msg_clear_cache">Dies löscht das Cache-Verzeichnis, das von Gradle erstellt wurde. Wenn Sie es löschen, kann der nächste Build etwas länger dauern, als gewöhnlich, da Gradle die benötigten Dateien erneut herunterlädt.\n\nSind Sie sicher, dass Sie die Caches löschen möchten?</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
-  <string name="title_preview_layout">Layout Vorschau</string>
   <string name="title_viewaction_delete">L&#xF6;schen</string>
   <string name="msg_yesno_def_title">Bitte best&#xE4;tigen</string>
   <string name="msg_yesno_def_message">Bist du dir sicher?</string>
-  <string name="msg_empty_ui_layout">Es wurden keine View hinzugef&#xFC;gt. Zum Hinzuf&#xFC;gen klicken.</string>
-  <string name="msg_generate_xml_failed">XML-Code konnte nicht generiert werden</string>
-  <string name="title_generating_xml">Generieren von XML-Code</string>
   <string name="msg_swipe_up">Wischen Sie nach oben, um Build Ausgaben, Logs und mehr anzuzeigen.</string>
   <string name="msg_ide_crashed">AndroidIDE ist abgest&#xFC;rzt</string>
   <string name="msg_report_crash">Bitte &#xF6;ffnen Sie ein Issue auf GitHub mit dem folgenden Stacktrace:</string>
@@ -201,7 +188,6 @@
   <string name="idepref_visiblePassword_title">Sichtbares Passwort-Flag</string>
   <string name="idepref_visiblePassword_summary">Für sichtbares Passworteingabetyp-Flag im Editor verwenden. Dadurch wird sichergestellt, dass keine Vorschläge per Softkeyboard gemacht werden.</string>
   <string name="previous">Zurück</string>
-  <string name="title_gradle_service_notification_ticker">Gradle build service gestartet</string>
   <string name="title_gradle_service_notification">Gradle build service</string>
   <string name="title_cancel_build">Build abbrechen</string>
   <string name="msg_initializing_project">Projekt initialisiert</string>
@@ -332,7 +318,6 @@
   <string name="msg_constructor_available">Ein Konstruktor mit denselben Parametertypen ist bereits verfügbar</string>
   <string name="replace">Ersetzen</string>
   <string name="replaceAll">Alle ersetzen</string>
-  <string name="title_run_tasks">Tasks ausführen</string>
   <string name="hint_search_tasks">Aufgaben suchen…</string>
   <string name="msg_err_select_tasks">Bitte wählen Sie die auszuführenden Aufgaben</string>
   <string name="title_confirmation">Bestätigung</string>
@@ -346,7 +331,6 @@
   <string name="git_clone_success">Git Klon erfolgreich</string>
   <string name="git_clone_failed">Fehler beim Klonen des Git-Repositorys</string>
   <string name="msg_select_attr">Wählen Sie ein Attribut aus der folgenden Liste</string>
-  <string name="action_show_hierarchy">Layout Hierarchie anzeigen</string>
   <string name="idepref_editor_colorScheme">Farbschema</string>
   <string name="idepref_editor_colorScheme_summary">Farbschema für den Editor auswählen</string>
   <string name="idepref_general_uiMode">UI-Modus</string>
@@ -382,7 +366,6 @@
   <string name="msg_path_must_be_file">Muss ein Pfad zu einer Datei sein</string>
   <string name="msg_classname_with_keywords">Klassenname enthält Keywords</string>
   <string name="msg_path_must_be_dir">Muss ein Pfad zu einem Ordner sein</string>
-  <string name="msg_invalid_layout_name">Ungültiger Layout-Dateiname</string>
   <string name="msg_invalid_project_details">Ungültige Projekt-Details</string>
   <string name="msg_use_kts">Kotlin Script (.kts) für Gradle Build-Dateien verwenden</string>
   <string name="title_privacy">Datenschutz</string>
@@ -412,12 +395,9 @@
   <string name="msg_codeaction_failed">Fehler beim Ausführen der Aktion</string>
   <string name="idepref_devOptions_enableLogsender_title">LogSender aktivieren</string>
   <string name="idepref_devOptions_enableLogsender_summary">When disabled, logs from applications won\'t be shown in AndroidIDE</string>
-  <string name="title_build_variants">Build Varianten</string>
   <string name="title_apply">Übernehmen</string>
   <string name="title_discard">Verwerfen</string>
-  <string name="msg_build_variants_fetch_failed">Failed to fetch build variants</string>
   <string name="title_choose_application">Anwendung auswählen</string>
-  <string name="err_selected_variant_not_found">Selected build variant not found</string>
   <string name="title_disconnect_log_senders">Disconnect log senders</string>
   <string name="title_begin_long_select">Lange Auswahl starten</string>
   <string name="idepref_editor_stickScroll_title">Sticky scroll</string>
@@ -442,8 +422,6 @@
   <string name="msg_file_is_not_dir">Ausgewählte Datei ist kein Verzeichnis</string>
   <string name="msg_project_dir_doesnt_exist">Projektverzeichnis existiert nicht</string>
   <string name="msg_files_being_saved">Ein Speichervorgang wird bereits ausgeführt!</string>
-  <string name="title_install_tools">SDK-Installation</string>
-  <string name="subtitle_install_tools">Entwicklungstools installieren</string>
   <string name="msg_install_tools">Die Entwicklungstools müssen installiert werden, damit die IDE funktioniert. Durch Klicken auf den Button wird das Terminal geöffnet, um die Tools zu installieren. Um diese zu installieren, folgen Sie den Anweisungen <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">hier</a>.<br/><br/>Oder lesen Sie die <a href="https://docs.androidide.com/">Dokumentation</a>]]>.</string>
   <string name="greeting_title">Willkommen</string>
   <string name="greeting_subtitle">Lerne, Erstelle, Veröffentliche. Alles auf Ihrem Android.</string>
@@ -462,8 +440,6 @@
   <string name="msg_cannot_create_terminal_session">Terminalsitzung kann nicht erstellt werden</string>
   <string name="action_auto_install">Automatische Installation</string>
   <string name="action_manual_install">Manuelle Installation</string>
-  <string name="hint_android_sdk_version">Android SDK Version</string>
-  <string name="hin_jdk_version">JDK Version</string>
   <string name="action_install_git">Git installieren</string>
   <string name="action_install_openssh">OpenSSH installieren</string>
   <string name="msg_terminal_new_sessions_disabled">Sitzung kann nicht erstellt werden. Neue Sitzungen sind deaktiviert!</string>

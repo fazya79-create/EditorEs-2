@@ -18,7 +18,6 @@
 package com.itsaky.androidide.activities.editor
 
 import android.content.Intent
-import android.content.pm.PackageInstaller.SessionCallback
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -36,7 +35,6 @@ import androidx.activity.viewModels
 import androidx.annotation.GravityInt
 import androidx.annotation.StringRes
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.collection.MutableIntIntMap
 import androidx.core.graphics.Insets
 import androidx.core.view.GravityCompat
 import androidx.core.view.WindowInsetsCompat
@@ -47,14 +45,8 @@ import com.blankj.utilcode.constant.MemoryConstants
 import com.blankj.utilcode.util.ConvertUtils.byte2MemorySize
 import com.blankj.utilcode.util.FileUtils
 import com.blankj.utilcode.util.ThreadUtils
-import com.github.mikephil.charting.components.AxisBase
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.formatter.IAxisValueFormatter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.Tab
 import com.itsaky.androidide.R
@@ -66,7 +58,6 @@ import com.itsaky.androidide.app.EdgeToEdgeIDEActivity
 import com.itsaky.androidide.databinding.ActivityEditorBinding
 import com.itsaky.androidide.databinding.ContentEditorBinding
 import com.itsaky.androidide.databinding.LayoutDiagnosticInfoBinding
-import com.itsaky.androidide.events.InstallationResultEvent
 import com.itsaky.androidide.fragments.SearchResultFragment
 import com.itsaky.androidide.fragments.sidebar.EditorSidebarFragment
 import com.itsaky.androidide.fragments.sidebar.FileTreeFragment
@@ -79,18 +70,13 @@ import com.itsaky.androidide.models.DiagnosticGroup
 import com.itsaky.androidide.models.OpenedFile
 import com.itsaky.androidide.models.Range
 import com.itsaky.androidide.models.SearchResult
-import com.itsaky.androidide.preferences.internal.BuildPreferences
 import com.itsaky.androidide.projects.IProjectManager
 import com.itsaky.androidide.tasks.cancelIfActive
 import com.itsaky.androidide.ui.CodeEditorView
 import com.itsaky.androidide.ui.ContentTranslatingDrawerLayout
 import com.itsaky.androidide.ui.SwipeRevealLayout
 import com.itsaky.androidide.utils.ActionMenuUtils.createMenu
-import com.itsaky.androidide.utils.ApkInstallationSessionCallback
 import com.itsaky.androidide.utils.DialogUtils.newMaterialDialogBuilder
-import com.itsaky.androidide.utils.InstallationResultHandler.onResult
-import com.itsaky.androidide.utils.IntentUtils
-import com.itsaky.androidide.utils.MemoryUsageWatcher
 import com.itsaky.androidide.utils.flashError
 import com.itsaky.androidide.utils.resolveAttr
 import com.itsaky.androidide.viewmodel.EditorViewModel
@@ -117,8 +103,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
   protected var diagnosticInfoBinding: LayoutDiagnosticInfoBinding? = null
   protected var filesTreeFragment: FileTreeFragment? = null
   protected var editorBottomSheet: BottomSheetBehavior<out View?>? = null
-  protected val memoryUsageWatcher = MemoryUsageWatcher()
-  protected val pidToDatasetIdxMap = MutableIntIntMap(initialCapacity = 3)
 
   var isDestroying = false
     protected set
@@ -127,8 +111,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
    * Editor activity's [CoroutineScope] for executing tasks in the background.
    */
   protected val editorActivityScope = CoroutineScope(Dispatchers.Default)
-
-  internal var installationCallback: ApkInstallationSessionCallback? = null
 
   val editorViewModel by viewModels<EditorViewModel>()
 
@@ -155,27 +137,7 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
     }
   }
 
-  private val memoryUsageListener = MemoryUsageWatcher.MemoryUsageListener { memoryUsage ->
-    memoryUsage.forEachValue { proc ->
-      _binding?.memUsageView?.chart?.apply {
-        val dataset = (data.getDataSetByIndex(pidToDatasetIdxMap[proc.pid]) as LineDataSet?)
-          ?: run {
-            log.error("No dataset found for process: {}: {}", proc.pid, proc.pname)
-            return@forEachValue
-          }
 
-        dataset.entries.mapIndexed { index, entry ->
-          entry.y = byte2MemorySize(proc.usageHistory[index], MemoryConstants.MB).toFloat()
-        }
-
-        dataset.label = "%s - %.2fMB".format(proc.pname, dataset.entries.last().y)
-        dataset.notifyDataSetChanged()
-        data.notifyDataChanged()
-        notifyDataSetChanged()
-        invalidate()
-      }
-    }
-  }
 
   private var isImeVisible = false
   private var contentCardRealHeight: Int? = null
@@ -189,15 +151,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
   private var optionsMenuInvalidator: Runnable? = null
 
   companion object {
-
-    @JvmStatic
-    protected val PROC_IDE = "IDE"
-
-    @JvmStatic
-    protected val PROC_GRADLE_TOOLING = "Gradle Tooling"
-
-    @JvmStatic
-    protected val PROC_GRADLE_DAEMON = "Gradle Daemon"
 
     @JvmStatic
     protected val log: Logger = LoggerFactory.getLogger(BaseEditorActivity::class.java)
@@ -230,12 +183,7 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
 
     optionsMenuInvalidator = null
 
-    installationCallback?.destroy()
-    installationCallback = null
-
     if (isDestroying) {
-      memoryUsageWatcher.stopWatching(true)
-      memoryUsageWatcher.listener = null
       editorActivityScope.cancelIfActive("Activity is being destroyed")
     }
   }
@@ -287,24 +235,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
     }
   }
 
-  @Subscribe(threadMode = MAIN)
-  open fun onInstallationResult(event: InstallationResultEvent) {
-    val intent = event.intent
-    if (isDestroying) {
-      return
-    }
-
-    val packageName = onResult(this, intent) ?: return
-
-    if (BuildPreferences.launchAppAfterInstall) {
-      IntentUtils.launchApp(this, packageName)
-      return
-    }
-
-    Snackbar.make(content.realContainer, string.msg_action_open_application, Snackbar.LENGTH_LONG)
-      .setAction(string.yes) { IntentUtils.launchApp(this, packageName) }.show()
-  }
-
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
@@ -330,8 +260,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
     setupContainers()
     setupDiagnosticInfo()
 
-    setupMemUsageChart()
-    watchMemory()
   }
 
   private fun onSwipeRevealDragProgress(progress: Float) {
@@ -341,96 +269,11 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
       content.editorAppBarLayout.updatePadding(
         top = (insetsTop * (1f - progress)).roundToInt()
       )
-      memUsageView.chart.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-        topMargin = (insetsTop * progress).roundToInt()
-      }
-    }
-  }
-
-  private fun setupMemUsageChart() {
-    binding.memUsageView.chart.apply {
-      val colorAccent = resolveAttr(R.attr.colorAccent)
-
-      isDragEnabled = false
-      description.isEnabled = false
-      xAxis.axisLineColor = colorAccent
-      axisRight.axisLineColor = colorAccent
-
-      setPinchZoom(false)
-      setBackgroundColor(editorSurfaceContainerBackground)
-      setDrawGridBackground(true)
-      setScaleEnabled(true)
-
-      axisLeft.isEnabled = false
-      axisRight.valueFormatter = object :
-        IAxisValueFormatter {
-        override fun getFormattedValue(value: Float, axis: AxisBase?): String {
-          return "%dMB".format(value.roundToLong())
-        }
-      }
-    }
-  }
-
-  private fun watchMemory() {
-    memoryUsageWatcher.listener = memoryUsageListener
-    memoryUsageWatcher.watchProcess(Process.myPid(), PROC_IDE)
-    resetMemUsageChart()
-  }
-
-  protected fun resetMemUsageChart() {
-    val processes = memoryUsageWatcher.getMemoryUsages()
-    val datasets = Array(processes.size) { index ->
-      LineDataSet(
-        List(MemoryUsageWatcher.MAX_USAGE_ENTRIES) { Entry(it.toFloat(), 0f) },
-        processes[index].pname
-      )
-    }
-
-    val bgColor = editorSurfaceContainerBackground
-    val textColor = resolveAttr(R.attr.colorOnSurface)
-
-    for ((index, proc) in processes.withIndex()) {
-      val dataset = datasets[index]
-      dataset.color = getMemUsageLineColorFor(proc)
-      dataset.setDrawIcons(false)
-      dataset.setDrawCircles(false)
-      dataset.setDrawCircleHole(false)
-      dataset.setDrawValues(false)
-      dataset.formLineWidth = 1f
-      dataset.formSize = 15f
-      dataset.isHighlightEnabled = false
-      pidToDatasetIdxMap[proc.pid] = index
-    }
-
-    binding.memUsageView.chart.setBackgroundColor(bgColor)
-
-    binding.memUsageView.chart.apply {
-      data = LineData(*datasets)
-      axisRight.textColor = textColor
-      axisLeft.textColor = textColor
-      legend.textColor = textColor
-
-      data.setValueTextColor(textColor)
-      setBackgroundColor(bgColor)
-      setGridBackgroundColor(bgColor)
-      notifyDataSetChanged()
-      invalidate()
-    }
-  }
-
-  private fun getMemUsageLineColorFor(proc: MemoryUsageWatcher.ProcessMemoryInfo): Int {
-    return when (proc.pname) {
-      PROC_IDE -> Color.BLUE
-      PROC_GRADLE_TOOLING -> Color.RED
-      PROC_GRADLE_DAEMON -> Color.GREEN
-      else -> throw IllegalArgumentException("Unknown process: $proc")
     }
   }
 
   override fun onPause() {
     super.onPause()
-    memoryUsageWatcher.listener = null
-    memoryUsageWatcher.stopWatching(false)
 
     this.isDestroying = isFinishing
     getFileTreeFragment()?.saveTreeState()
@@ -439,9 +282,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
   override fun onResume() {
     super.onResume()
     invalidateOptionsMenu()
-
-    memoryUsageWatcher.listener = memoryUsageListener
-    memoryUsageWatcher.startWatching()
 
     try {
       getFileTreeFragment()?.listProjectFiles()
@@ -757,9 +597,5 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
     builder.setMessage(string.msg_need_help)
     builder.setPositiveButton(android.R.string.ok, null)
     builder.create().show()
-  }
-
-  open fun installationSessionCallback(): SessionCallback {
-    return ApkInstallationSessionCallback(this).also { installationCallback = it }
   }
 }

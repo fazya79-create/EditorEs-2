@@ -41,10 +41,8 @@
   <string name="title_clear_output">Çıktıyı temizle</string>
   <string name="build_output">Yapım İşi Çıktısı</string>
   <string name="quick_run_debug">Hızlı başlat</string>
-  <string name="msg_sync_needed">Gradle dosyaları değişti. Lütfen projeni bağımlılıklar ve konfigürasyonlarla yeniden inşa et.</string>
   <string name="preparing">Hazırlanıyor</string>
   <string name="preparing_first">Hazırlanıyor. İlk inşa 10-15 dakikanızı alabilir!</string>
-  <string name="msg_installing_gradlew">Gradle Wrapper kullanılabilir değil!\nVarsayılan bir tanesi indiriliyor. Gradle v7.4 eğer gerekliyse indirilecek.</string>
   <string name="run">Çalıştır</string>
   <!-- Project -->
   <string name="title_first_build">İlk İnşa</string>
@@ -88,12 +86,10 @@
   <string name="project_creation_failed">Proje oluşturulamadı</string>
   <string name="msg_folder_creation_failed">Klasö oluşturulamadı!</string>
   <string name="msg_file_creation_failed">Dosya oluşturma başarısız!</string>
-  <string name="msg_layout_file_creation_failed">Düzen dosyası oluşturulamadı!</string>
   <string name="msg_folder_created">Klasör başarıyla oluşturuldu!</string>
   <string name="msg_file_created">Dosya başarıyla oluşturuldu!</string>
   <string name="msg_folder_exists">Klasör zaten var!</string>
   <string name="msg_file_exists">Dosya zaten mevcut!</string>
-  <string name="msg_layout_file_exists">Düzen dosyası zaten mevcut!</string>
   <string name="msg_invalid_name">Geçersiz Ad!</string>
   <string name="text_create">Oluştur</string>
   <string name="msg_can_contain_slashes">Eğer yol dosya ayırıcı (\'/\') içeriyorsa gerekli (ana) dizinler oluşturulacaktır.</string>
@@ -101,9 +97,6 @@
   <string name="file_name">Dosya Adı</string>
   <string name="new_name">Yeni ad</string>
   <string name="new_file">Yeni dosya</string>
-  <string name="create_auto_layout">Düzen dosyası oluştur</string>
-  <string name="new_java_class">Yeni Java class</string>
-  <string name="new_xml_resource">Yeni XML kaynağı</string>
   <string name="new_folder">Yeni klasör</string>
   <string name="title_confirm_delete">Silmeyi onayla</string>
   <string name="msg_confirm_delete">\n%s \'yi silmek istediğinize emin misiniz?</string>
@@ -123,7 +116,6 @@
   <string name="save_failed">Dosyalar kaydedilemedi</string>
   <string name="msg_newfile_dest">Hedef: %s/</string>
   <string name="restype_drawable">Çekilebilir</string>
-  <string name="restype_layout">Katman</string>
   <string name="restype_menu">Menü</string>
   <string name="restype_other">Diğer</string>
   <string name="classtype_class">Sınıf</string>
@@ -164,16 +156,11 @@
   <string name="msg_preferences">Ayarlar</string>
   <string name="pref_changelog">Değişiklikler</string>
   <string name="msg_editor_font_size">Lütfen editörün varsayılan font büyüklüğünü seçin:</string>
-  <string name="msg_clear_cache">Bu işlem Gradle tarafından oluşturulan bütün önbelleği temizleyecek. Eğer bunu silerseniz Gradle bütün gerekli dosyaları tekrar indireceğinden normal inşa süresinden daha uzun bir sürede derleme alacaksınız.\n\nÖnbelleği temizlemek istediğinize emin misiniz?</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
-  <string name="title_preview_layout">Düzeni Önizle</string>
   <string name="title_viewaction_delete">Sil</string>
   <string name="msg_yesno_def_title">Lütfen onaylayın</string>
   <string name="msg_yesno_def_message">Emin misiniz?</string>
-  <string name="msg_empty_ui_layout">Herhangi bir View eklenmedi. Eklemek için tıklayın.</string>
-  <string name="msg_generate_xml_failed">XML kodu oluşturulamadı</string>
-  <string name="title_generating_xml">XML kodu oluşturuluyor</string>
   <string name="msg_swipe_up">İnşa çıktısı, günlükler ve daha fazlası için yukarı kaydırın.</string>
   <string name="msg_ide_crashed">AndroidIDE çöktü</string>
   <string name="msg_report_crash">Lütfen aşağıdaki talimatları izleyerek Github\'da bir konu açın:</string>
@@ -201,7 +188,6 @@
   <string name="idepref_visiblePassword_title">Görünür parola bayrağı</string>
   <string name="idepref_visiblePassword_summary">Düzenleyicide görünür parola giriş türü için kullanın. Bu ekran klavyesi tarafından öneri sunulamamasını sağlar.</string>
   <string name="previous">Önceki</string>
-  <string name="title_gradle_service_notification_ticker">Gradle build işlemi başlatıldı</string>
   <string name="title_gradle_service_notification">Gradle build işlemi</string>
   <string name="title_cancel_build">Oluşturmayı iptal et</string>
   <string name="msg_initializing_project">Proje başlatılıyor</string>
@@ -332,7 +318,6 @@
   <string name="msg_constructor_available">Aynı parametre türlerine sahip bir oluşturucu zaten mevcut</string>
   <string name="replace">Yer değiştir</string>
   <string name="replaceAll">Tümünü değiştir</string>
-  <string name="title_run_tasks">Görevleri çalıştır</string>
   <string name="hint_search_tasks">Görevleri ara…</string>
   <string name="msg_err_select_tasks">Lütfen çalıştırmak için görev seçin</string>
   <string name="title_confirmation">Doğrulama</string>
@@ -346,7 +331,6 @@
   <string name="git_clone_success">Depo başarıyla klonlandı</string>
   <string name="git_clone_failed">Depo klonlama başarısız</string>
   <string name="msg_select_attr">Aşağıdaki listeden bir öznitelik seç</string>
-  <string name="action_show_hierarchy">Düzen aşamalarını göster</string>
   <string name="idepref_editor_colorScheme">Renk Şeması</string>
   <string name="idepref_editor_colorScheme_summary">Düzenleyicide kullanmak için bir renk şeması seç</string>
   <string name="idepref_general_uiMode">UI Modu</string>
@@ -382,7 +366,6 @@
   <string name="msg_path_must_be_file">Bir dosyaya yol olması gerekir</string>
   <string name="msg_classname_with_keywords">Anahtar kelimeleri içeren sınıf</string>
   <string name="msg_path_must_be_dir">Bir dizine yol olması gerekir</string>
-  <string name="msg_invalid_layout_name">Geçersiz düzen dosya adı</string>
   <string name="msg_invalid_project_details">Geçersiz proje detayları</string>
   <string name="msg_use_kts">Gradle inşa dosyaları için Kotlin Script (.kts) kullan</string>
   <string name="title_privacy">Gizlilik</string>
@@ -412,12 +395,9 @@
   <string name="msg_codeaction_failed">Kod eylemi gerçekleştirilemedi</string>
   <string name="idepref_devOptions_enableLogsender_title">LogSender\'ı Etkinleştir</string>
   <string name="idepref_devOptions_enableLogsender_summary">Devre dışı bırakıldığında, uygulamalardan gelen loglar AndroidIDE de görüntülenmeyecek</string>
-  <string name="title_build_variants">İnşa türleri</string>
   <string name="title_apply">Uygula</string>
   <string name="title_discard">Vazgeç</string>
-  <string name="msg_build_variants_fetch_failed">İnşa türleri alınamadı</string>
   <string name="title_choose_application">Uygulama seç</string>
-  <string name="err_selected_variant_not_found">Seçili inşa türü bulunamadı</string>
   <string name="title_disconnect_log_senders">Günlük göndericilerinin bağlantısını kes</string>
   <string name="title_begin_long_select">Uzun seçime başla</string>
   <string name="idepref_editor_stickScroll_title">Yapışkan kaydırma</string>
@@ -442,8 +422,6 @@
   <string name="msg_file_is_not_dir">Seçilen dosya bir dizin değil</string>
   <string name="msg_project_dir_doesnt_exist">Proje dizini mevcut değil</string>
   <string name="msg_files_being_saved">Bir dosya kaydetme işlemi zaten devam ediyor!</string>
-  <string name="title_install_tools">SDK kurulumu</string>
-  <string name="subtitle_install_tools">Geliştirme araçlarını yükle</string>
   <string name="msg_install_tools">Geliştirici araçları IDE\'nin çalışması için yüklenmeli. Tamam butonuna tıklamak kurulum terminalini açacaktır. Yüklemek için, adımları takip edin <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">Buradan</a>. <br/><br/> Veya <a href="https://docs.androidide.com/">Dokümanları okuyun</a>]]>.</string>
   <string name="greeting_title">Hoş geldiniz</string>
   <string name="greeting_subtitle">Öğren, inşa et, çalıştır. Hepsi Android\'inde.</string>
@@ -462,8 +440,6 @@
   <string name="msg_cannot_create_terminal_session">Terminal oturumu oluşturulamıyor</string>
   <string name="action_auto_install">Otomatik yükleme</string>
   <string name="action_manual_install">Manuel Kurulum</string>
-  <string name="hint_android_sdk_version">Android SDK sürümü</string>
-  <string name="hin_jdk_version">JDK sürümü</string>
   <string name="action_install_git">Git\'i kur</string>
   <string name="action_install_openssh">OpenSSH\'ı kur</string>
   <string name="msg_terminal_new_sessions_disabled">Oturum oluşturulamıyor. Yeni oturumlar devre dışı bırakıldı!</string>

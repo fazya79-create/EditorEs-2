@@ -7,7 +7,6 @@ kotlin = "1.9.24"
 kotlin-coroutines = "1.8.1"
 tree-sitter = "4.3.1"
 editor = "0.23.4"
-glide = "4.16.0"
 androidx-vectordrawable = "1.2.0"
 androidx-navigation = "2.7.7"
 ksp = "1.9.24-1.0.20"
@@ -18,7 +17,6 @@ retrofit = "2.9.0"
 markwon = "4.6.2"
 maven-publish-plugin = "0.29.0"
 logback = "1.5.3"
-realm = "10.18.0"
 benchmark = "1.2.4"
 benchmark-junit4 = "1.2.4"
 
@@ -28,10 +26,6 @@ benchmark-junit4 = "1.2.4"
 composite-appintro = { module = "com.itsaky.androidide.build:appintro" }
 composite-desugaringCore = { module = "com.itsaky.androidide.build:desugaring-core" }
 composite-fuzzysearch = { module = "com.itsaky.androidide.build:fuzzysearch" }
-composite-javapoet = { module = "com.itsaky.androidide.build:javapoet" }
-composite-jaxp = { module = "com.itsaky.androidide.build:jaxp" }
-composite-jdt = { module = "com.itsaky.androidide.build:jdt" }
-composite-layoutlibApi = { module = "com.itsaky.androidide.build:layoutlib-api" }
 
 # AndroidIDE
 androidide-ts = { module = "com.itsaky.androidide.treesitter:android-tree-sitter", version.ref = "tree-sitter" }
@@ -44,11 +38,8 @@ androidide-ts-xml = { module = "com.itsaky.androidide.treesitter:tree-sitter-xml
 # Common
 common-editor = { module = "io.github.Rosemoe.sora-editor:editor", version.ref = "editor" }
 common-utilcode = { module = "com.blankj:utilcodex", version = "1.31.1" }
-common-glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
-common-glide_ap = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 common-antlr4 = { module = "org.antlr:antlr4", version.ref = "antlr4" }
 common-antlr4-runtime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr4" }
-common-javaparser = { module = "com.github.javaparser:javaparser-symbol-solver-core", version = "3.26.1" }
 common-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.14.0" }
 common-io = { module = "commons-io:commons-io", version = "2.15.1" }
 common-kotlin = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
@@ -62,11 +53,8 @@ common-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "r
 common-retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 common-markwon-core = { module = "io.noties.markwon:core", version.ref = "markwon" }
 common-markwon-extStrikethrough = { module = "io.noties.markwon:ext-strikethrough", version.ref = "markwon" }
-common-markwon-linkify = { module = "io.noties.markwon:linkify", version.ref = "markwon" }
-common-markwon-recycler = { module = "io.noties.markwon:recycler", version.ref = "markwon" }
 common-hiddenApiBypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version = "4.3" }
 common-termuxAmLib = { module = "com.termux:termux-am-library", version = "v2.0.0" }
-common-charts = { module = "com.github.AppDevNext:AndroidChart", version = "3.1.0.21" }
 
 # AndroidX
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.7.1" }
@@ -123,10 +111,6 @@ logging-logback-core = { module = "com.itsaky.androidide.build:logback-core" }
 logging-logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
 # XML
-xml-xercesImpl = { module = "xerces:xercesImpl", version = "2.12.2" }
-xml-apis = { module = "xml-apis:xml-apis", version = "2.0.2" }
-xml-remark = { module = "com.kotcrab.remark:remark", version = "1.2.0" }
-xml-resolver = { module = "xml-resolver:xml-resolver", version = "1.2" }
 xml-jb-annotations = { module = "org.jetbrains:annotations", version = "24.1.0" }
 
 # GIT
@@ -151,9 +135,6 @@ tests-mockk = { module = "io.mockk:mockk", version = "1.13.10" }
 tests-barista = { module = "com.adevinta.android:barista", version = "4.3.0" }
 
 # Tooling
-tooling-builderModel = { module = "com.android.tools.build:builder-model", version.ref = "agp-tooling" }
-tooling-gradleApi = { module = "com.itsaky.androidide.gradle:gradle-tooling-api", version.ref = "gradle-tooling" }
-tooling-slf4j = { module = "org.slf4j:slf4j-api", version = "2.0.12" }
 
 # Classpaths
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }

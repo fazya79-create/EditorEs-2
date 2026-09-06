@@ -41,10 +41,8 @@
   <string name="title_clear_output">আউটপুট পরিস্কার করুন</string>
   <string name="build_output">বিল্ড আউটপুট</string>
   <string name="quick_run_debug">দ্রুত চালান</string>
-  <string name="msg_sync_needed">Gradle ফাইলগুলি পরিবর্তিত হয়েছে৷ ডিপেনডেন্সি এবং কনফিগারেশন সিঙ্ক করার জন্য অনুগ্রহ করে আপনার প্রকল্পটি পুনর্নির্মাণ করুন৷</string>
   <string name="preparing">প্রস্তুত হচ্ছে৷</string>
   <string name="preparing_first">প্রস্তুতি হচ্ছে। প্রথমবার তৈরি হতে 10-15 মিনিট পর্যন্ত সময় লাগতে পারে!</string>
-  <string name="msg_installing_gradlew">Gradle Wrapper উপলব্ধ নেই!\nডিফল্ট একটি ইনস্টল করা হচ্ছে। প্রয়োজনে Gradle v7.4 ডাউনলোড করা হবে।</string>
   <string name="run">চালান</string>
   <!-- Project -->
   <string name="title_first_build">প্রথম বিল্ড</string>
@@ -89,12 +87,10 @@
   <string name="project_creation_failed">প্রকল্প তৈরি করতে ব্যর্থ</string>
   <string name="msg_folder_creation_failed">ফোল্ডার তৈরি করতে ব্যর্থ হয়েছে!</string>
   <string name="msg_file_creation_failed">ফাইল তৈরি করতে ব্যর্থ!</string>
-  <string name="msg_layout_file_creation_failed">লেআউট ফাইল তৈরি করতে ব্যর্থ!</string>
   <string name="msg_folder_created">ফোল্ডার সফলভাবে তৈরি হয়েছে!</string>
   <string name="msg_file_created">ফাইল সফলভাবে তৈরি হয়েছে!</string>
   <string name="msg_folder_exists">ফোল্ডার আগে থেকেই আছে!</string>
   <string name="msg_file_exists">ফাইল আগে থেকেই আছে!</string>
-  <string name="msg_layout_file_exists">লেআউট ফাইল আগে থেকেই আছে!</string>
   <string name="msg_invalid_name">অবৈধ নাম!</string>
   <string name="text_create">তৈরি করুন</string>
   <string name="msg_can_contain_slashes">যদি পাথটিতে ফাইল বিভাজক (\'/\') থাকে, তাহলে প্রয়োজনীয় (অভিভাবক) ডিরেক্টরিগুলি তৈরি করা হবে যদি সেগুলি বিদ্যমান না থাকে৷</string>
@@ -102,9 +98,6 @@
   <string name="file_name">ফাইলের নাম</string>
   <string name="new_name">নতুন নাম</string>
   <string name="new_file">নতুন ফাইল</string>
-  <string name="create_auto_layout">লেআউট ফাইল তৈরি করুন</string>
-  <string name="new_java_class">নতুন জাভা ক্লাস</string>
-  <string name="new_xml_resource">নতুন XML resource</string>
   <string name="new_folder">নতুন ফোল্ডার</string>
   <string name="title_confirm_delete">ডিলিট করা নিশ্চিত করুন</string>
   <string name="msg_confirm_delete">আপনি কি ডিলিট করার বিষয়ে নিশ্চিত:\n%s?</string>
@@ -124,7 +117,6 @@
   <string name="save_failed">ফাইল গুলি সেভ করতে ব্যর্থ</string>
   <string name="msg_newfile_dest">গন্তব্য: %s/</string>
   <string name="restype_drawable">ড্রয়েবল</string>
-  <string name="restype_layout">লেআউট</string>
   <string name="restype_menu">মেনু</string>
   <string name="restype_other">অন্যান্য</string>
   <string name="classtype_class">শ্রেণী</string>
@@ -165,16 +157,11 @@
   <string name="msg_preferences">পছন্দ</string>
   <string name="pref_changelog">চেঞ্জলগ</string>
   <string name="msg_editor_font_size">দয়া করে সম্পাদকের ডিফল্ট ফন্ট সাইজ বেছে নিন :</string>
-  <string name="msg_clear_cache">এটি Gradle দ্বারা তৈরি ক্যাশে ডিরেক্টরি মুছে ফেলবে। আপনি এটি মুছে ফেললে, পরবর্তী বিল্ডটি স্বাভাবিকের চেয়ে কিছুটা বেশি সময় নিতে পারে কারণ Gradle প্রয়োজনীয় ফাইলগুলি আবার ডাউনলোড করবে।\n\nআপনি কি ক্যাশে মুছে ফেলার বিষয়ে নিশ্চিত?</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
-  <string name="title_preview_layout">প্রিভিউ লেআউট</string>
   <string name="title_viewaction_delete">ডিলিট</string>
   <string name="msg_yesno_def_title">অনুগ্রহ করে নিশ্চিত করুন</string>
   <string name="msg_yesno_def_message">আপনি কি নিশ্চিত?</string>
-  <string name="msg_empty_ui_layout">কোন ভিউ যোগ করা হয়নি। যোগ করতে ক্লিক করুন৷</string>
-  <string name="msg_generate_xml_failed">XML কোড তৈরি করতে ব্যর্থ</string>
-  <string name="title_generating_xml">XML কোড তৈরি করা হচ্ছে</string>
   <string name="msg_swipe_up">বিল্ড আউটপুট, লগ এবং আরও অনেক কিছুর জন্য উপরে সোয়াইপ করুন।</string>
   <string name="msg_ide_crashed">AndroidIDE ক্র্যাশ হয়েছে</string>
   <string name="msg_report_crash">অনুগ্রহ করে গিটহাবে নিম্নলিখিত স্ট্যাকট্রেস সহ একটি সমস্যা খুলুন :</string>
@@ -202,7 +189,6 @@
   <string name="idepref_visiblePassword_title">দৃশ্যমান পাসওয়ার্ড ফ্লাগ</string>
   <string name="idepref_visiblePassword_summary">এডিটরে দৃশ্যমান পাসওয়ার্ড ইনপুট টাইপ ফ্লাগ এর জন্য ব্যবহার করুন৷ এটি নিশ্চিত করে যে সফ্ট কীবোর্ড দ্বারা কোন পরামর্শ প্রস্তাব করা হয় না৷</string>
   <string name="previous">পূর্ববর্তী</string>
-  <string name="title_gradle_service_notification_ticker">Gradle বিল্ড পরিষেবা শুরু হয়েছে</string>
   <string name="title_gradle_service_notification">Gradle build পরিষেবা</string>
   <string name="title_cancel_build">বিল্ড বাতিল করুন</string>
   <string name="msg_initializing_project">প্রকল্প শুরু করা হচ্ছে</string>
@@ -333,7 +319,6 @@
   <string name="msg_constructor_available">একই ধরনের প্যারামিটার সহ একটি কনস্ট্রাক্টর ইতিমধ্যেই উপলব্ধ</string>
   <string name="replace">প্রতিস্থাপন করুন</string>
   <string name="replaceAll">সবকটি প্রতিস্থাপন করুন</string>
-  <string name="title_run_tasks">প্রক্রিয়া চালান</string>
   <string name="hint_search_tasks">প্রক্রিয়া খুজুন…</string>
   <string name="msg_err_select_tasks">চালানোর জন্য প্রক্রিয়া নির্বাচন করুন</string>
   <string name="title_confirmation">নিশ্চিতকরণ</string>
@@ -347,7 +332,6 @@
   <string name="git_clone_success">গিট ক্লোন সফল হয়েছে</string>
   <string name="git_clone_failed">গিট রেপোসিটরি ক্লোন করতে ব্যর্থ</string>
   <string name="msg_select_attr">নীচের লিস্ট থেকে অ্যাট্রিবিউট নির্বাচন করুন</string>
-  <string name="action_show_hierarchy">লেআউট-এর শ্রেণিবিন্যাস দেখান</string>
   <string name="idepref_editor_colorScheme">কালার স্কিম</string>
   <string name="idepref_editor_colorScheme_summary">এডিটর-এ ব্যাবহার করার জন্য কালার স্কিম নির্বাচন করুন</string>
   <string name="idepref_general_uiMode">UI মোড</string>
@@ -383,7 +367,6 @@
   <string name="msg_path_must_be_file">একটি ফাইল পাথ হতে হবে</string>
   <string name="msg_classname_with_keywords">ক্লাসের নামের মধ্যে কীওয়ার্ড আছে</string>
   <string name="msg_path_must_be_dir">একটি ডিরেক্টরির পথ হতে হবে</string>
-  <string name="msg_invalid_layout_name">অবৈধ লেআউট ফাইলের নাম</string>
   <string name="msg_invalid_project_details">প্রকল্পের বিবরণ অবৈধ</string>
   <string name="msg_use_kts">Gradle বিল্ড ফাইলের জন্য Kotlin Script (.kts) ব্যবহার করুন</string>
   <string name="title_privacy">গোপনীয়তা</string>
@@ -413,12 +396,9 @@
   <string name="msg_codeaction_failed">কোড ক্রিয়া সম্পাদন করতে ব্যর্থ হয়েছে৷</string>
   <string name="idepref_devOptions_enableLogsender_title">LogSender সক্রিয় করুন</string>
   <string name="idepref_devOptions_enableLogsender_summary">নিষ্ক্রিয় করা হলে, অ্যাপ্লিকেশান থেকে লগগুলি AndroidIDE-এ দেখানো হবে না৷</string>
-  <string name="title_build_variants">বিল্ড ভ্যারিয়েন্ট</string>
   <string name="title_apply">প্রয়োগ করুন</string>
   <string name="title_discard">খারিজ করুন</string>
-  <string name="msg_build_variants_fetch_failed">বিল্ড ভ্যারিয়েন্টগুলি আনতে ব্যর্থ হয়েছে</string>
   <string name="title_choose_application">অ্যাপ্লিকেশন চয়ন করুন</string>
-  <string name="err_selected_variant_not_found">নির্বাচিত বিল্ড ভ্যারিয়েন্ট পাওয়া যায়নি</string>
   <string name="title_disconnect_log_senders">লগ প্রেরকদের সংযোগ বিচ্ছিন্ন করুন</string>
   <string name="title_begin_long_select">দীর্ঘ নির্বাচন শুরু করুন</string>
   <string name="idepref_editor_stickScroll_title">স্টিকি স্ক্রল</string>
@@ -443,8 +423,6 @@
   <string name="msg_file_is_not_dir">নির্বাচিত ফাইলটি একটি ডিরেক্টরি নয়</string>
   <string name="msg_project_dir_doesnt_exist">প্রকল্প ডিরেক্টরি বিদ্যমান নেই</string>
   <string name="msg_files_being_saved">একটি ফাইল save অপারেশন ইতিমধ্যেই চলছে!</string>
-  <string name="title_install_tools">SDK ইনস্টলেশন</string>
-  <string name="subtitle_install_tools">ডেভেলপমেন্ট টুলসগুলি ইনস্টল করুন</string>
   <string name="msg_install_tools">IDE কাজ করার জন্য ডেভেলপমেন্ট টুলগুলি ইনস্টল করা আবশ্যক। সম্পন্ন বাটনে ক্লিক করলে টুলগুলি ইনস্টল করার জন্য টার্মিনাল খুলবে। ইনস্টল করতে, <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html"> এখানকার</a> নির্দেশাবলী অনুসরণ করুন।<br/><br/>অথবা <a href="https://docs.androidide.com/">ডকুমেন্টেশন</a>]]> পড়ুন।</string>
   <string name="greeting_title">স্বাগতম</string>
   <string name="greeting_subtitle">শিখুন, তৈরি করুন, চালান। সব আপনার অ্যান্ড্রয়েডে।</string>
@@ -463,8 +441,6 @@
   <string name="msg_cannot_create_terminal_session">টার্মিনাল সেশন তৈরি করতে অক্ষম</string>
   <string name="action_auto_install">স্বয়ংক্রিয় ইনস্টলেশন</string>
   <string name="action_manual_install">ম্যানুয়াল ইনস্টলেশন</string>
-  <string name="hint_android_sdk_version">অ্যান্ড্রয়েড SDK ভার্সন</string>
-  <string name="hin_jdk_version">JDK ভার্সন</string>
   <string name="action_install_git">Git ইনস্টল করুন</string>
   <string name="action_install_openssh">OpenSSH ইনস্টল করুন</string>
   <string name="msg_terminal_new_sessions_disabled">সেশন তৈরি করা যাবে না। নতুন সেশন তৈরি করা নিষ্ক্রিয়!</string>

@@ -41,10 +41,8 @@
   <string name="title_clear_output">清空输出</string>
   <string name="build_output">构建输出</string>
   <string name="quick_run_debug">快速运行</string>
-  <string name="msg_sync_needed">Gradle 文件已更改，请重构您的项目以同步依赖项和配置。</string>
   <string name="preparing">准备中</string>
   <string name="preparing_first">准备中，首次构建可能需要 10-15 分钟！</string>
-  <string name="msg_installing_gradlew">Gradle Wrapper 不可用！\n正在安装默认的包装器。如有需要，将下载 Gradle v7.4。</string>
   <string name="run">运行</string>
   <!-- Project -->
   <string name="title_first_build">首次构建</string>
@@ -88,12 +86,10 @@
   <string name="project_creation_failed">项目创建失败</string>
   <string name="msg_folder_creation_failed">创建文件夹失败！</string>
   <string name="msg_file_creation_failed">文件创建失败！</string>
-  <string name="msg_layout_file_creation_failed">布局文件创建失败！</string>
   <string name="msg_folder_created">文件夹创建成功！</string>
   <string name="msg_file_created">文件创建成功！</string>
   <string name="msg_folder_exists">文件夹已存在！</string>
   <string name="msg_file_exists">文件已存在！</string>
-  <string name="msg_layout_file_exists">布局文件已存在！</string>
   <string name="msg_invalid_name">名称无效！</string>
   <string name="text_create">创建</string>
   <string name="msg_can_contain_slashes">如果路径包含文件分隔符（“/”），则将创建所需的（父）目录（如果它们不存在）。</string>
@@ -101,9 +97,6 @@
   <string name="file_name">文件名称</string>
   <string name="new_name">新名称</string>
   <string name="new_file">新文件</string>
-  <string name="create_auto_layout">创建布局文件</string>
-  <string name="new_java_class">新 Java 类</string>
-  <string name="new_xml_resource">新 XML 资源</string>
   <string name="new_folder">新文件夹</string>
   <string name="title_confirm_delete">确认删除</string>
   <string name="msg_confirm_delete">您确定要删除：\n%s 吗？</string>
@@ -123,7 +116,6 @@
   <string name="save_failed">文件保存失败</string>
   <string name="msg_newfile_dest">位于：%s/</string>
   <string name="restype_drawable">可绘制资源</string>
-  <string name="restype_layout">布局</string>
   <string name="restype_menu">菜单</string>
   <string name="restype_other">其他</string>
   <string name="classtype_class">类</string>
@@ -164,16 +156,11 @@
   <string name="msg_preferences">首选项</string>
   <string name="pref_changelog">变更日志</string>
   <string name="msg_editor_font_size">请选择编辑器的默认字体大小：</string>
-  <string name="msg_clear_cache">这将删除 Gradle 创建的缓存目录。如果删除，下一次的构建可能需要更长的时间，因为 Gradle 将再次下载所需的文件。\n\n您确定要删除缓存吗？</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
-  <string name="title_preview_layout">预览布局</string>
   <string name="title_viewaction_delete">删除</string>
   <string name="msg_yesno_def_title">请确认</string>
   <string name="msg_yesno_def_message">您确定吗？</string>
-  <string name="msg_empty_ui_layout">尚未添加任何视图，单击以添加。</string>
-  <string name="msg_generate_xml_failed">XML 代码生成失败</string>
-  <string name="title_generating_xml">生成 XML 代码</string>
   <string name="msg_swipe_up">上滑可查看构建输出、日志等。</string>
   <string name="msg_ide_crashed">AndroidIDE 崩溃了</string>
   <string name="msg_report_crash">请使用以下堆栈跟踪在 Github 上打开一个 issue：</string>
@@ -201,7 +188,6 @@
   <string name="idepref_visiblePassword_title">明文密码标记</string>
   <string name="idepref_visiblePassword_summary">编辑器中使用明文密码输入类型标记。这确保软键盘不会有字词建议。</string>
   <string name="previous">上一个</string>
-  <string name="title_gradle_service_notification_ticker">Gradle 构建服务已启动</string>
   <string name="title_gradle_service_notification">Gradle 构建服务</string>
   <string name="title_cancel_build">取消构建</string>
   <string name="msg_initializing_project">初始化项目</string>
@@ -332,7 +318,6 @@
   <string name="msg_constructor_available">已存在相同参数类型的构造函数</string>
   <string name="replace">替换</string>
   <string name="replaceAll">全部替换</string>
-  <string name="title_run_tasks">运行任务</string>
   <string name="hint_search_tasks">搜索任务…</string>
   <string name="msg_err_select_tasks">请选择要运行的任务</string>
   <string name="title_confirmation">确认</string>
@@ -346,7 +331,6 @@
   <string name="git_clone_success">git 克隆成功</string>
   <string name="git_clone_failed">无法克隆 git 存储库</string>
   <string name="msg_select_attr">从下面的列表中选择一个属性</string>
-  <string name="action_show_hierarchy">显示布局层次</string>
   <string name="idepref_editor_colorScheme">配色方案</string>
   <string name="idepref_editor_colorScheme_summary">选择要在编辑器中使用的配色方案</string>
   <string name="idepref_general_uiMode">界面模式</string>
@@ -382,7 +366,6 @@
   <string name="msg_path_must_be_file">必须是文件路径</string>
   <string name="msg_classname_with_keywords">类名包含关键字</string>
   <string name="msg_path_must_be_dir">必须是目录路径</string>
-  <string name="msg_invalid_layout_name">布局文件名无效</string>
   <string name="msg_invalid_project_details">项目信息无效</string>
   <string name="msg_use_kts">将 Kotlin 脚本 (.kts) 用于 Gradle build 文件</string>
   <string name="title_privacy">隐私</string>
@@ -412,12 +395,9 @@
   <string name="msg_codeaction_failed">无法执行代码操作</string>
   <string name="idepref_devOptions_enableLogsender_title">启用 LogSender</string>
   <string name="idepref_devOptions_enableLogsender_summary">禁用后，应用的日志将不会显示在 AndroidIDE 中</string>
-  <string name="title_build_variants">构建变体</string>
   <string name="title_apply">应用</string>
   <string name="title_discard">放弃</string>
-  <string name="msg_build_variants_fetch_failed">无法获取构建变体</string>
   <string name="title_choose_application">选择应用项</string>
-  <string name="err_selected_variant_not_found">找不到选定的构建变体</string>
   <string name="title_disconnect_log_senders">断开日志发送器</string>
   <string name="title_begin_long_select">开始长选</string>
   <string name="idepref_editor_stickScroll_title">粘滞滚动</string>
@@ -442,8 +422,6 @@
   <string name="msg_file_is_not_dir">所选文件不是目录</string>
   <string name="msg_project_dir_doesnt_exist">项目目录不存在</string>
   <string name="msg_files_being_saved">文件保存操作已在进行中！</string>
-  <string name="title_install_tools">SDK 安装</string>
-  <string name="subtitle_install_tools">安装开发工具</string>
   <string name="msg_install_tools">必须安装开发工具才能使 IDE 工作，单击完成按钮将打开终端来安装工具。若要安装，请按照<![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">此处</a>的说明进行操作。<br/><br/>或者阅读<a href="https://docs.androidide.com/">文档</a>]]>。</string>
   <string name="greeting_title">欢迎</string>
   <string name="greeting_subtitle">学习、构建、启动，一切尽在您的 Android 设备上。</string>
@@ -462,8 +440,6 @@
   <string name="msg_cannot_create_terminal_session">无法创建终端会话</string>
   <string name="action_auto_install">自动安装</string>
   <string name="action_manual_install">手动安装</string>
-  <string name="hint_android_sdk_version">Android SDK 版本</string>
-  <string name="hin_jdk_version">JDK 版本</string>
   <string name="action_install_git">安装 Git</string>
   <string name="action_install_openssh">安装 OpenSSH</string>
   <string name="msg_terminal_new_sessions_disabled">无法创建会话，新会话被禁用！</string>

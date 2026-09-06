@@ -21,14 +21,8 @@ import android.graphics.Typeface
 import com.itsaky.androidide.app.BaseApplication
 import java.io.File
 
-fun quicksand(): Typeface =
-  Typeface.createFromAsset(BaseApplication.getBaseInstance().assets, "fonts/quicksand.ttf")
-
 fun jetbrainsMono(): Typeface =
   Typeface.createFromAsset(BaseApplication.getBaseInstance().assets, "fonts/jetbrains-mono.ttf")
-
-fun josefinSans(): Typeface =
-  Typeface.createFromAsset(BaseApplication.getBaseInstance().assets, "fonts/josefin-sans.ttf")
 
 fun customOrJBMono(useCustom: Boolean = true): Typeface {
   val fontFile = File(Environment.ANDROIDIDE_UI, "font.ttf")

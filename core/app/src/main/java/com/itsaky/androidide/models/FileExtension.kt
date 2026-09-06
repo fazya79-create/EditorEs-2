@@ -33,7 +33,6 @@ enum class FileExtension(val extension: String, @DrawableRes val icon: Int) {
   KT("kt", R.drawable.ic_language_kotlin),
   KTS("kts", R.drawable.ic_language_kts),
   XML("xml", R.drawable.ic_language_xml),
-  GRADLE("gradle", R.drawable.ic_gradle),
   JSON("json", R.drawable.ic_language_json),
   PROPERTIES("properties", R.drawable.ic_language_properties),
   APK("apk", R.drawable.ic_file_apk),

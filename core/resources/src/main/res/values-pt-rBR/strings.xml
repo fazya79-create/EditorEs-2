@@ -41,10 +41,8 @@
   <string name="title_clear_output">Limpar logs</string>
   <string name="build_output">Saída de compilação</string>
   <string name="quick_run_debug">Executar</string>
-  <string name="msg_sync_needed">Os arquivos do Gradle mudaram. Por favor, reconstrua seu projeto para sincronizar dependências e configurações.</string>
   <string name="preparing">Preparando</string>
   <string name="preparing_first">Preparando. A primeira compilação pode levar até 10-15 minutos!</string>
-  <string name="msg_installing_gradlew">Gradle Wrapper não está disponível!\nInstalando um padrão. Gradle v7.4 será baixado se necessário.</string>
   <string name="run">Executar</string>
   <!-- Project -->
   <string name="title_first_build">Primeira compilação</string>
@@ -88,12 +86,10 @@
   <string name="project_creation_failed">Falha ao criar projeto</string>
   <string name="msg_folder_creation_failed">Falha ao criar pasta!</string>
   <string name="msg_file_creation_failed">Falha ao criar arquivo!</string>
-  <string name="msg_layout_file_creation_failed">Falha ao criar arquivo de layout!</string>
   <string name="msg_folder_created">Pasta criada com sucesso!</string>
   <string name="msg_file_created">Arquivo criado com sucesso!</string>
   <string name="msg_folder_exists">A pasta já existe!</string>
   <string name="msg_file_exists">O arquivo já existe!</string>
-  <string name="msg_layout_file_exists">O arquivo de layout já existe!</string>
   <string name="msg_invalid_name">Nome inválido!</string>
   <string name="text_create">Criar</string>
   <string name="msg_can_contain_slashes">Se o caminho conter o separador de arquivos (\'/\'), então os diretórios necessários (pai) serão criados se eles não existirem.</string>
@@ -101,9 +97,6 @@
   <string name="file_name">Nome do arquivo</string>
   <string name="new_name">Novo nome</string>
   <string name="new_file">Novo arquivo</string>
-  <string name="create_auto_layout">Criar arquivo de layout</string>
-  <string name="new_java_class">Nova classe Java</string>
-  <string name="new_xml_resource">Novo recurso XML</string>
   <string name="new_folder">Nova pasta</string>
   <string name="title_confirm_delete">Confirmar exclusão</string>
   <string name="msg_confirm_delete">Tem certeza de que deseja excluir:\n%s?</string>
@@ -123,7 +116,6 @@
   <string name="save_failed">Falha ao salvar arquivos</string>
   <string name="msg_newfile_dest">Destino: %s/</string>
   <string name="restype_drawable">Desenhável</string>
-  <string name="restype_layout">Layout</string>
   <string name="restype_menu">Menu</string>
   <string name="restype_other">Outro</string>
   <string name="classtype_class">Classe</string>
@@ -164,16 +156,11 @@
   <string name="msg_preferences">Configurações</string>
   <string name="pref_changelog">Registro de alterações</string>
   <string name="msg_editor_font_size">Por favor, escolha o tamanho da fonte padrão do editor:</string>
-  <string name="msg_clear_cache">Isso excluirá o diretório de caches criado pelo Gradle. Se você excluir, a próxima compilação pode demorar um pouco mais do que o normal, já que o Gradle baixará os arquivos necessários novamente.\n\nTem certeza que deseja excluir os caches?</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
-  <string name="title_preview_layout">Visualizar layout</string>
   <string name="title_viewaction_delete">Excluir</string>
   <string name="msg_yesno_def_title">Por favor, confirme</string>
   <string name="msg_yesno_def_message">Tem certeza?</string>
-  <string name="msg_empty_ui_layout">Nenhuma visualização foi adicionada. Clique para adicionar.</string>
-  <string name="msg_generate_xml_failed">Falha ao gerar código XML</string>
-  <string name="title_generating_xml">Gerando código XML</string>
   <string name="msg_swipe_up">Deslize para cima para ver a saída de compilação, logs e mais.</string>
   <string name="msg_ide_crashed">AndroidIDE parou</string>
   <string name="msg_report_crash">Abra um problema no github com o seguinte stacktrace:</string>
@@ -201,7 +188,6 @@
   <string name="idepref_visiblePassword_title">Sinalizador de senha visível</string>
   <string name="idepref_visiblePassword_summary">Use para sinalizar o tipo de entrada de senha visível no editor. Isso garante que nenhuma sugestão seja proposta pelo teclado virtual.</string>
   <string name="previous">Anterior</string>
-  <string name="title_gradle_service_notification_ticker">Serviço de compilação Gradle iniciado</string>
   <string name="title_gradle_service_notification">Serviço de compilação Gradle</string>
   <string name="title_cancel_build">Cancelar compilação</string>
   <string name="msg_initializing_project">Inicializando projeto</string>
@@ -332,7 +318,6 @@
   <string name="msg_constructor_available">Um construtor com os mesmos tipos de parâmetro já está disponível</string>
   <string name="replace">Substituir</string>
   <string name="replaceAll">Substituir tudo</string>
-  <string name="title_run_tasks">Executar tarefas</string>
   <string name="hint_search_tasks">Pesquisar tarefas…</string>
   <string name="msg_err_select_tasks">Selecione as tarefas a serem executadas</string>
   <string name="title_confirmation">Confirmação</string>
@@ -346,7 +331,6 @@
   <string name="git_clone_success">Git clonado com sucesso</string>
   <string name="git_clone_failed">Falha ao clonar repositório git</string>
   <string name="msg_select_attr">Selecione um atributo da lista abaixo</string>
-  <string name="action_show_hierarchy">Mostrar hierarquia do layout</string>
   <string name="idepref_editor_colorScheme">Esquema de cores</string>
   <string name="idepref_editor_colorScheme_summary">Escolha o esquema de cores para usar no editor</string>
   <string name="idepref_general_uiMode">Modo</string>
@@ -382,7 +366,6 @@
   <string name="msg_path_must_be_file">Deve ter um caminho para um arquivo</string>
   <string name="msg_classname_with_keywords">Nome da classe contém palavras-chave</string>
   <string name="msg_path_must_be_dir">Deve ser o caminho para um diretório</string>
-  <string name="msg_invalid_layout_name">Nome do arquivo de layout inválido</string>
   <string name="msg_invalid_project_details">Detalhes do projeto inválidos</string>
   <string name="msg_use_kts">Use o Kotlin Script (.kts) para arquivos de compilação do Gradle</string>
   <string name="title_privacy">Privacidade</string>
@@ -412,12 +395,9 @@
   <string name="msg_codeaction_failed">Falha ao executar a ação de código</string>
   <string name="idepref_devOptions_enableLogsender_title">Ativar LogSender</string>
   <string name="idepref_devOptions_enableLogsender_summary">Quando desativado, os logs do aplicativo não serão exibidos no AndroidIDE</string>
-  <string name="title_build_variants">Variantes de compilação</string>
   <string name="title_apply">Aplicar</string>
   <string name="title_discard">Descartar</string>
-  <string name="msg_build_variants_fetch_failed">Falha ao obter variantes de compilação</string>
   <string name="title_choose_application">Escolha o aplicativo</string>
-  <string name="err_selected_variant_not_found">Variante de compilação selecionada não encontrada</string>
   <string name="title_disconnect_log_senders">Desconectar remetentes de log</string>
   <string name="title_begin_long_select">Iniciar seleção longa</string>
   <string name="idepref_editor_stickScroll_title">Rolagem fixa</string>
@@ -442,8 +422,6 @@
   <string name="msg_file_is_not_dir">Arquivo selecionado não é um diretório</string>
   <string name="msg_project_dir_doesnt_exist">Diretório do projeto não existe</string>
   <string name="msg_files_being_saved">Uma operação de salvamento de arquivo já está em andamento!</string>
-  <string name="title_install_tools">Instalação do SDK</string>
-  <string name="subtitle_install_tools">Instalar as ferramentas de desenvolvimento</string>
   <string name="msg_install_tools">As ferramentas de desenvolvimento devem ser instaladas para que o IDE funcione. Ao clicar no botão concluído, o terminal será aberto para instalar as ferramentas. Para instalar, siga as instruções <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">aqui</a>.<br/><br/>Ou leia a documentação <a href="https://docs.androidide.com/"></a>]]>.</string>
   <string name="greeting_title">Bem-vindo</string>
   <string name="greeting_subtitle">Aprenda, construa, lançe. Tudo no seu Android.</string>
@@ -462,8 +440,6 @@
   <string name="msg_cannot_create_terminal_session">Não foi possível criar a sessão do terminal</string>
   <string name="action_auto_install">Instalação automática</string>
   <string name="action_manual_install">Instalação manual</string>
-  <string name="hint_android_sdk_version">Versão do SDK do Android</string>
-  <string name="hin_jdk_version">Versão do JDK</string>
   <string name="action_install_git">Instalar Git</string>
   <string name="action_install_openssh">Instalar OpenSSH</string>
   <string name="msg_terminal_new_sessions_disabled">Não foi possível criar a sessão. Novas sessões estão desativadas!</string>

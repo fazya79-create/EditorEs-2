@@ -26,14 +26,10 @@ import com.github.appintro.AppIntroPageTransformerType
 import com.itsaky.androidide.R
 import com.itsaky.androidide.R.string
 import com.itsaky.androidide.app.configuration.IDEBuildConfigProvider
-import com.itsaky.androidide.backend.build.ToolchainKind
-import com.itsaky.androidide.backend.build.ToolchainPaths
 import com.itsaky.androidide.backend.proot.ProotConfig
 import com.itsaky.androidide.fragments.onboarding.GreetingFragment
 import com.itsaky.androidide.fragments.onboarding.OnboardingInfoFragment
 import com.itsaky.androidide.fragments.onboarding.PermissionsFragment
-import com.itsaky.androidide.fragments.onboarding.StatisticsFragment
-import com.itsaky.androidide.preferences.internal.StatPreferences
 import com.itsaky.androidide.preferences.internal.prefManager
 import com.itsaky.androidide.ui.themes.IThemeManager
 import com.termux.shared.android.PackageUtils
@@ -93,11 +89,6 @@ class OnboardingActivity : AppIntro2() {
       return
     }
 
-    if (!StatPreferences.statConsentDialogShown) {
-      addSlide(StatisticsFragment.newInstance(this))
-      StatPreferences.statConsentDialogShown = true
-    }
-
     if (!PermissionsFragment.areAllPermissionsGranted(this)) {
       addSlide(PermissionsFragment.newInstance(this))
     }
@@ -118,12 +109,9 @@ class OnboardingActivity : AppIntro2() {
   }
 
   override fun onNextPressed(currentFragment: Fragment?) {
-    (currentFragment as? StatisticsFragment?)?.updateStatOptInStatus()
   }
 
   override fun onDonePressed(currentFragment: Fragment?) {
-    (currentFragment as? StatisticsFragment?)?.updateStatOptInStatus()
-
     if (!IDEBuildConfigProvider.getInstance().supportsCpuAbi()) {
       finishAffinity()
       return
@@ -135,14 +123,11 @@ class OnboardingActivity : AppIntro2() {
   }
 
   private fun checkToolsIsInstalled(): Boolean {
-    return ProotConfig.isInstalled(this) &&
-      ToolchainPaths.isInstalled(this, ToolchainKind.Ndk) &&
-      ToolchainPaths.isInstalled(this, ToolchainKind.CMake)
+    return ProotConfig.isInstalled(this)
   }
 
   private fun isSetupCompleted(): Boolean {
     return checkToolsIsInstalled()
-        && StatPreferences.statConsentDialogShown
         && PermissionsFragment.areAllPermissionsGranted(this)
   }
 

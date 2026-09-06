@@ -80,8 +80,6 @@ dependencies {
     implementation(libs.google.guava)
     implementation(libs.common.markwon.core)
     implementation(libs.common.markwon.extStrikethrough)
-    implementation(libs.common.markwon.linkify)
-    implementation(libs.common.markwon.recycler)
 
     implementation(projects.core.backend)
     implementation(projects.core.common)

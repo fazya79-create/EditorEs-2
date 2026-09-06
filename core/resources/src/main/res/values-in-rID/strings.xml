@@ -41,10 +41,8 @@
   <string name="title_clear_output">Bersihkan hasil</string>
   <string name="build_output">Hasil Build</string>
   <string name="quick_run_debug">Quick run</string>
-  <string name="msg_sync_needed">File Gradle telah berubah. Mohon build ulang proyek anda untuk menyinkronkan dependensi dan konfigurasi.</string>
   <string name="preparing">Menyiapkan</string>
   <string name="preparing_first">Menyiapkan. Build pertama mungkin memakan waktu sekitar 10&#8211;15 menit!</string>
-  <string name="msg_installing_gradlew">Gradle Wrapper tidak tersedia!\nMenginstal Gradle bawaan. Gradle v7.4 akan diunduh jika diperlukan.</string>
   <string name="run">Jalankan</string>
   <!-- Project -->
   <string name="title_first_build">Build Pertama</string>
@@ -88,12 +86,10 @@
   <string name="project_creation_failed">Gagal membuat proyek</string>
   <string name="msg_folder_creation_failed">Gagal membuat folder!</string>
   <string name="msg_file_creation_failed">Gagal membuat file!</string>
-  <string name="msg_layout_file_creation_failed">Gagal membuat file tata letak!</string>
   <string name="msg_folder_created">Folder sukses dibuat!</string>
   <string name="msg_file_created">File sukses dibuat!</string>
   <string name="msg_folder_exists">Folder sudah ada!</string>
   <string name="msg_file_exists">File sudah ada!</string>
-  <string name="msg_layout_file_exists">File tata letak sudah ada!</string>
   <string name="msg_invalid_name">Nama Tidak Valid!</string>
   <string name="text_create">Buat</string>
   <string name="msg_can_contain_slashes">Jika jalur terdapat pemisah File (\'/\'), maka direktori (awal) yang diperlukan akan dibuat jika mereka tidak ada.</string>
@@ -101,9 +97,6 @@
   <string name="file_name">Nama File</string>
   <string name="new_name">Nama baru</string>
   <string name="new_file">File baru</string>
-  <string name="create_auto_layout">Buat file tata letak</string>
-  <string name="new_java_class">Class Java baru</string>
-  <string name="new_xml_resource">File XML baru</string>
   <string name="new_folder">Folder baru</string>
   <string name="title_confirm_delete">Konfirmasi hapus</string>
   <string name="msg_confirm_delete">Anda yakin ingin menghapus:\n%s?</string>
@@ -123,7 +116,6 @@
   <string name="save_failed">Gagal menyimpan file</string>
   <string name="msg_newfile_dest">Tujuan: %s/</string>
   <string name="restype_drawable">Drawable</string>
-  <string name="restype_layout">Layout</string>
   <string name="restype_menu">Menu</string>
   <string name="restype_other">Lainnya</string>
   <string name="classtype_class">Class</string>
@@ -164,16 +156,11 @@
   <string name="msg_preferences">Preferensi</string>
   <string name="pref_changelog">Log Perubahan</string>
   <string name="msg_editor_font_size">Mohon pilih ukuran huruf bawaan dari editor :</string>
-  <string name="msg_clear_cache">Ini akan menghapus direktori cache yang dibuat oleh Gradle. Jika Anda menghapusnya, build berikutnya mungkin akan memakan waktu lebih lama dari biasanya karena Gradle akan mengunduh file yang diperlukan lagi.\n\nApakah Anda yakin ingin menghapus cache?</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
-  <string name="title_preview_layout">Pratinjau Layout</string>
   <string name="title_viewaction_delete">Hapus</string>
   <string name="msg_yesno_def_title">Mohon konfirmasi</string>
   <string name="msg_yesno_def_message">Anda yakin?</string>
-  <string name="msg_empty_ui_layout">Tidak ada View yang ditambahkan. Klik untuk menambahkan.</string>
-  <string name="msg_generate_xml_failed">Gagal untuk menghasilkan kode XML</string>
-  <string name="title_generating_xml">Hasilkan kode XML</string>
   <string name="msg_swipe_up">Geser ke atas untuk hasil build, log dan lainnya.</string>
   <string name="msg_ide_crashed">AndroidIDE crash</string>
   <string name="msg_report_crash">Mohon buka isu di github dengan menyertakan stacktrace :</string>
@@ -201,7 +188,6 @@
   <string name="idepref_visiblePassword_title">Perlihatkan Password Flag</string>
   <string name="idepref_visiblePassword_summary">Gunakan untuk flag jenis input kata sandi yang terlihat di editor. Ini memastikan bahwa tidak ada saran yang diajukan oleh soft keyboard.</string>
   <string name="previous">Sebelumnya</string>
-  <string name="title_gradle_service_notification_ticker">Layanan build Gradle dimulai</string>
   <string name="title_gradle_service_notification">Layanan build gradle</string>
   <string name="title_cancel_build">Batalkan build</string>
   <string name="msg_initializing_project">Inisialisasi proyek</string>
@@ -332,7 +318,6 @@
   <string name="msg_constructor_available">Konstruktor dengan tipe parameter yang sama sudah tersedia</string>
   <string name="replace">Ganti</string>
   <string name="replaceAll">Ganti semua</string>
-  <string name="title_run_tasks">Jalankan task</string>
   <string name="hint_search_tasks">Cari task…</string>
   <string name="msg_err_select_tasks">Silakan pilih task untuk dijalankan</string>
   <string name="title_confirmation">Konfirmasi</string>
@@ -346,7 +331,6 @@
   <string name="git_clone_success">Git clone berhasil</string>
   <string name="git_clone_failed">Gagal mengkloning repositori git</string>
   <string name="msg_select_attr">Pilih atribut dari daftar di bawah ini</string>
-  <string name="action_show_hierarchy">Tampilkan hierarki tata letak</string>
   <string name="idepref_editor_colorScheme">Skema warna</string>
   <string name="idepref_editor_colorScheme_summary">Pilih skema warna untuk digunakan dalam editor</string>
   <string name="idepref_general_uiMode">Mode UI</string>
@@ -382,7 +366,6 @@
   <string name="msg_path_must_be_file">Harus jalur ke file</string>
   <string name="msg_classname_with_keywords">Nama kelas berisi kata kunci</string>
   <string name="msg_path_must_be_dir">Harus jalur ke direktori</string>
-  <string name="msg_invalid_layout_name">Nama file tata letak tidak valid</string>
   <string name="msg_invalid_project_details">Detail proyek tidak valid</string>
   <string name="msg_use_kts">Gunakan Skrip Kotlin (.kts) untuk file Build Gradle</string>
   <string name="title_privacy">Privasi</string>
@@ -412,12 +395,9 @@
   <string name="msg_codeaction_failed">Gagal melakukan tindakan kode</string>
   <string name="idepref_devOptions_enableLogsender_title">Aktifkan LogSender</string>
   <string name="idepref_devOptions_enableLogsender_summary">Saat dinonaktifkan, log dari aplikasi tidak akan ditampilkan di AndroidIDE</string>
-  <string name="title_build_variants">Bangun varian</string>
   <string name="title_apply">Terapkan</string>
   <string name="title_discard">Buang</string>
-  <string name="msg_build_variants_fetch_failed">Gagal mengambil varian build</string>
   <string name="title_choose_application">Pilih aplikasi</string>
-  <string name="err_selected_variant_not_found">Varian build yang dipilih tidak ditemukan</string>
   <string name="title_disconnect_log_senders">Putuskan sambungan pengirim log</string>
   <string name="title_begin_long_select">Mulai pilih yang panjang</string>
   <string name="idepref_editor_stickScroll_title">Gulir lengket</string>
@@ -442,8 +422,6 @@
   <string name="msg_file_is_not_dir">File yang dipilih bukan direktori</string>
   <string name="msg_project_dir_doesnt_exist">Direktori proyek tidak ada</string>
   <string name="msg_files_being_saved">Operasi penyimpanan file sedang berlangsung!</string>
-  <string name="title_install_tools">Instalasi SDK</string>
-  <string name="subtitle_install_tools">Instal alat pengembangan</string>
   <string name="msg_install_tools">Alat pengembangan harus diinstal agar IDE dapat berfungsi. Mengklik tombol selesai akan membuka terminal untuk menginstal alat. Untuk menginstal, ikuti petunjuk <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">di sini</a>.<br/><br/>Atau baca <a href="https://docs.androidide.com/">dokumentasi</a>]]>.</string>
   <string name="greeting_title">Selamat datang</string>
   <string name="greeting_subtitle">Pelajari, bangun, luncurkan. Semua di Android Anda.</string>
@@ -462,8 +440,6 @@
   <string name="msg_cannot_create_terminal_session">Tidak dapat membuat sesi terminal</string>
   <string name="action_auto_install">Instalasi otomatis</string>
   <string name="action_manual_install">Instalasi manual</string>
-  <string name="hint_android_sdk_version">Versi SDK Android</string>
-  <string name="hin_jdk_version">Versi JDK</string>
   <string name="action_install_git">Instal Git</string>
   <string name="action_install_openssh">Instal OpenSSH</string>
   <string name="msg_terminal_new_sessions_disabled">Tidak dapat membuat sesi. Sesi baru dinonaktifkan!</string>

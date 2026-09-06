@@ -92,7 +92,6 @@ desugaring {
 
 dependencies {
   // Annotation processors
-  kapt(libs.common.glide.ap)
   kapt(libs.google.auto.service)
   kapt(projects.annotation.processors)
 
@@ -100,11 +99,9 @@ dependencies {
   implementation(libs.common.jsonrpc)
   implementation(libs.common.lsp4j)
   implementation(libs.common.utilcode)
-  implementation(libs.common.glide)
   implementation(libs.common.kotlin.coroutines.android)
   implementation(libs.common.retrofit)
   implementation(libs.common.retrofit.gson)
-  implementation(libs.common.charts)
   implementation(libs.common.hiddenApiBypass)
 
   implementation(libs.google.auto.service.annotations)
@@ -130,8 +127,6 @@ dependencies {
   implementation(libs.androidx.transition)
   implementation(libs.androidx.vectors)
   implementation(libs.androidx.animated.vectors)
-  implementation(libs.androidx.work)
-  implementation(libs.androidx.work.ktx)
   implementation(libs.google.material)
   implementation(libs.google.flexbox)
 
@@ -147,8 +142,6 @@ dependencies {
   implementation(projects.core.actions)
   implementation(projects.core.backend)
   implementation(projects.core.common)
-  implementation(projects.core.indexingApi)
-  implementation(projects.core.indexingCore)
   implementation(projects.core.lspApi)
   implementation(projects.core.lspModels)
   implementation(projects.core.projects)
@@ -158,7 +151,6 @@ dependencies {
   implementation(projects.event.eventbus)
   implementation(projects.event.eventbusAndroid)
   implementation(projects.event.eventbusEvents)
-  implementation(projects.logging.idestats)
   implementation(projects.logging.logsender)
   implementation(projects.termux.application)
   implementation(projects.termux.view)

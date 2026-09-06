@@ -14,10 +14,6 @@
     android:layout_height="match_parent"
     app:dragHandle="@id/editor_toolbar">
 
-    <include
-      android:id="@+id/mem_usage_view"
-      layout="@layout/layout_mem_usage" />
-
     <com.google.android.material.card.MaterialCardView
       android:id="@+id/content_card"
       android:layout_width="match_parent"

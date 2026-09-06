@@ -8,14 +8,18 @@
         layout="@layout/partial_primary_toolbar"
         android:id="@+id/partial_primary_toolbar"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:overScrollMode="never"
+        android:layout_height="match_parent"
         android:paddingTop="@dimen/content_padding"
-        android:paddingBottom="36dip" />
+        android:paddingBottom="36dip">
+
+        <TextView
+            android:id="@+id/report_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textIsSelectable="true"
+            android:typeface="monospace" />
+    </ScrollView>
 
 </LinearLayout>

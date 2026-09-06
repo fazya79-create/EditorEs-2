@@ -28,7 +28,6 @@ import com.itsaky.androidide.managers.ToolsManager;
 import com.itsaky.androidide.utils.Environment;
 import com.itsaky.androidide.utils.FileUtil;
 import com.itsaky.androidide.utils.FlashbarUtilsKt;
-import com.itsaky.androidide.utils.JavaCharacter;
 import com.itsaky.androidide.utils.VMUtils;
 import java.io.File;
 
@@ -56,7 +55,6 @@ public class BaseApplication extends Application {
     super.onCreate();
 
     mPrefsManager = new PreferenceManager(this);
-    JavaCharacter.initMap();
 
     if (!VMUtils.isJvm()) {
       ToolsManager.init(this, null);

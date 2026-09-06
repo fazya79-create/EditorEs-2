@@ -41,10 +41,8 @@
   <string name="title_clear_output">आउटपुट हटाएँ</string>
   <string name="build_output">बिल्ड आउटपुट</string>
   <string name="quick_run_debug">क्विक रन</string>
-  <string name="msg_sync_needed">ग्रेडल फ़ाइलें बदल गई हैं। डिपेंडेंसी और कॉन्फ़िगरेशन्स को सिंक करने के लिए कृपया अपनी प्रोजेक्ट का पुनर्निर्माण करें।</string>
   <string name="preparing">तैयार कर रहे हैं</string>
   <string name="preparing_first">तैयार कर रहे हैं। पहले निर्माण में 10–15 मिनट तक लग सकते हैं!</string>
-  <string name="msg_installing_gradlew">ग्रेडल रैपर उपलब्ध नहीं है!\nडिफ़ॉल्ट इंस्टॉल किया जा रहा है। यदि आवश्यक हो तो ग्रेडल v7.4 डाउनलोड किया जाएगा।</string>
   <string name="run">रन</string>
   <!-- Project -->
   <string name="title_first_build">पहला निर्माण</string>
@@ -88,12 +86,10 @@
   <string name="project_creation_failed">प्रोजेक्ट बनाने में विफल रहे!</string>
   <string name="msg_folder_creation_failed">फ़ोल्डर बनाने में विफल रहे!</string>
   <string name="msg_file_creation_failed">फ़ाइल बनाने में विफल रहे!</string>
-  <string name="msg_layout_file_creation_failed">लेआउट फाइल बनाने में विफल!</string>
   <string name="msg_folder_created">फ़ोल्डर सफलतापूर्वक बनाया गया है!</string>
   <string name="msg_file_created">फ़ाइल सफलतापूर्वक बनाया गया है!</string>
   <string name="msg_folder_exists">फ़ोल्डर पहले से ही मौजूद है!</string>
   <string name="msg_file_exists">फ़ाइल पहले से ही मौजूद है!</string>
-  <string name="msg_layout_file_exists">लेआउट फ़ाइल पहले से ही मौजूद है!</string>
   <string name="msg_invalid_name">अमान्य नाम!</string>
   <string name="text_create">बनाए</string>
   <string name="msg_can_contain_slashes">यदि पथ में फ़ाइल विभाजक (\'/\') है, तो आवश्यक (पैरेंट) डायरेक्टरीज बनाई जाएंगी यदि वे मौजूद नहीं हैं।</string>
@@ -101,9 +97,6 @@
   <string name="file_name">फ़ाइल का नाम</string>
   <string name="new_name">नया नाम</string>
   <string name="new_file">नई फ़ाइल</string>
-  <string name="create_auto_layout">लेआउट फ़ाइल बनाएँ</string>
-  <string name="new_java_class">नया जावा क्लास</string>
-  <string name="new_xml_resource">नया एक्सएमएल रिसोर्स</string>
   <string name="new_folder">नया फ़ोल्डर</string>
   <string name="title_confirm_delete">डिलीट कन्फर्म करे</string>
   <string name="msg_confirm_delete">कया आप श्योर है डिलीट करने के लिए:\n%s?</string>
@@ -123,7 +116,6 @@
   <string name="save_failed">फाइल सेव करने में विफल!</string>
   <string name="msg_newfile_dest">डेस्टिनेशन: %s/</string>
   <string name="restype_drawable">ड्रावेबल</string>
-  <string name="restype_layout">लेआउट</string>
   <string name="restype_menu">मेन्यू</string>
   <string name="restype_other">अन्य</string>
   <string name="classtype_class">क्लास</string>
@@ -164,16 +156,11 @@
   <string name="msg_preferences">प्रेफरेंसेस</string>
   <string name="pref_changelog">चैंजलॉग</string>
   <string name="msg_editor_font_size">कृपया एडिटर का डिफ़ॉल्ट फ़ॉन्ट साइज चुनें :</string>
-  <string name="msg_clear_cache">यह ग्रेडल द्वारा बनाई गई कैश डायरेक्टरी को हटा देगा। यदि आप इसे हटाते हैं, तो अगली बिल्ड में सामान्य से थोड़ा अधिक समय लग सकता है क्योंकि ग्रेडल आवश्यक फ़ाइलों को फिर से डाउनलोड करेगा।\n\nक्या आप सुनिश्चित हैं कि आप कैश हटाना चाहते हैं?</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
-  <string name="title_preview_layout">प्रिव्यू लेआउट</string>
   <string name="title_viewaction_delete">डिलीट</string>
   <string name="msg_yesno_def_title">कृपया कन्फर्म करें</string>
   <string name="msg_yesno_def_message">कया आप श्योर हो?</string>
-  <string name="msg_empty_ui_layout">कोई व्यू नहीं जोड़ा गया है। जोड़ने के लिए क्लिक करें।</string>
-  <string name="msg_generate_xml_failed">XML कोड जनरेट करने में विफल</string>
-  <string name="title_generating_xml"> XML कोड जनरेट किया जा रहा है</string>
   <string name="msg_swipe_up">बिल्ड आउटपुट, लॉग आदि के लिए ऊपर की ओर स्वाइप करें।</string>
   <string name="msg_ide_crashed">AndroidIDE क्रैश हो गया</string>
   <string name="msg_report_crash">कृपया निम्नलिखित स्टैकट्रेस के साथ गिटहब पर एक मुद्दा खोलें :</string>
@@ -201,7 +188,6 @@
   <string name="idepref_visiblePassword_title">दृश्यमान पासवर्ड फ्लेग</string>
   <string name="idepref_visiblePassword_summary">एडिटर में दृश्यमान पासवर्ड इनपुट टाइप फ्लेग के लिए उपयोग करें। यह सुनिश्चित करता है कि सॉफ्ट कीबोर्ड द्वारा कोई सुझाव प्रस्तावित नहीं किया गया है।</string>
   <string name="previous">पहले का</string>
-  <string name="title_gradle_service_notification_ticker">ग्रेडल बिल्ड सर्विस शुरू हुई है</string>
   <string name="title_gradle_service_notification">ग्रेडल बिल्ड सर्विस</string>
   <string name="title_cancel_build">बिल्ड रद्द करें</string>
   <string name="msg_initializing_project">इनिटियलाइजिंग प्रोजेक्ट</string>
@@ -332,7 +318,6 @@
   <string name="msg_constructor_available">एक समान पैरामीटर टाइप्स वाला कंस्ट्रक्टर पहले से ही उपलब्ध है</string>
   <string name="replace">बदलें</string>
   <string name="replaceAll">सभी बदलें</string>
-  <string name="title_run_tasks">टास्कस चलाएं</string>
   <string name="hint_search_tasks">टास्कस खोजें</string>
   <string name="msg_err_select_tasks">कृपया चलाने के लिए टास्कस का चयन करें</string>
   <string name="title_confirmation">पुष्टीकरण</string>
@@ -346,7 +331,6 @@
   <string name="git_clone_success">Git क्लोन सफल हुआ</string>
   <string name="git_clone_failed">Git रिपॉजिटरी क्लोन करने में विफल</string>
   <string name="msg_select_attr">नीचे दी गई सूची से एक एट्रिब्यूट का चयन करें</string>
-  <string name="action_show_hierarchy">लेआउट हायरार्की दिखाएं</string>
   <string name="idepref_editor_colorScheme">कलर स्कीम</string>
   <string name="idepref_editor_colorScheme_summary">एडिटर में उपयोग करने के लिए कलर स्कीम चुनें</string>
   <string name="idepref_general_uiMode">UI मोड</string>
@@ -382,7 +366,6 @@
   <string name="msg_path_must_be_file">किसी फ़ाइल का पथ होना चाहिए</string>
   <string name="msg_classname_with_keywords">क्लास के नाम में कीवर्ड शामिल हैं</string>
   <string name="msg_path_must_be_dir">किसी डायरेक्टरी का पथ होना चाहिए</string>
-  <string name="msg_invalid_layout_name">लेआउट फाइल का नाम अमान्य है</string>
   <string name="msg_invalid_project_details">प्रोजेक्ट विवरण अमान्य है</string>
   <string name="msg_use_kts">ग्रैडल बिल्ड फ़ाइलों के लिए कोटलिन स्क्रिप्ट (.kts) का उपयोग करें</string>
   <string name="title_privacy">गोपनीयता नीति</string>
@@ -412,12 +395,9 @@
   <string name="msg_codeaction_failed">कोड कार्रवाई करने में विफल</string>
   <string name="idepref_devOptions_enableLogsender_title">LogSender सक्षम करें</string>
   <string name="idepref_devOptions_enableLogsender_summary">अक्षम होने पर, एप्लिकेशन के लॉग AndroidIDE में नहीं दिखाए जाएंगे</string>
-  <string name="title_build_variants">बिल्ड वैरिएंट्स</string>
   <string name="title_apply">लागू करें</string>
   <string name="title_discard">रद्द करें</string>
-  <string name="msg_build_variants_fetch_failed">बिल्ड वेरिएंट लाने में विफल</string>
   <string name="title_choose_application">अप्लिकेशन को चुनें</string>
-  <string name="err_selected_variant_not_found">चयनित बिल्ड वैरिएंट नहीं मिला</string>
   <string name="title_disconnect_log_senders">LogSender को डिस्कनेक्ट करें</string>
   <string name="title_begin_long_select">लंबा चयन प्रारंभ करें</string>
   <string name="idepref_editor_stickScroll_title">स्टिकी स्क्रॉल</string>
@@ -442,8 +422,6 @@
   <string name="msg_file_is_not_dir">चुनी गई फ़ाइल एक डायरेक्टरी नहीं है!</string>
   <string name="msg_project_dir_doesnt_exist">प्रोजेक्ट डायरेक्टरी मौजूद नहीं है</string>
   <string name="msg_files_being_saved">फ़ाइल सहेजने का कार्य पहले से ही प्रगति पर है!</string>
-  <string name="title_install_tools">SDK इंस्टालेशन</string>
-  <string name="subtitle_install_tools">विकास उपकरण इनस्टॉल करें</string>
   <string name="msg_install_tools">आईडीई के काम करने के लिए विकास उपकरण इनस्टॉल होने चाहिए। डन बटन पर क्लिक करने से उपकरण इनस्टॉल करने के लिए टर्मिनल खुल जाएगा। इंस्टॉल करने के लिए, <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">इन</a > निर्देशों का पालन करें । <br/><br/>या <a href="https://docs.androidide.com/">दस्तावेज़ीकरण</a>]]> पढ़ें।</string>
   <string name="greeting_title">स्वागत है</string>
   <string name="greeting_subtitle">सीखें, निर्माण करें, लॉन्च करें। सभी आपके Android पर.</string>
@@ -462,8 +440,6 @@
   <string name="msg_cannot_create_terminal_session">टर्मिनल सेशन बनाने में असमर्थ</string>
   <string name="action_auto_install">आटोमेटिक इंस्टालेशन</string>
   <string name="action_manual_install">मैन्युअल इंस्टालेशन</string>
-  <string name="hint_android_sdk_version">Android SDK वर्जन</string>
-  <string name="hin_jdk_version">JDK वर्जन</string>
   <string name="action_install_git">Git इनस्टॉल करें</string>
   <string name="action_install_openssh">OpenSSH इनस्टॉल करें</string>
   <string name="msg_terminal_new_sessions_disabled">सेशन नहीं बनाया जा सकता. नए सेशन अक्षम हैं!</string>

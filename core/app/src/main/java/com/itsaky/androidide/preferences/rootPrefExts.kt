@@ -22,7 +22,6 @@ import kotlinx.parcelize.Parcelize
 
 internal fun IDEPreferences.addRootPreferences() {
   addPreference(ConfigurationPreferences())
-  addPreference(PrivacyPreferences())
   addPreference(DeveloperOptionsPreferences())
   addPreference(AboutPreferences())
 }
@@ -39,18 +38,6 @@ class ConfigurationPreferences(
     addPreference(EditorPreferencesScreen())
     addPreference(BackendPreferencesScreen())
     addPreference(TermuxPreferences())
-  }
-}
-
-@Parcelize
-class PrivacyPreferences(
-  override val key: String = "idepref_privacy",
-  override val title: Int = string.title_privacy,
-  override val children: List<IPreference> = mutableListOf()
-) : IPreferenceGroup() {
-
-  init {
-    addPreference(StatPreferencesScreen())
   }
 }
 

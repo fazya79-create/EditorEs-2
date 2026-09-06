@@ -41,10 +41,8 @@
   <string name="title_clear_output">مسح المخرجات</string>
   <string name="build_output">مخرجات البناء</string>
   <string name="quick_run_debug">تشغيل سريع</string>
-  <string name="msg_sync_needed">تم تغيير ملفات Gradle. الرجاء إعادة بناء المشروع الخاص بك لمزامنة الاعتمادات والتهيئات.</string>
   <string name="preparing">جاري الإعداد</string>
   <string name="preparing_first">التحضير للبناء. قد يستغرق البناء الأول ما يصل إلى 10-15 دقيقة!</string>
-  <string name="msg_installing_gradlew">عذرا، Gradle wrapwrapper غير متوفر!\nجاري تثبيت واحدة افتراضية. سيتم تنزيل Gradle v7.4 إذا لزم الأمر.</string>
   <string name="run">تشغيل</string>
   <!-- Project -->
   <string name="title_first_build">أول بناء</string>
@@ -88,12 +86,10 @@
   <string name="project_creation_failed">فشل إنشاء المشروع</string>
   <string name="msg_folder_creation_failed">فشل في إنشاء المجلد</string>
   <string name="msg_file_creation_failed">فشل في إنشاء ملف</string>
-  <string name="msg_layout_file_creation_failed">فشل إنشاء ملف التخطيط!</string>
   <string name="msg_folder_created">تم إنشاء المجلد بنجاح</string>
   <string name="msg_file_created">تم إنشاء الملف بنجاح</string>
   <string name="msg_folder_exists">المجلد موجود بالفعل</string>
   <string name="msg_file_exists">الملف موجود بالفعل!</string>
-  <string name="msg_layout_file_exists">مِلَفّ التخطيط موجود فعلًا!</string>
   <string name="msg_invalid_name">اسم غير صحيح!</string>
   <string name="text_create">إنشاء</string>
   <string name="msg_can_contain_slashes">إذا كان المسار يحتوي على فاصل الملفات (\'/\')، فسيتم إنشاء الدلائل المطلوبة (الأم) إذا لم تكن موجودة.</string>
@@ -101,9 +97,6 @@
   <string name="file_name">إسم الملف</string>
   <string name="new_name">اسم جديد</string>
   <string name="new_file">ملف جديد</string>
-  <string name="create_auto_layout">إنشاء مِلَفّ تخطيط</string>
-  <string name="new_java_class">كلاس جافا جديد</string>
-  <string name="new_xml_resource">مصدر XML جديد</string>
   <string name="new_folder">مجلد جديد</string>
   <string name="title_confirm_delete">تأكيد الحذف</string>
   <string name="msg_confirm_delete">هل أنت متأكد من أنك تريد حذف:\n%s؟</string>
@@ -123,7 +116,6 @@
   <string name="save_failed">فشل حفظ الملفات</string>
   <string name="msg_newfile_dest">الوجهة: %s/</string>
   <string name="restype_drawable">مورد رسم</string>
-  <string name="restype_layout">الواجهة</string>
   <string name="restype_menu">القائمة</string>
   <string name="restype_other">أخرى</string>
   <string name="classtype_class">كلاس</string>
@@ -164,16 +156,11 @@
   <string name="msg_preferences">الإعدادات</string>
   <string name="pref_changelog">سِجل التغييرات</string>
   <string name="msg_editor_font_size">الرجاء اختيار حجم الخط الافتراضي للمحرر :</string>
-  <string name="msg_clear_cache">هذا الأمر سيقوم بحذف مسار/مجلد البيانات المؤقتة الذي تم أنشاءه بواسطة Gradle. إذا حذفته، قد تتأخر عملية البناء نسبياً كما سيتم تنزيل الملفات المطلوبة بواسطة Gradle مرة أخرى.\n\nهل أنت متيقِّن من حذف التخزين المؤقت؟</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
-  <string name="title_preview_layout">معاينة التخطيط</string>
   <string name="title_viewaction_delete">حذف</string>
   <string name="msg_yesno_def_title">يرجى التأكيد</string>
   <string name="msg_yesno_def_message">هل أنت متأكد؟</string>
-  <string name="msg_empty_ui_layout">لم يتم إضافة أي عرض. انقر للإضافة.</string>
-  <string name="msg_generate_xml_failed">فشل في إنشاء كود XML</string>
-  <string name="title_generating_xml">إنشاء كود XML</string>
   <string name="msg_swipe_up">مرر لأعلى للإخراج والسجلات والمزيد.</string>
   <string name="msg_ide_crashed">تحطم AndroidIDE</string>
   <string name="msg_report_crash">الرجاء فتح مشكلة على github مع المكونات التالية:</string>
@@ -201,7 +188,6 @@
   <string name="idepref_visiblePassword_title">علامة كلمة المرور المرئية</string>
   <string name="idepref_visiblePassword_summary">استخدم لعلم نوع إدخال كلمة المرور المرئية في المحرر. هذا يضمن عدم اقتراح أي اقتراحات بواسطة لوحة المفاتيح الناعمة.</string>
   <string name="previous">السابق</string>
-  <string name="title_gradle_service_notification_ticker">تم بدء خدمة بناء Gradle</string>
   <string name="title_gradle_service_notification">خدمة بناء Gradle</string>
   <string name="title_cancel_build">إلغاء البناء</string>
   <string name="msg_initializing_project">تهيئة المشروع</string>
@@ -332,7 +318,6 @@
   <string name="msg_constructor_available">المولد بنفس المعطيات (باراميتر) متوفر بالفعل</string>
   <string name="replace">إستبدال</string>
   <string name="replaceAll">استبدال الكل</string>
-  <string name="title_run_tasks">تشغيل المهام</string>
   <string name="hint_search_tasks">البحث عن المهام…</string>
   <string name="msg_err_select_tasks">الرجاء تحديد المهام لتشغيلها</string>
   <string name="title_confirmation">التأكيد</string>
@@ -346,7 +331,6 @@
   <string name="git_clone_success">تم نسخ مشروع Git بنجاح</string>
   <string name="git_clone_failed">فشل في استنساخ مشروع git</string>
   <string name="msg_select_attr">حدد سمة من القائمة أدناه</string>
-  <string name="action_show_hierarchy">عرض التسلسل الهرمي للتخطيط</string>
   <string name="idepref_editor_colorScheme">نظام الألوان</string>
   <string name="idepref_editor_colorScheme_summary">اختر مخطط الألوان لاستخدامه في المحرر</string>
   <string name="idepref_general_uiMode">نمط واجهة المستخدم</string>
@@ -382,7 +366,6 @@
   <string name="msg_path_must_be_file">يجب أن يكون مسار إلى ملف</string>
   <string name="msg_classname_with_keywords">اسم الكلاس يحتوي على كلمات مفتاحية</string>
   <string name="msg_path_must_be_dir">يجب أن يكون المسار إلى مجلد</string>
-  <string name="msg_invalid_layout_name">اسم ملف التخطيط غير صالح</string>
   <string name="msg_invalid_project_details">تفاصيل المشروع غير صالحة</string>
   <string name="msg_use_kts">استخدام سكريبت كوتلن (.kts) لإنشاء ملفات بناء غرادل</string>
   <string name="title_privacy">الخصوصية</string>
@@ -412,12 +395,9 @@
   <string name="msg_codeaction_failed">فشلت في تنفيذ الإجراء.</string>
   <string name="idepref_devOptions_enableLogsender_title">تمكين مرسل السجلات.</string>
   <string name="idepref_devOptions_enableLogsender_summary">عند التعطيل، لن يتم عرض سجلات التطبيقات في AndroidIDE.</string>
-  <string name="title_build_variants">Build variants</string>
   <string name="title_apply">Apply</string>
   <string name="title_discard">Discard</string>
-  <string name="msg_build_variants_fetch_failed">Failed to fetch build variants</string>
   <string name="title_choose_application">Choose application</string>
-  <string name="err_selected_variant_not_found">Selected build variant not found</string>
   <string name="title_disconnect_log_senders">Disconnect log senders</string>
   <string name="title_begin_long_select">Begin long select</string>
   <string name="idepref_editor_stickScroll_title">Sticky scroll</string>
@@ -442,8 +422,6 @@
   <string name="msg_file_is_not_dir">Selected file is not a directory</string>
   <string name="msg_project_dir_doesnt_exist">Project directory does not exist</string>
   <string name="msg_files_being_saved">A file save operation is already in progress!</string>
-  <string name="title_install_tools">SDK Installation</string>
-  <string name="subtitle_install_tools">Install the development tools</string>
   <string name="msg_install_tools">The development tools must be installed for the IDE to work. Clicking the done button will open terminal to install the tools. To install, follow the instructions <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">here</a>.<br/><br/>Or read the <a href="https://docs.androidide.com/">documentation</a>]]>.</string>
   <string name="greeting_title">Welcome</string>
   <string name="greeting_subtitle">Learn, build, launch. All on your Android.</string>
@@ -462,8 +440,6 @@
   <string name="msg_cannot_create_terminal_session">Unable to create terminal session</string>
   <string name="action_auto_install">Automatic installation</string>
   <string name="action_manual_install">Manual installation</string>
-  <string name="hint_android_sdk_version">Android SDK version</string>
-  <string name="hin_jdk_version">JDK version</string>
   <string name="action_install_git">Install Git</string>
   <string name="action_install_openssh">Install OpenSSH</string>
   <string name="msg_terminal_new_sessions_disabled">Cannot create session. New sessions are disabled!</string>
