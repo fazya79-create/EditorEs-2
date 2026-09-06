@@ -35,12 +35,9 @@ import kotlinx.coroutines.withContext
 import com.github.appintro.SlidePolicy
 import com.itsaky.androidide.R
 import com.itsaky.androidide.adapters.onboarding.OnboardingPermissionsAdapter
-import com.itsaky.androidide.backend.proot.InstallPhase
+import com.itsaky.androidide.backend.InstallFlashbar
 import com.itsaky.androidide.backend.proot.ProotConfig
 import com.itsaky.androidide.backend.proot.UbuntuInstaller
-import com.itsaky.androidide.utils.flashError
-import com.itsaky.androidide.utils.flashInfo
-import com.itsaky.androidide.utils.flashSuccess
 import com.itsaky.androidide.buildinfo.BuildInfo
 import com.itsaky.androidide.models.OnboardingPermissionItem
 import com.itsaky.androidide.utils.flashError
@@ -167,27 +164,20 @@ class PermissionsFragment : OnboardingMultiActionFragment(), SlidePolicy {
       return
     }
     installingUbuntu = true
-    flashInfo("Ubuntu installation started in background")
     val appContext = requireContext().applicationContext
+    val progress = InstallFlashbar(requireActivity(), "Installing Ubuntu")
     lifecycleScope.launch {
-      var failure: String? = null
       withContext(Dispatchers.IO) {
         UbuntuInstaller(appContext).install { phase ->
-          if (phase is InstallPhase.Failed) {
-            failure = phase.message
-          }
+          progress.update(phase)
         }
       }
       installingUbuntu = false
-      if (!isAdded) {
-        return@launch
-      }
-      if (ProotConfig.isInstalled(appContext)) {
-        flashSuccess("Installation finished")
+      if (isAdded) {
+        onPermissionsUpdated()
       } else {
-        flashError(failure ?: "Installation failed")
+        progress.dismiss()
       }
-      onPermissionsUpdated()
     }
   }
 

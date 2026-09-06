@@ -485,4 +485,16 @@ class FlashbarView(context: Context) : LinearLayout(context) {
 
     progressBar.progressTintList = ColorStateList.valueOf(progressTint)
   }
+
+  fun setDeterminateProgress(progress: Int) {
+    fbLeftProgress.isIndeterminate = false
+    fbRightProgress.isIndeterminate = false
+    fbLeftProgress.setProgressCompat(progress.coerceIn(0, 100), true)
+    fbRightProgress.setProgressCompat(progress.coerceIn(0, 100), true)
+  }
+
+  fun setIndeterminateProgress() {
+    fbLeftProgress.isIndeterminate = true
+    fbRightProgress.isIndeterminate = true
+  }
 }
