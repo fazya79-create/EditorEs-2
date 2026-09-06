@@ -7,6 +7,9 @@
 # lsp4j models are deserialized with Gson
 -keep class org.eclipse.lsp4j.** { *; }
 
+# keep jgit whole: R8 crashes optimizing its bytecode
+-keep class org.eclipse.jgit.** { *; }
+
 
 # Services
 -keep @com.google.auto.service.AutoService class ** {
