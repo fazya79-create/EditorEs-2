@@ -35,10 +35,12 @@ import kotlinx.coroutines.withContext
 import com.github.appintro.SlidePolicy
 import com.itsaky.androidide.R
 import com.itsaky.androidide.adapters.onboarding.OnboardingPermissionsAdapter
-import com.itsaky.androidide.backend.BackendInstallNotifier
 import com.itsaky.androidide.backend.proot.InstallPhase
 import com.itsaky.androidide.backend.proot.ProotConfig
 import com.itsaky.androidide.backend.proot.UbuntuInstaller
+import com.itsaky.androidide.utils.flashError
+import com.itsaky.androidide.utils.flashInfo
+import com.itsaky.androidide.utils.flashSuccess
 import com.itsaky.androidide.buildinfo.BuildInfo
 import com.itsaky.androidide.models.OnboardingPermissionItem
 import com.itsaky.androidide.utils.flashError
@@ -165,27 +167,27 @@ class PermissionsFragment : OnboardingMultiActionFragment(), SlidePolicy {
       return
     }
     installingUbuntu = true
+    flashInfo("Ubuntu installation started in background")
     val appContext = requireContext().applicationContext
-    val notifier = BackendInstallNotifier(requireContext())
     lifecycleScope.launch {
+      var failure: String? = null
       withContext(Dispatchers.IO) {
         UbuntuInstaller(appContext).install { phase ->
-          when (phase) {
-            is InstallPhase.Downloading ->
-              notifier.showProgress(phase.percent,
-                "Downloading ${phase.percent}% (${"%.1f".format(phase.receivedMb)}/${"%.1f".format(phase.totalMb)} MB)")
-            is InstallPhase.Extracting -> notifier.showIndeterminate("Extracting ${phase.count} files…")
-            is InstallPhase.Finalizing -> notifier.showIndeterminate("Finalizing…")
-            is InstallPhase.Done -> notifier.showDone()
-            is InstallPhase.Failed -> notifier.showFailed(phase.message)
-            else -> Unit
+          if (phase is InstallPhase.Failed) {
+            failure = phase.message
           }
         }
       }
       installingUbuntu = false
-      if (isAdded) {
-        onPermissionsUpdated()
+      if (!isAdded) {
+        return@launch
       }
+      if (ProotConfig.isInstalled(appContext)) {
+        flashSuccess("Installation finished")
+      } else {
+        flashError(failure ?: "Installation failed")
+      }
+      onPermissionsUpdated()
     }
   }
 

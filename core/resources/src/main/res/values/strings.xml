@@ -424,9 +424,6 @@
   <string name="permission_desc_storage">Required to access project files.</string>
   <string name="permission_title_install_ubuntu">Install Ubuntu</string>
   <string name="permission_desc_install_ubuntu">Download and set up the Ubuntu environment (required).</string>
-  <string name="notif_backend_channel">Native backend</string>
-  <string name="notif_backend_title">Installing Ubuntu</string>
-  <string name="notif_backend_done">Installation finished</string>
   <string name="onboarding_title_permissions">Permissions</string>
   <string name="onboarding_subtitle_permissions">AndroidIDE requires the following permissions</string>
   <string name="msg_grant_permissions">Please grant the permissions to continue.</string>
