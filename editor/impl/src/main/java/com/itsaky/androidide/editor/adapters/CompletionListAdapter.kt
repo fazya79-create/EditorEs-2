@@ -26,30 +26,16 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.itsaky.androidide.editor.R
 import com.itsaky.androidide.editor.databinding.LayoutCompletionItemBinding
-import com.itsaky.androidide.lookup.Lookup
 import com.itsaky.androidide.lsp.models.ClassCompletionData
-import com.itsaky.androidide.lsp.models.CompletionItemKind.CLASS
-import com.itsaky.androidide.lsp.models.CompletionItemKind.CONSTRUCTOR
-import com.itsaky.androidide.lsp.models.CompletionItemKind.ENUM
-import com.itsaky.androidide.lsp.models.CompletionItemKind.FIELD
-import com.itsaky.androidide.lsp.models.CompletionItemKind.INTERFACE
-import com.itsaky.androidide.lsp.models.CompletionItemKind.METHOD
 import com.itsaky.androidide.lsp.models.MemberCompletionData
-import com.itsaky.androidide.lsp.models.MethodCompletionData
 import com.itsaky.androidide.preferences.internal.EditorPreferences
-import com.itsaky.androidide.resources.R.string.msg_api_info_deprecated
-import com.itsaky.androidide.resources.R.string.msg_api_info_removed
-import com.itsaky.androidide.resources.R.string.msg_api_info_since
 import com.itsaky.androidide.syntax.colorschemes.SchemeAndroidIDE
 import com.itsaky.androidide.syntax.colorschemes.SchemeAndroidIDE.COMPLETION_WND_TEXT_API
 import com.itsaky.androidide.syntax.colorschemes.SchemeAndroidIDE.COMPLETION_WND_TEXT_DETAIL
 import com.itsaky.androidide.syntax.colorschemes.SchemeAndroidIDE.COMPLETION_WND_TEXT_LABEL
 import com.itsaky.androidide.syntax.colorschemes.SchemeAndroidIDE.COMPLETION_WND_TEXT_TYPE
-import com.itsaky.androidide.tasks.executeAsync
 import com.itsaky.androidide.utils.customOrJBMono
-import com.itsaky.androidide.xml.versions.ApiVersions
 import io.github.rosemoe.sora.widget.component.EditorCompletionAdapter
-import org.eclipse.jdt.core.Signature
 import com.itsaky.androidide.lsp.models.CompletionItem as LspCompletionItem
 
 class CompletionListAdapter : EditorCompletionAdapter() {
@@ -95,7 +81,6 @@ class CompletionListAdapter : EditorCompletionAdapter() {
     binding.completionApiInfo.visibility = View.GONE
 
     applyColorScheme(binding, isCurrentCursorPosition)
-    showApiInfoIfNeeded(item, binding.completionApiInfo)
     return binding.root
   }
 
@@ -139,104 +124,4 @@ class CompletionListAdapter : EditorCompletionAdapter() {
     binding.root.background = gd
   }
 
-  private fun showApiInfoIfNeeded(item: LspCompletionItem, textView: TextView) {
-    executeAsync({
-      if (!isValidForApiVersion(item)) {
-        return@executeAsync null
-      }
-
-      val data = item.data
-      val versions =
-        Lookup.getDefault().lookup(ApiVersions.COMPLETION_LOOKUP_KEY) ?: return@executeAsync null
-      val info =
-        when (data) {
-          is ClassCompletionData -> versions.classInfo(data.className)
-          is MemberCompletionData -> {
-            if (data is MethodCompletionData) {
-              // if the member is a method
-              // build the method identifier by joining the method name and the erased parameter types
-              // for method 'int some(String)', the identifier becomes 'some(Ljava/lang/String;)'
-              // return type of the method is ignored
-              versions.memberInfo(
-                data.classInfo.flatName,
-                methodIdentifier(data.memberName, data.erasedParameterTypes)
-              )
-            } else {
-              versions.memberInfo(data.classInfo.flatName, data.memberName)
-            }
-          }
-
-          else -> return@executeAsync null
-        }
-
-      val sb = StringBuilder()
-      if (info!!.since > 1) {
-        sb.append(textView.context.getString(msg_api_info_since, info.since))
-        sb.append("\n")
-      }
-
-      if (info.removedIn > 0) {
-        sb.append(textView.context.getString(msg_api_info_removed, info.removedIn))
-        sb.append("\n")
-      }
-
-      if (info.deprecatedIn > 0) {
-        sb.append(textView.context.getString(msg_api_info_deprecated, info.deprecatedIn))
-        sb.append("\n")
-      }
-
-      return@executeAsync sb
-    }) {
-      if (it.isNullOrBlank()) {
-        textView.visibility = View.GONE
-        return@executeAsync
-      }
-
-      textView.text = it
-      textView.visibility = View.VISIBLE
-    }
-  }
-
-  private fun methodIdentifier(memberName: String, erasedParameterTypes: List<String>): String {
-    val sb = StringBuilder()
-    sb.append(memberName)
-    sb.append('(')
-    for (type in erasedParameterTypes) {
-      if (type.length == 1 && type[0] in "BCDFIJSVZ") {
-        sb.append(type)
-      } else {
-        sb.append(Signature.createTypeSignature(type, true))
-      }
-    }
-    sb.append(')')
-    return sb.toString()
-  }
-
-  private fun isValidForApiVersion(item: LspCompletionItem?): Boolean {
-    if (item == null) {
-      return false
-    }
-    val type = item.completionKind
-    val data = item.data
-    return if ( // These represent a class type
-      (type === CLASS ||
-        type === INTERFACE ||
-        type === ENUM ||
-
-        // These represent a method type
-        type === METHOD ||
-        type === CONSTRUCTOR ||
-
-        // A field type
-        type === FIELD) && data != null
-    ) {
-      val className =
-        when (data) {
-          is ClassCompletionData -> data.className
-          is MemberCompletionData -> data.classInfo.className
-          else -> null
-        }
-      !className.isNullOrBlank()
-    } else false
-  }
 }

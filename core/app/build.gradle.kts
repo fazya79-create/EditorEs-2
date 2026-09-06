@@ -114,7 +114,6 @@ dependencies {
   implementation(libs.common.retrofit.gson)
   implementation(libs.common.charts)
   implementation(libs.common.hiddenApiBypass)
-  implementation(libs.aapt2.common)
 
   implementation(libs.google.auto.service.annotations)
   implementation(libs.google.gson)
@@ -181,9 +180,6 @@ dependencies {
   implementation(projects.utilities.templatesApi)
   implementation(projects.utilities.templatesImpl)
   implementation(projects.utilities.treeview)
-  implementation(projects.xml.aaptcompiler)
-  implementation(projects.xml.lsp)
-  implementation(projects.xml.utils)
 
   testImplementation(projects.testing.unitTest)
   androidTestImplementation(projects.testing.androidTest)

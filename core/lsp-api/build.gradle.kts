@@ -56,7 +56,6 @@ dependencies {
     api(projects.core.lspModels)
     api(projects.utilities.lookup)
     api(projects.utilities.preferences)
-    api(projects.xml.utils)
 
     compileOnly(projects.core.actions)
     compileOnly(projects.core.common)

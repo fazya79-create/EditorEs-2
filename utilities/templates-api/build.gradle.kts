@@ -35,10 +35,6 @@ dependencies {
   api(projects.core.common)
   api(projects.core.resources)
   api(projects.logging.logger)
-  api(projects.xml.dom)
-  api(projects.xml.utils)
-
-  api(libs.aapt2.common)
   api(libs.androidx.annotation)
   api(libs.androidx.appcompat)
   api(libs.google.material)

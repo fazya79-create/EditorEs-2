@@ -74,7 +74,6 @@ dependencies {
     implementation(projects.event.eventbusAndroid)
     implementation(projects.event.eventbusEvents)
     implementation(projects.utilities.shared)
-    implementation(projects.xml.lsp)
 
     testImplementation(libs.tests.junit)
     testImplementation(libs.tests.google.truth)

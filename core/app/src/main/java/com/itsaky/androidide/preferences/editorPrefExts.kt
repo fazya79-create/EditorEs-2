@@ -60,7 +60,6 @@ class EditorPreferencesScreen(
   init {
     addPreference(CommonConfigurations())
     addPreference(JavaCodeConfigurations())
-    addPreference(XMLPreferencesScreen())
   }
 }
 

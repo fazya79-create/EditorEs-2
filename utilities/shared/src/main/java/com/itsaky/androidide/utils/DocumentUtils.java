@@ -38,10 +38,6 @@ public class DocumentUtils {
         && !name.equals("package-info.java");
   }
 
-  public static boolean isXmlFile(Path file) {
-    return PathsKt.getExtension(file).equals("xml") && Files.exists(file) && !Files.isDirectory(file);
-  }
-
   public static boolean isSameFile(Path first, Path second) {
     try {
       return Files.isSameFile(first, second);

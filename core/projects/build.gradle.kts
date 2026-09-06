@@ -49,7 +49,6 @@ dependencies {
   implementation(projects.logging.logger)
   implementation(projects.utilities.lookup)
   implementation(projects.utilities.shared)
-  implementation(projects.xml.utils)
 
   implementation(libs.common.io)
   implementation(libs.common.kotlin.coroutines.android)

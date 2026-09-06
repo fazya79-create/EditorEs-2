@@ -77,8 +77,6 @@
 }
 
 # Used in preferences
--keep enum org.eclipse.lemminx.dom.builder.EmptyElements { *; }
--keep enum com.itsaky.androidide.xml.permissions.Permission { *; }
 
 # Lots of native methods in tree-sitter
 # There are some fields as well that are accessed from native field

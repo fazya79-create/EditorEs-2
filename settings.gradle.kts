@@ -158,11 +158,6 @@ include(
   ":utilities:templates-api",
   ":utilities:templates-impl",
   ":utilities:treeview",
-  ":xml:aaptcompiler",
-  ":xml:dom",
-  ":xml:lsp",
-  ":xml:resources-api",
-  ":xml:utils",
 )
 
 object FDroidConfig {
