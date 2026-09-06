@@ -16,7 +16,7 @@ jobs:
   build_apk:
     strategy:
       matrix:
-        build_type: ['debug', 'release']
+        build_type: ['release']
     name: Build APK
     runs-on: ubuntu-latest
     steps:
@@ -44,12 +44,16 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Create CI debug keystore
+      - name: Restore release keystore
         run: |
           mkdir -p config
-          keytool -genkey -v -keystore config/debug.keystore -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10950 -dname "CN=Android Debug,O=Android,C=US"
-          echo "DEBUG_KEYSTORE=${{ github.workspace }}/config/debug.keystore" >> "$GITHUB_ENV"
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > config/release.keystore
+          echo "RELEASE_KEYSTORE=${{ github.workspace }}/config/release.keystore" >> "$GITHUB_ENV"
       - name: Assemble ${{ matrix.build_type }} APK
+        env:
+          RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           build_type=${{ matrix.build_type }}
           ./gradlew :core:app:assemble${build_type^}

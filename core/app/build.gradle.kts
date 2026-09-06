@@ -51,6 +51,13 @@ android {
         keyPassword = "android"
       }
     }
+    create("release") {
+      storeFile = file(
+        System.getenv("RELEASE_KEYSTORE") ?: "config/release.keystore")
+      storePassword = System.getenv("RELEASE_STORE_PASSWORD")
+      keyAlias = System.getenv("RELEASE_KEY_ALIAS") ?: "editores"
+      keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+    }
   }
 
   defaultConfig {
@@ -65,6 +72,7 @@ android {
   buildTypes {
     release {
       isShrinkResources = true
+      signingConfig = signingConfigs.getByName("release")
     }
   }
 
