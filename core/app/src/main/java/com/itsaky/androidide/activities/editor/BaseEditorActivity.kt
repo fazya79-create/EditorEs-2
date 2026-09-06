@@ -94,9 +94,6 @@ import com.itsaky.androidide.utils.MemoryUsageWatcher
 import com.itsaky.androidide.utils.flashError
 import com.itsaky.androidide.utils.resolveAttr
 import com.itsaky.androidide.viewmodel.EditorViewModel
-import com.itsaky.androidide.xml.resources.ResourceTableRegistry
-import com.itsaky.androidide.xml.versions.ApiVersionsRegistry
-import com.itsaky.androidide.xml.widgets.WidgetTableRegistry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.greenrobot.eventbus.Subscribe
@@ -246,9 +243,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
   protected open fun postDestroy() {
     if (isDestroying) {
       Lookup.getDefault().unregisterAll()
-      ApiVersionsRegistry.getInstance().clear()
-      ResourceTableRegistry.getInstance().clear()
-      WidgetTableRegistry.getInstance().clear()
     }
   }
 
@@ -560,12 +554,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
 
   open fun handleSearchResultVisibility(errorVisible: Boolean) {
     content.bottomSheet.handleSearchResultVisibility(errorVisible)
-  }
-
-  open fun showFirstBuildNotice() {
-    newMaterialDialogBuilder(this).setPositiveButton(android.R.string.ok, null)
-      .setTitle(string.title_first_build).setMessage(string.msg_first_build).setCancelable(false)
-      .create().show()
   }
 
   open fun getFileTreeFragment(): FileTreeFragment? {

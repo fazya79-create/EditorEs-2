@@ -40,25 +40,12 @@ public final class Environment {
   public static File HOME;
   public static File ANDROIDIDE_HOME;
   public static File ANDROIDIDE_UI;
-  public static File JAVA_HOME;
   public static File ANDROID_HOME;
   public static File TMP_DIR;
   public static File BIN_DIR;
   public static File LIB_DIR;
   public static File PROJECTS_DIR;
   public static File REALM_DB_DIR;
-
-  /**
-   * Used by Java LSP until the project is initialized.
-   */
-  public static File ANDROID_JAR;
-
-  public static File TOOLING_API_JAR;
-
-  public static File INIT_SCRIPT;
-  public static File GRADLE_USER_HOME;
-  public static File AAPT2;
-  public static File JAVA;
   public static File BASH_SHELL;
   public static File LOGIN_SHELL;
 
@@ -71,24 +58,14 @@ public final class Environment {
     BIN_DIR = mkdirIfNotExits(new File(PREFIX, "bin"));
     LIB_DIR = mkdirIfNotExits(new File(PREFIX, "lib"));
     PROJECTS_DIR = mkdirIfNotExits(new File(FileUtil.getExternalStorageDir(), PROJECTS_FOLDER));
-    ANDROID_JAR = mkdirIfNotExits(new File(ANDROIDIDE_HOME, "android.jar"));
-    TOOLING_API_JAR = new File(mkdirIfNotExits(new File(ANDROIDIDE_HOME, "tooling-api")),
-      "tooling-api-all.jar");
-    AAPT2 = new File(ANDROIDIDE_HOME, "aapt2");
     ANDROIDIDE_UI = mkdirIfNotExits(new File(ANDROIDIDE_HOME, "ui"));
     REALM_DB_DIR = mkdirIfNotExits(new File(ROOT, "realm-dbs"));
 
-    INIT_SCRIPT = new File(mkdirIfNotExits(new File(ANDROIDIDE_HOME, "init")), "init.gradle");
-    GRADLE_USER_HOME = new File(HOME, ".gradle");
-
     ANDROID_HOME = new File(HOME, "android-sdk");
-    JAVA_HOME = new File(PREFIX, "opt/openjdk");
 
-    JAVA = new File(JAVA_HOME, "bin/java");
     BASH_SHELL = new File(BIN_DIR, "bash");
     LOGIN_SHELL = new File(BIN_DIR, "login");
 
-    setExecutable(JAVA);
     setExecutable(BASH_SHELL);
 
     System.setProperty("user.home", HOME.getAbsolutePath());
@@ -118,8 +95,6 @@ public final class Environment {
     env.put("ANDROID_HOME", ANDROID_HOME.getAbsolutePath());
     env.put("ANDROID_SDK_ROOT", ANDROID_HOME.getAbsolutePath());
     env.put("ANDROID_USER_HOME", HOME.getAbsolutePath() + "/.android");
-    env.put("JAVA_HOME", JAVA_HOME.getAbsolutePath());
-    env.put("GRADLE_USER_HOME", GRADLE_USER_HOME.getAbsolutePath());
     env.put("SYSROOT", PREFIX.getAbsolutePath());
     env.put("PROJECTS", PROJECTS_DIR.getAbsolutePath());
 

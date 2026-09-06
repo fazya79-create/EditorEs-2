@@ -61,7 +61,6 @@ dependencies {
     implementation(libs.google.gson)
 
     implementation(libs.common.utilcode)
-    implementation(libs.composite.jdt)
     
     implementation(libs.google.material)
 

@@ -30,8 +30,6 @@ android {
 }
 
 dependencies {
-  api(libs.composite.javapoet)
-
   api(projects.core.common)
   api(projects.core.resources)
   api(projects.logging.logger)

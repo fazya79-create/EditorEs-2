@@ -108,7 +108,6 @@ dependencies {
   implementation(libs.common.lsp4j)
   implementation(libs.common.utilcode)
   implementation(libs.common.glide)
-  implementation(libs.common.jsoup)
   implementation(libs.common.kotlin.coroutines.android)
   implementation(libs.common.retrofit)
   implementation(libs.common.retrofit.gson)
@@ -150,7 +149,6 @@ dependencies {
   // Dependencies in composite build
   implementation(libs.composite.appintro)
   implementation(libs.composite.desugaringCore)
-  implementation(libs.composite.javapoet)
 
   // Local projects here
   implementation(projects.core.actions)

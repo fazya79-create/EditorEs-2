@@ -38,6 +38,7 @@ import com.itsaky.androidide.actions.FillMenuParams
 import com.itsaky.androidide.editor.language.treesitter.JsonLanguage
 import com.itsaky.androidide.editor.language.treesitter.KotlinLanguage
 import com.itsaky.androidide.editor.language.treesitter.LogLanguage
+import com.itsaky.androidide.editor.language.treesitter.TSLanguageRegistry
 import com.itsaky.androidide.editor.schemes.IDEColorSchemeProvider
 import com.itsaky.androidide.editor.ui.IDEEditor
 import com.itsaky.androidide.eventbus.events.editor.DocumentChangeEvent

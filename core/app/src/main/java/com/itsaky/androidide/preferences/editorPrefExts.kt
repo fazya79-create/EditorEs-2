@@ -59,7 +59,6 @@ class EditorPreferencesScreen(
 
   init {
     addPreference(CommonConfigurations())
-    addPreference(JavaCodeConfigurations())
   }
 }
 
