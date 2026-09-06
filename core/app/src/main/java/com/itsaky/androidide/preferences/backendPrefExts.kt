@@ -19,6 +19,7 @@ package com.itsaky.androidide.preferences
 
 import android.content.Context
 import androidx.preference.Preference
+import com.itsaky.androidide.backend.InstallFlashbar
 import com.itsaky.androidide.backend.build.ToolchainInstaller
 import com.itsaky.androidide.backend.build.ToolchainKind
 import com.itsaky.androidide.backend.build.ToolchainPaths
@@ -93,17 +94,29 @@ private class InstallUbuntuPreference(
 
   override fun onPreferenceClick(preference: Preference): Boolean {
     val context = preference.context
-    flashInfo(string.idepref_backend_install_started)
+    val activity = context as? android.app.Activity
+    val progress = activity?.let {
+      InstallFlashbar(it, context.getString(string.idepref_backend_install_ubuntu))
+    } ?: run {
+      flashInfo(string.idepref_backend_install_started)
+      null
+    }
     executeAsync(callable = {
       runBlocking {
-        UbuntuInstaller(context.applicationContext).install {}
+        UbuntuInstaller(context.applicationContext).install { phase ->
+          progress?.update(phase)
+        }
       }
       ProotConfig.isInstalled(context.applicationContext)
     }) { installed ->
-      if (installed == true) {
-        flashSuccess(string.idepref_backend_install_done)
-      } else {
-        flashError(string.idepref_backend_install_failed_simple)
+      if (progress == null) {
+        if (installed == true) {
+          flashSuccess(string.idepref_backend_install_done)
+        } else {
+          flashError(string.idepref_backend_install_failed_simple)
+        }
+      } else if (installed != true) {
+        progress.failed(context.getString(string.idepref_backend_install_failed_simple))
       }
       updateSummary(context, preference)
     }
@@ -171,13 +184,23 @@ private class InstallCmakePreference(
 
 private fun installToolchain(preference: Preference, kind: ToolchainKind) {
   val context = preference.context
-  flashInfo(string.idepref_backend_install_started)
+  val activity = context as? android.app.Activity
+  val label = if (kind == ToolchainKind.Ndk) {
+    context.getString(string.idepref_backend_install_ndk)
+  } else {
+    context.getString(string.idepref_backend_install_cmake)
+  }
+  val progress = activity?.let { InstallFlashbar(it, label) } ?: run {
+    flashInfo(string.idepref_backend_install_started)
+    null
+  }
   executeAsync(callable = {
     runBlocking {
       val releases = ToolchainRepository.fetchReleases(kind)
       val release = releases.firstOrNull() ?: return@runBlocking false
       var done = false
       ToolchainInstaller(context.applicationContext, kind).install(release) { phase ->
+        progress?.update(phase)
         done = phase is com.itsaky.androidide.backend.build.ToolchainPhase.Done
       }
       if (done) {
@@ -187,10 +210,14 @@ private fun installToolchain(preference: Preference, kind: ToolchainKind) {
       done
     }
   }) { done ->
-    if (done == true) {
-      flashSuccess(string.idepref_backend_install_done)
-    } else {
-      flashError(string.idepref_backend_install_failed_simple)
+    if (progress == null) {
+      if (done == true) {
+        flashSuccess(string.idepref_backend_install_done)
+      } else {
+        flashError(string.idepref_backend_install_failed_simple)
+      }
+    } else if (done != true) {
+      progress.failed(context.getString(string.idepref_backend_install_failed_simple))
     }
     val installed = ToolchainPaths.installedVersion(context.applicationContext, kind)
     preference.summary = if (installed != null) {
