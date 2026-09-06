@@ -27,6 +27,7 @@ import com.itsaky.androidide.R
 import com.itsaky.androidide.R.string
 import com.itsaky.androidide.app.configuration.IDEBuildConfigProvider
 import com.itsaky.androidide.backend.proot.ProotConfig
+import com.itsaky.androidide.fragments.onboarding.BackendInstallFragment
 import com.itsaky.androidide.fragments.onboarding.GreetingFragment
 import com.itsaky.androidide.fragments.onboarding.OnboardingInfoFragment
 import com.itsaky.androidide.fragments.onboarding.PermissionsFragment
