@@ -17,7 +17,6 @@
 package com.itsaky.androidide.activities
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
@@ -65,7 +64,6 @@ class AboutActivity : EdgeToEdgeIDEActivity() {
     private val ACTION_TG_CHANNEL = id++
     private val ACTION_TG_GROUP = id++
     private val ACTION_CONTRIBUTE = id++
-    private val ACTION_CONTRIBUTORS = id++
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,7 +117,6 @@ class AboutActivity : EdgeToEdgeIDEActivity() {
       ACTION_TG_GROUP -> app.openTelegramGroup()
       ACTION_TG_CHANNEL -> app.openTelegramChannel()
       ACTION_CONTRIBUTE -> app.openUrl(BaseApplication.CONTRIBUTOR_GUIDE_URL)
-      ACTION_CONTRIBUTORS -> startActivity(Intent(this, ContributorsActivity::class.java))
     }
   }
 
@@ -173,15 +170,6 @@ class AboutActivity : EdgeToEdgeIDEActivity() {
           R.drawable.ic_code,
           R.string.title_contribute,
           R.string.summary_contribute
-        )
-      )
-      add(
-        SimpleIconTitleDescriptionItem.create(
-          this@AboutActivity,
-          ACTION_CONTRIBUTORS,
-          R.drawable.ic_heart_outline,
-          R.string.title_contributors,
-          R.string.summary_contributors
         )
       )
     }

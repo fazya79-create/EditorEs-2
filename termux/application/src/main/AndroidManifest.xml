@@ -41,14 +41,6 @@
       android:documentLaunchMode="intoExisting"
       android:name=".shared.activities.ReportActivity" />
 
-    <activity
-      android:excludeFromRecents="true"
-      android:exported="false"
-      android:name=".app.api.file.FileReceiverActivity"
-      android:noHistory="true"
-      android:resizeableActivity="true"
-      android:taskAffinity="${TERMUX_PACKAGE_NAME}.filereceiver" />
-
     <meta-data
       android:name="android.max_aspect"
       android:value="10.0" />

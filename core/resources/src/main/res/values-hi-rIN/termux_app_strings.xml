@@ -48,8 +48,6 @@
   <string name="action_kill_process">प्रोसेस (%d) को खत्म करें</string>
   <string name="title_confirm_kill_process">क्या आप सचमुच इस सेशन को समाप्त करना चाहते हैं?</string>
   <string name="action_toggle_keep_screen_on">स्क्रीन ऑन रखें</string>
-  <string name="action_open_help">मदद</string>
-  <string name="action_open_settings">सेटिंग्स</string>
   <string name="action_report_issue">समस्या सूचित करें</string>
   <string name="msg_generating_report">रिपोर्ट बना रहा है...</string>
   <string name="msg_add_termux_debug_info">रिपोर्ट में Termux डिबग जानकारी जोड़ें?</string>
@@ -69,11 +67,8 @@
   <string name="termux_preferences_summary">Termux टर्मिनल के लिए प्राथमिकताएँ।</string>
   <!-- Debugging Preferences -->
   <string name="termux_debugging_preferences_title">डिबगिंग</string>
-  <string name="termux_debugging_preferences_summary">डिबगिंग के लिए प्राथमिकताएँ</string>
   <!-- Logging Category -->
-  <string name="termux_logging_header">लॉगिंग</string>
   <!-- Log Level -->
-  <string name="termux_log_level_title">लॉग स्तर</string>
   <!-- Terminal View Key Logging -->
   <string name="termux_terminal_view_key_logging_enabled_title">टर्मिनल दृश्य कुंजी लॉग करें</string>
   <string name="termux_terminal_view_key_logging_enabled_off">लॉग में टर्मिनल दृश्य कुंजियों के लिए एंट्रीज नहीं होंगी। (डिफ़ॉल्ट)</string>
@@ -83,8 +78,6 @@
   <string name="termux_crash_report_notifications_enabled_off">क्रैश रिपोर्ट के लिए सूचनाएं अक्षम करें.</string>
   <string name="termux_crash_report_notifications_enabled_on">क्रैश रिपोर्ट के लिए सूचनाएं दिखाएं. (डिफ़ॉल्ट)</string>
   <!-- Terminal IO Preferences -->
-  <string name="termux_terminal_io_preferences_title">टर्मिनल I/O</string>
-  <string name="termux_terminal_io_preferences_summary">टर्मिनल I/O के लिए प्राथमिकताएँ</string>
   <!-- Keyboard Category -->
   <string name="termux_keyboard_header">कीबोर्ड</string>
   <!-- Soft Keyboard -->
@@ -96,8 +89,6 @@
   <string name="termux_soft_keyboard_enabled_only_if_no_hardware_off">हार्डवेयर कीबोर्ड कनेक्ट होने पर भी सॉफ्ट कीबोर्ड सक्षम किया जाएगा। (डिफ़ॉल्ट)</string>
   <string name="termux_soft_keyboard_enabled_only_if_no_hardware_on">सॉफ्ट कीबोर्ड केवल तभी सक्षम किया जाएगा जब कोई हार्डवेयर कीबोर्ड कनेक्ट न हो।</string>
   <!-- Terminal View Preferences -->
-  <string name="termux_terminal_view_preferences_title">टर्मिनल व्यू</string>
-  <string name="termux_terminal_view_preferences_summary">टर्मिनल व्यू के लिए प्राथमिकताएँ</string>
   <!-- View Category -->
   <string name="termux_terminal_view_view_header">व्यू</string>
   <!-- Terminal View Margin Adjustment -->

@@ -30,12 +30,6 @@
   <string name="error_attempted_to_ask_for_permissions_not_requested">Mencoba meminta izin yang belum diminta dalam manifes aplikasi: %1$s</string>
   <string name="error_has_not_requested_legacy_external_storage">Paket \"%1$s\" menargetkan targetSdkVersion %2$d dan berjalan di Sdk Android %3$d tetapi belum menyetel requestLegacyExternalStorage ke true dalam manifes aplikasi</string>
   <string name="msg_requires_dump_and_package_usage_stats_permissions">Memerlukan izin `DUMP` dan `PACKAGE_USAGE_STATS`</string>
-  <string name="error_display_over_other_apps_permission_not_granted">%1$s memerlukan
-         Izin \"Tampilkan di aplikasi lain\" untuk memulai aktivitas dan layanan dari latar belakang di Android &gt;= 10.
-         Memberikannya dari Pengaturan Android -&gt; Aplikasi -&gt; %1$s -&gt;  Lanjutan -&gt; Tarik aplikasi lain.
-         Nama izin mungkin berbeda pada perangkat yang berbeda, seperti pada Xiaomi, namanya
-         \"Tampilkan jendela pop-up saat berjalan di latar belakang\", periksa https://dontkillmyapp.com
-         untuk masalah khusus perangkat.</string>
   <!-- TermuxPluginUtils -->
   <string name="error_allow_external_apps_ungranted">%1$s mengharuskan properti `allow-external-apps` disetel ke `true` di file `%2$s`.</string>
   <!-- ReportActivity -->

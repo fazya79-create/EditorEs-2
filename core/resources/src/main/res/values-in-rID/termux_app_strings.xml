@@ -48,8 +48,6 @@
   <string name="action_kill_process">Matikan proses (%d)</string>
   <string name="title_confirm_kill_process">Yakin mematikan sesi ini?</string>
   <string name="action_toggle_keep_screen_on">Biarkan layarnya menyala</string>
-  <string name="action_open_help">Bantuan</string>
-  <string name="action_open_settings">Pengaturan</string>
   <string name="action_report_issue">Laporkan masalah</string>
   <string name="msg_generating_report">Menghasilkan Laporan</string>
   <string name="msg_add_termux_debug_info">Tambahkan info debug termux untuk dilaporkan?</string>
@@ -69,11 +67,8 @@
   <string name="termux_preferences_summary">Preferensi untuk terminal Termux.</string>
   <!-- Debugging Preferences -->
   <string name="termux_debugging_preferences_title">Men-debug</string>
-  <string name="termux_debugging_preferences_summary">Preferensi untuk debugging</string>
   <!-- Logging Category -->
-  <string name="termux_logging_header">Logging</string>
   <!-- Log Level -->
-  <string name="termux_log_level_title">Tingkat Log</string>
   <!-- Terminal View Key Logging -->
   <string name="termux_terminal_view_key_logging_enabled_title">Pencatatan Kunci Tampilan Terminal</string>
   <string name="termux_terminal_view_key_logging_enabled_off">Log tidak akan memiliki entri untuk kunci tampilan terminal. (Default)</string>
@@ -83,8 +78,6 @@
   <string name="termux_crash_report_notifications_enabled_off">Nonaktifkan pemberitahuan untuk laporan kerusakan.</string>
   <string name="termux_crash_report_notifications_enabled_on">Tampilkan pemberitahuan untuk laporan kerusakan. (Default)</string>
   <!-- Terminal IO Preferences -->
-  <string name="termux_terminal_io_preferences_title">Terminal I/O</string>
-  <string name="termux_terminal_io_preferences_summary">Preferensi untuk terminal I/O</string>
   <!-- Keyboard Category -->
   <string name="termux_keyboard_header">Papan ketik</string>
   <!-- Soft Keyboard -->
@@ -96,8 +89,6 @@
   <string name="termux_soft_keyboard_enabled_only_if_no_hardware_off">Keyboard lunak akan diaktifkan meskipun keyboard perangkat keras tersambung. (Default)</string>
   <string name="termux_soft_keyboard_enabled_only_if_no_hardware_on">Keyboard lunak hanya akan diaktifkan jika tidak ada keyboard perangkat keras yang tersambung.</string>
   <!-- Terminal View Preferences -->
-  <string name="termux_terminal_view_preferences_title">Tampilan Terminal</string>
-  <string name="termux_terminal_view_preferences_summary">Preferensi untuk tampilan terminal</string>
   <!-- View Category -->
   <string name="termux_terminal_view_view_header">Tampilan</string>
   <!-- Terminal View Margin Adjustment -->

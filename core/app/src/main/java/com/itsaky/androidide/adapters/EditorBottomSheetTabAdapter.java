@@ -25,7 +25,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import com.itsaky.androidide.fragments.DiagnosticsListFragment;
 import com.itsaky.androidide.fragments.SearchResultFragment;
-import com.itsaky.androidide.fragments.output.AppLogFragment;
 import com.itsaky.androidide.fragments.output.BuildOutputFragment;
 import com.itsaky.androidide.fragments.output.IDELogFragment;
 import com.itsaky.androidide.resources.R;
@@ -49,8 +48,6 @@ public class EditorBottomSheetTabAdapter extends FragmentStateAdapter {
             fragmentActivity.getString(R.string.build_output),
             BuildOutputFragment.class,
             ++index));
-    this.fragments.add(
-        new Tab(fragmentActivity.getString(R.string.app_logs), AppLogFragment.class, ++index));
     this.fragments.add(
         new Tab(fragmentActivity.getString(R.string.ide_logs), IDELogFragment.class, ++index));
     this.fragments.add(
@@ -130,11 +127,6 @@ public class EditorBottomSheetTabAdapter extends FragmentStateAdapter {
     }
 
     return null;
-  }
-
-  @Nullable
-  public AppLogFragment getLogFragment() {
-    return findFragmentByClass(AppLogFragment.class);
   }
 
   @Nullable

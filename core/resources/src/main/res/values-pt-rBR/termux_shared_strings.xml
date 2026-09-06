@@ -30,12 +30,6 @@
   <string name="error_attempted_to_ask_for_permissions_not_requested">Tentativa de pedir permissões que não foram solicitadas no manifesto do app: %1$s</string>
   <string name="error_has_not_requested_legacy_external_storage">O pacote%1$s\" está direcionando targetSdkVersion %2$d e está sendo executado no android sdk %3$d mas não configurou requestLegacyExternalStorage para true no manifesto do aplicativo</string>
   <string name="msg_requires_dump_and_package_usage_stats_permissions">Requer permissão `DUMP` e `PACKAGE_USAGE_STATS`</string>
-  <string name="error_display_over_other_apps_permission_not_granted">%1$s requer
-        a permissão \"Exibir sobre outros apps\" para iniciar atividades e serviços a partir do plano de fundo do Android &gt;= 10.
-        Conceda isso em Configurações do Android -&gt; Apps -&gt; %1$s -&gt; Avançado -&gt; Sobrepor outros aplicativos.
-        O nome da permissão pode ser diferente em diferentes dispositivos, como em Xiaomi, os chamados
-        \"Exibir janelas pop-up enquanto executa em segundo plano\", consulte https://dontkillmyapp. 
-        para problemas específicos do dispositivo.</string>
   <!-- TermuxPluginUtils -->
   <string name="error_allow_external_apps_ungranted">%1$s requires `allow-external-apps` property to be set to `true` in `%2$s` file.</string>
   <!-- ReportActivity -->

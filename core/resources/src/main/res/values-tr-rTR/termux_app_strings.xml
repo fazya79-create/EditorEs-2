@@ -48,8 +48,6 @@
   <string name="action_kill_process">Süreci öldür (%d)</string>
   <string name="title_confirm_kill_process">Bu oturumu gerçekten öldürecek misin?</string>
   <string name="action_toggle_keep_screen_on">Ekranı açık tut</string>
-  <string name="action_open_help">Yardım</string>
-  <string name="action_open_settings">Ayarlar</string>
   <string name="action_report_issue">Sorun Bildir</string>
   <string name="msg_generating_report">Rapor Oluşturma</string>
   <string name="msg_add_termux_debug_info">Rapora termux hata ayıklama bilgisini ekleyin?</string>
@@ -69,11 +67,8 @@
   <string name="termux_preferences_summary">Termux uçbirimi için seçenekler.</string>
   <!-- Debugging Preferences -->
   <string name="termux_debugging_preferences_title">Hata ayıklama</string>
-  <string name="termux_debugging_preferences_summary">Hata ayıklama ayarları</string>
   <!-- Logging Category -->
-  <string name="termux_logging_header">Günlükler</string>
   <!-- Log Level -->
-  <string name="termux_log_level_title">Günlük Düzeyi</string>
   <!-- Terminal View Key Logging -->
   <string name="termux_terminal_view_key_logging_enabled_title">Terminal Görünümü Tuş Günlüğü</string>
   <string name="termux_terminal_view_key_logging_enabled_off">Günlüklerde terminal görünümü tuşları için girişler bulunmayacaktır. (Varsayılan)</string>
@@ -83,8 +78,6 @@
   <string name="termux_crash_report_notifications_enabled_off">Kilitlenme raporları için bildirimleri devre dışı bırakın.</string>
   <string name="termux_crash_report_notifications_enabled_on">Kilitlenme raporları için bildirimleri göster. (Varsayılan)</string>
   <!-- Terminal IO Preferences -->
-  <string name="termux_terminal_io_preferences_title">Terminal I/O</string>
-  <string name="termux_terminal_io_preferences_summary">Terminal I/O için tercihler</string>
   <!-- Keyboard Category -->
   <string name="termux_keyboard_header">Klavye</string>
   <!-- Soft Keyboard -->
@@ -96,8 +89,6 @@
   <string name="termux_soft_keyboard_enabled_only_if_no_hardware_off">Soft keyboard will be enabled even if hardware keyboard is connected. (Default)</string>
   <string name="termux_soft_keyboard_enabled_only_if_no_hardware_on">Soft keyboard will be enabled only if no hardware keyboard is connected.</string>
   <!-- Terminal View Preferences -->
-  <string name="termux_terminal_view_preferences_title">Uçbirim Görünümü</string>
-  <string name="termux_terminal_view_preferences_summary">Uçbirim görünümü için seçenekler</string>
   <!-- View Category -->
   <string name="termux_terminal_view_view_header">Görünüm</string>
   <!-- Terminal View Margin Adjustment -->

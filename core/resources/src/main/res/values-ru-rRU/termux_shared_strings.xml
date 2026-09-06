@@ -30,7 +30,6 @@
   <string name="error_attempted_to_ask_for_permissions_not_requested">Запрошено разрешение, не указанное в Manifest-файле приложения: %1$s</string>
   <string name="error_has_not_requested_legacy_external_storage">Пакет \"%1$s\" нацелен на SDK %2$d (targetSdkVersion) и запущен на SDK %3$d, однако опция requestLegacyExternalStorage не включена в его Manifest-файле</string>
   <string name="msg_requires_dump_and_package_usage_stats_permissions">Требуются разрешения `DUMP` и `PACKAGE_USAGE_STATS`</string>
-  <string name="error_display_over_other_apps_permission_not_granted">Разрешение \"Отображение поверх других приложений\" требуется для запуска процессов в фоновом режиме на Android 10 и новее. Выдайте его из настроек устройства (Приложения -&gt; %1$s -&gt; Дополнительно -&gt; Отображение поверх других приложений). Имя разрешения может отличаться, например, на устройствах Xiaomi оно называется \"Показывать всплывающие окна\". Посетите https://dontkillmyapp.com для более точной информации для вашего устройства.</string>
   <!-- TermuxPluginUtils -->
   <string name="error_allow_external_apps_ungranted">%1$s requires `allow-external-apps` property to be set to `true` in `%2$s` file.</string>
   <!-- ReportActivity -->

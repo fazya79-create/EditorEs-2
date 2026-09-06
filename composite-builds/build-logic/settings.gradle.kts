@@ -44,8 +44,7 @@ include(
   ":common",
   ":desugaring",
   ":desugaring-core",
-  ":plugins",
-  ":properties-parser"
+  ":plugins"
 )
 
 rootProject.name = "build-logic"

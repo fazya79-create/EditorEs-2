@@ -21,7 +21,6 @@
     }
   ],
   "ignorePaths": [
-    "testing/resources/**",
-    "gradle-plugin/src/test/resources/**"
+    "composite-builds/external/**"
   ]
 }

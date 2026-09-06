@@ -48,8 +48,6 @@
   <string name="action_kill_process">কিল প্রসেস (%d)</string>
   <string name="title_confirm_kill_process">সত্যিই এই অধিবেশন হত্যা?</string>
   <string name="action_toggle_keep_screen_on">পর্দা চালু রাখুন</string>
-  <string name="action_open_help">সাহায্য</string>
-  <string name="action_open_settings">সেটিংস</string>
   <string name="action_report_issue">রিপোর্ট ইস্যু</string>
   <string name="msg_generating_report">প্রতিবেদন তৈরি করা হচ্ছে</string>
   <string name="msg_add_termux_debug_info">রিপোর্ট করতে termux ডিবাগ তথ্য যোগ করুন?</string>
@@ -69,11 +67,8 @@
   <string name="termux_preferences_summary">Termux টার্মিনালের জন্য পছন্দসমূহ।.</string>
   <!-- Debugging Preferences -->
   <string name="termux_debugging_preferences_title">ডিবাগিং</string>
-  <string name="termux_debugging_preferences_summary">ডিবাগিং জন্য পছন্দ</string>
   <!-- Logging Category -->
-  <string name="termux_logging_header">লগিং</string>
   <!-- Log Level -->
-  <string name="termux_log_level_title">লগ লেভেল</string>
   <!-- Terminal View Key Logging -->
   <string name="termux_terminal_view_key_logging_enabled_title">টার্মিনাল ভিউ কী লগিং</string>
   <string name="termux_terminal_view_key_logging_enabled_off">লগগুলিতে টার্মিনাল ভিউ কীগুলির জন্য এন্ট্রি থাকবে না। (ডিফল্ট)</string>
@@ -83,8 +78,6 @@
   <string name="termux_crash_report_notifications_enabled_off">ক্র্যাশ রিপোর্টের জন্য বিজ্ঞপ্তি অক্ষম করুন।.</string>
   <string name="termux_crash_report_notifications_enabled_on">ক্র্যাশ রিপোর্টের জন্য বিজ্ঞপ্তি দেখান। (ডিফল্ট)</string>
   <!-- Terminal IO Preferences -->
-  <string name="termux_terminal_io_preferences_title">টার্মিনাল I/O</string>
-  <string name="termux_terminal_io_preferences_summary">টার্মিনাল I/O এর জন্য পছন্দ</string>
   <!-- Keyboard Category -->
   <string name="termux_keyboard_header">কীবোর্ড</string>
   <!-- Soft Keyboard -->
@@ -96,8 +89,6 @@
   <string name="termux_soft_keyboard_enabled_only_if_no_hardware_off">Soft keyboard will be enabled even if hardware keyboard is connected. (Default)</string>
   <string name="termux_soft_keyboard_enabled_only_if_no_hardware_on">Soft keyboard will be enabled only if no hardware keyboard is connected.</string>
   <!-- Terminal View Preferences -->
-  <string name="termux_terminal_view_preferences_title">টার্মিনাল ভিউ</string>
-  <string name="termux_terminal_view_preferences_summary">টার্মিনাল ভিউ জন্য পছন্দ</string>
   <!-- View Category -->
   <string name="termux_terminal_view_view_header">দেখুন</string>
   <!-- Terminal View Margin Adjustment -->

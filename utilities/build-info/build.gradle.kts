@@ -16,8 +16,6 @@
  */
 
 
-import com.android.SdkConstants
-import com.itsaky.androidide.build.config.AGP_VERSION_MINIMUM
 import com.itsaky.androidide.build.config.BuildConfig
 import com.itsaky.androidide.build.config.CI
 import com.itsaky.androidide.build.config.FDroidConfig
@@ -73,10 +71,6 @@ tasks.create("generateBuildInfo") {
         "REPO_OWNER" to ProjectConfig.REPO_OWNER,
         "REPO_NAME" to ProjectConfig.REPO_NAME,
         "PROJECT_SITE" to ProjectConfig.PROJECT_SITE,
-
-        "AGP_VERSION_MININUM" to AGP_VERSION_MINIMUM,
-        "AGP_VERSION_LATEST" to libs.versions.agp.tooling.get(),
-        "AGP_VERSION_GRADLE_LATEST" to SdkConstants.GRADLE_LATEST_VERSION,
 
         "SNAPSHOTS_REPOSITORY" to VersionUtils.SONATYPE_SNAPSHOTS_REPO,
         "PUBLIC_REPOSITORY" to VersionUtils.SONATYPE_PUBLIC_REPO,

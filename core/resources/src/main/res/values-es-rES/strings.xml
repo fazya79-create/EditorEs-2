@@ -6,9 +6,6 @@
   <string name="text_to_search">Text to search</string>
   <string name="about_option_email">Correo</string>
   <string name="about_option_website">Web</string>
-  <string name="about_footer">Android IDE %1$s para %2$s</string>
-  <string name="about_subtitle">Simplemente un IDE para Android</string>
-  <string name="msg_get_package_failed">¡Error al extraer el nombre del paquete!</string>
   <string name="msg_need_help">Si estás enfrentando problemas durante el uso de Android IDE o con la creación de aplicaciones Android, puedes unirte al grupo en Telegram para pedir ayuda.\n\nTambién puedes enviar sugerencias a nuestro correo electrónico.</string>
   <string name="need_help">¿Necesitas Ayuda?</string>
   <string name="ide_preferences">Configuración</string>
@@ -17,7 +14,6 @@
   <string name="msg_empty_view">No data</string>
   <string name="title_terminal">Terminal</string>
   <string name="reset">Reiniciar</string>
-  <string name="app_logs">Registros de la app</string>
   <string name="ide_logs">Registros del IDE</string>
   <!-- LSP, Diagnostics & Completions -->
   <string name="get_started">Comenzar</string>
@@ -32,7 +28,6 @@
   <!-- Build Tools Installation -->
   <string name="msg_no_references">No se encontraron referencias</string>
   <string name="view_diags">Diagnósticos</string>
-  <string name="title_installation_failed">Instalación fallida</string>
   <string name="msg_picked_isnt_dir">¡El archivo elegido no es un directorio!</string>
   <string name="please_wait">Por favor, espere un momento…</string>
   <!-- Project Builder -->
@@ -40,9 +35,6 @@
   <string name="msg_unsupported_device">You are using %1$s variant of AndroidIDE on a %2$s-only device. This configuration is not supported. Please install the %2$s variant of AndroidIDE.</string>
   <string name="title_clear_output">Limpiar salida</string>
   <string name="build_output">Salida de Compilación</string>
-  <string name="quick_run_debug">Ejecutar rápidamente</string>
-  <string name="preparing">Preparando...</string>
-  <string name="preparing_first">Preparando. ¡La primera construcción puede tardar hasta 10–15 minutos!</string>
   <string name="run">Run</string>
   <!-- Project -->
   <string name="title_first_build">Primera compilación</string>
@@ -75,7 +67,6 @@
   <string name="menu_find_file">Buscar en archivos</string>
   <string name="menu_find_project">Buscar en el proyecto</string>
   <string name="msg_search_modules">Buscar en el módulo</string>
-  <string name="msg_no_modules">Módulos no encontrados en proyecto</string>
   <string name="hint_find_project_filter">Filtrar extensiones de archivo (opcional)</string>
   <string name="msg_find_project_filter">Separar por \'|\'</string>
   <string name="msg_empty_search_query">Introducir texto</string>
@@ -115,13 +106,7 @@
   <string name="all_saved">¡Todos los archivos guardados!</string>
   <string name="save_failed">Error al guardar los archivos</string>
   <string name="msg_newfile_dest">Destino: %s/</string>
-  <string name="restype_drawable">Dibujables</string>
-  <string name="restype_menu">Menú</string>
-  <string name="restype_other">Otro</string>
-  <string name="classtype_class">Clase</string>
-  <string name="classtype_activity">Actividad</string>
   <string name="title_interface">Interfaz</string>
-  <string name="classtype_enum">Enumerar</string>
   <string name="msg_failed_list_files">¡Error al enumerar los archivos del proyecto!</string>
   <!-- Code Editor -->
   <string name="open_with">Abrir con...</string>
@@ -158,7 +143,6 @@
   <string name="msg_editor_font_size">Por favor, elija el tamaño de fuente predeterminado del editor:</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
-  <string name="title_viewaction_delete">Borrar</string>
   <string name="msg_yesno_def_title">Por favor, confirme</string>
   <string name="msg_yesno_def_message">¿Estás seguro?</string>
   <string name="msg_swipe_up">Desliza hacia arriba para construir salida, registros y más.</string>
@@ -166,7 +150,6 @@
   <string name="msg_report_crash">Por favor, abra un problema en github con el siguiente seguimiento:</string>
   <string name="msg_crash_report_hint">Haga clic en el botón de abajo para copiar registro y abrir la página de incidencias.</string>
   <string name="msg_copy_report_action">Copiar y reportar</string>
-  <string name="title_translations">Traducciones</string>
   <string name="action_expand_selection">Expandir selección</string>
   <string name="idepref_java_matchLower_title">Finalizaciones en minúsculas</string>
   <string name="title_common">General</string>
@@ -188,14 +171,7 @@
   <string name="idepref_visiblePassword_title">Marcador de contraseña visible</string>
   <string name="idepref_visiblePassword_summary">Usar para el marcador de tipo de entrada de contraseña visible en el editor. Esto asegura que no hay sugerencias propuestas por el teclado.</string>
   <string name="previous">Anterior</string>
-  <string name="title_gradle_service_notification">Gradle build service</string>
-  <string name="title_cancel_build">Cancelar compilación</string>
-  <string name="msg_initializing_project">Inicializando proyecto</string>
-  <string name="msg_project_initialized">Proyecto inicializado</string>
-  <string name="msg_project_initialization_failed">Error de inicialización del proyecto</string>
-  <string name="msg_project_not_initialized">Proyecto no está inicializado</string>
   <string name="msg_replacement">Reemplazo</string>
-  <string name="title_sync_project">Sincronizar proyecto</string>
   <string name="wizard_save_location">Guardar localización</string>
   <string name="wizard_language">Lenguaje del proyecto</string>
   <string name="next">Siguiente</string>
@@ -204,10 +180,6 @@
   <string name="idepref_msg_customGradleInstallation">Especifique una instalación personalizada de Gradle a usar para compilar. Esta versión SÓLO se especifica en gradle-wrapper.properties.</string>
   <string name="msg_gradle_installation_path">Ruta de instalación de Gradle</string>
   <string name="msg_gradle_installation_input_help">Dejar en blanco para usar Gradle wrapper.</string>
-  <string name="build_status_idle">No hay compilaciones en progreso</string>
-  <string name="build_status_in_progress">Compilación en curso...</string>
-  <string name="build_status_failed">Error de compilación. Vea la salida de compilación para más detalles.</string>
-  <string name="build_status_sucess">Compilación satisfactoria</string>
   <string name="msg_output_text_extraction_failed">Error al obtener texto del editor</string>
   <string name="err_invalid_data_by_intent">Intent devuelto datos no válidos</string>
   <string name="msg_select_from_primary_storage">Seleccione un directorio del almacenamiento principal</string>
@@ -227,9 +199,6 @@
   <string name="idepref_buildnrun_summary">Configurar la compilación de Gradle.</string>
   <string name="configure">Configurar</string>
   <string name="about">Acerca de</string>
-  <string name="idepref_github_summary">¡AndroidIDE es de código abierto!</string>
-  <string name="idepref_channel_summary">Suscríbete para las últimas actualizaciones.</string>
-  <string name="idepref_group_summary">Discuta las funcionalidades, bugs y mejoras aquí.</string>
   <string name="idepref_changelog_summary">¿Qué hay de nuevo?</string>
   <string name="idepref_about_summary">Más sobre AndroidIDE.</string>
   <string name="idepref_general_summary">Configuración general</string>
@@ -269,13 +238,7 @@
   <string name="idepref_customFont_title">Añadir fuente personalizada</string>
   <string name="idepref_customFont_summary">Si está habilitado, el archivo en\"/data/data/com.itsaky.androidide/files/home/.androidide/ui/font.ttf\" se utilizará como fuente del editor.</string>
   <string name="msg_installing_apk">Instalando APK...</string>
-  <string name="msg_action_open_application">¿Quieres abrir la aplicación?</string>
   <string name="title_gradle_service_notification_channel">Servicio de compilación de Gradle de AndroidIDE</string>
-  <string name="msg_hex_color_code">Código de color HEX</string>
-  <string name="msg_color_picker_pick">Elegir</string>
-  <string name="msg_chmod_exec">Configurando permisos ejecutables…</string>
-  <string name="msg_linking">Vinculando %1$s a %2$s</string>
-  <string name="msg_extracting_hooks">Extrayendo hook libraries...</string>
   <string name="msg_empty_package">El nombre del paquete está vacío</string>
   <string name="msg_package_is_not_valid">Nombre del paquete no es válido</string>
   <string name="msg_package_is_to_long">El nombre del paquete es muy largo</string>
@@ -283,46 +246,8 @@
   <string name="msg_package_not_use_digit_first">Un dígito no puede ser el primer carácter de un segmento de paquete</string>
   <string name="msg_package_not_valid_char_2">El carácter\"%1$s\" no está permitido en los nombres de paquetes de aplicaciones Android</string>
   <string name="msg_package_mus_have_dot">El paquete debe tener al menos un separador \'.\'</string>
-  <string name="action_import_classes">Importar class(es)</string>
-  <string name="action_generate_setters_getters">Generar setters/getters</string>
-  <string name="action_add_throws">Añadir \'throws\'</string>
-  <string name="action_comment_line">Comentar línea</string>
-  <string name="action_create_missing_method">Crear método faltante</string>
-  <string name="action_convert_to_block">Convertir en bloque</string>
-  <string name="action_generate_constructor">Generar constructor</string>
-  <string name="action_implement_abstract_methods">Implementar método(s) abstracto(s)</string>
-  <string name="action_remove_class">Quitar clase</string>
-  <string name="action_remove_method">Eliminar método</string>
-  <string name="action_remove_unused_throws">Eliminar throws sin usar</string>
-  <string name="action_suppress_unchecked_warning">Suprimir advertencia \'sin marcar\'</string>
-  <string name="action_uncomment_line">Des comentar línea</string>
-  <string name="action_convert_to_statement">Convert to statement</string>
-  <string name="msg_select_fields">Seleccionar campos</string>
-  <string name="msg_no_fields_selected">Ningún fichero seleccionado</string>
-  <string name="msg_no_fields_found">No se encontraron campos</string>
-  <string name="action_override_superclass_methods">Anular métodos de superclase</string>
-  <string name="msg_no_methods_selected">Ningún método seleccionado</string>
-  <string name="msg_cannot_override_methods">No se puede anular los métodos</string>
-  <string name="msg_cannot_generate_setters_getters">No se puede generar setters y getters</string>
-  <string name="msg_select_methods">Seleccionar métodos para anular</string>
-  <string name="msg_no_overridable_methods">No se puede encontrar ningún método anulable</string>
-  <string name="action_goto_definition">Ir a la definición</string>
-  <string name="action_find_references">Buscar referencias</string>
-  <string name="action_generate_toString">Generar toString()</string>
-  <string name="action_remove_unused_imports">Quitar imports no utilizadas</string>
-  <string name="action_organize_imports">Organizar imports</string>
-  <string name="msg_cannot_generate_toString">No se puede generar la implementación toString()</string>
-  <string name="msg_toString_overridden">toString() ya está sobreescrito</string>
-  <string name="action_generate_missing_constructor">Generar constructor faltante</string>
-  <string name="msg_cannot_generate_constructor">No se pudo generar el constructor</string>
-  <string name="msg_constructor_available">Un constructor con los mismos tipos de parámetros ya está disponible</string>
   <string name="replace">Reemplazar</string>
   <string name="replaceAll">Reemplaza todo</string>
-  <string name="hint_search_tasks">Buscar tareas…</string>
-  <string name="msg_err_select_tasks">Por favor, seleccione tareas a ejecutar</string>
-  <string name="title_confirmation">Confirmación</string>
-  <string name="msg_tasks_to_run">Las siguientes tareas se ejecutarán, en orden. Haga clic en el botón \'Ejecutar\' otra vez para confirmar.\n\n%1$s</string>
-  <string name="msg_loading_tasks">Cargando tareas...</string>
   <!-- GIT -->
   <string name="git_clone">Clonar</string>
   <string name="git_clone_repo">Clonar repositorio git</string>
@@ -330,7 +255,6 @@
   <string name="git_clone_in_progress">Clonando repositorio</string>
   <string name="git_clone_success">Clon de Git exitoso</string>
   <string name="git_clone_failed">Error al clonar el repositorio git</string>
-  <string name="msg_select_attr">Seleccione un atributo de la lista de abajo</string>
   <string name="idepref_editor_colorScheme">Paleta de colores</string>
   <string name="idepref_editor_colorScheme_summary">Elegir esquema de colores a usar en el editor</string>
   <string name="idepref_general_uiMode">UI</string>
@@ -351,54 +275,24 @@
   <string name="idepref_deleteEmptyLines_summary">Whether the editor should delete empty lines on a single backspace key event.</string>
   <string name="idepref_deleteTabs_title">Delete tab on backspace</string>
   <string name="idepref_deleteTabs_summary">When enabled, the editor will delete spaces equal to the tab width when the backspace key is pressed.</string>
-  <string name="btn_sync">Sync</string>
-  <string name="btn_ignore_changes">Ignore these changes</string>
-  <string name="title_fix_imports">Fix imports</string>
-  <string name="msg_no_unresolved_classes">No unresolved class names found</string>
-  <string name="title_class_chooser">Which %1$s?</string>
-  <string name="permlab_bind_logger_service">bind to log service</string>
-  <string name="permdesc_bind_logger_service">Allows this application to bind to AndroidIDE\'s logging service. This permission is required for AndroidIDE to read logs of this application.</string>
   <string name="wizard_module_name">Module name</string>
   <string name="wizard_module_type">Module type</string>
   <string name="msg_invalid_module_name">Invalid Gradle module name</string>
   <string name="msg_value_empty">Value is empty</string>
   <string name="msg_file_not_exist">File does not exist</string>
   <string name="msg_path_must_be_file">Must be path to a file</string>
-  <string name="msg_classname_with_keywords">Class name contains keywords</string>
   <string name="msg_path_must_be_dir">Must be path to a directory</string>
   <string name="msg_invalid_project_details">Invalid project details</string>
   <string name="msg_use_kts">Use Kotlin Script (.kts) for Gradle build files</string>
-  <string name="title_privacy">Privacy</string>
-  <string name="title_androidide_statistics">AndroidIDE Statistics</string>
-  <string name="msg_androidide_statistics">Help us improve AndroidIDE by providing anonymous statistics. We collect basic information about your device for user base statistics only. The exact data that is shared can be viewed in preferences. Your data is secure and not shared with third-party services. You can opt-out anytime in preferences.</string>
-  <string name="summary_anonymous_usage_stats">Anonymous usage stats</string>
-  <string name="idepref_stats_optIn_title">Stats collection</string>
-  <string name="idepref_stats_optIn_summary">Allow installation metrics and device statistics to be collected (fully anonymous).</string>
-  <string name="title_unique_id">Unique ID</string>
-  <string name="title_device">Device</string>
-  <string name="title_app_version">App version</string>
-  <string name="title_country">Country</string>
-  <string name="title_cpu_arch">CPU Arch</string>
-  <string name="title_preview_data">Preview data</string>
-  <string name="title_android_version">Versión de Android</string>
-  <string name="btn_opt_in">Opt-in</string>
   <string name="title_developer_options">Developer options</string>
   <string name="idepref_devOptions_summary">Experimental/debugging options for AndroidIDE</string>
   <string name="idepref_group_debugging">Debugging</string>
   <string name="idepref_devOptions_dumpLogs_title">Dump logs</string>
   <string name="idepref_devOptions_dumpLogs_summary">Dump AndroidIDE logs to $HOME/.androidide/logs</string>
   <string name="msg_emptyview_applogs">Run the debug variant of your application to view its logs here.</string>
-  <string name="msg_logsender_disabled">LogSender is disabled. You can enable it in preferences.</string>
   <string name="msg_emptyview_idelogs">Logs from the IDE are shown here.</string>
   <string name="msg_emptyview_diagnostics">Open a file to show its diagnostic results</string>
   <string name="msg_emptyview_buildoutput">"Build the application or run a task to see its build output here. "</string>
-  <string name="msg_codeaction_failed">Failed to perform code action</string>
-  <string name="idepref_devOptions_enableLogsender_title">Enable LogSender</string>
-  <string name="idepref_devOptions_enableLogsender_summary">When disabled, logs from applications won\'t be shown in AndroidIDE</string>
-  <string name="title_apply">Apply</string>
-  <string name="title_discard">Discard</string>
-  <string name="title_choose_application">Choose application</string>
-  <string name="title_disconnect_log_senders">Disconnect log senders</string>
   <string name="title_begin_long_select">Begin long select</string>
   <string name="idepref_editor_stickScroll_title">Sticky scroll</string>
   <string name="idepref_editor_stickyScroll_summary">Show the current scope at the top while scrolling the editor.</string>
@@ -407,7 +301,6 @@
   <string name="title_run_options">Run options</string>
   <string name="err_cannot_determine_package">Cannot run application. Unable to determine package name.</string>
   <string name="msg_launch_failure_no_app_module">Cannot run application. No application modules found in project.</string>
-  <string name="title_launch_app">Launch app</string>
   <string name="title_experiment_flavor">Experimental</string>
   <string name="msg_experimental_flavor">You are using %1$s variant of AndroidIDE on a %2$s device. This configuration may work, but it\'ll result in reduced performance and possible security vulnerabilities. Please avoid using this configuration whenever possible.</string>
   <string name="idepref_editor_pinLineNumbers_title">Pin line numbers</string>
@@ -418,11 +311,7 @@
   <string name="idepref_general_localeSelector_title">Language</string>
   <string name="idepref_general_localeSelector_summary">Select a language for AndroidIDE.</string>
   <string name="locale_system_default">System Default</string>
-  <string name="msg_project_dir_inaccessible">Project directory is not accessible</string>
-  <string name="msg_file_is_not_dir">Selected file is not a directory</string>
-  <string name="msg_project_dir_doesnt_exist">Project directory does not exist</string>
   <string name="msg_files_being_saved">A file save operation is already in progress!</string>
-  <string name="msg_install_tools">The development tools must be installed for the IDE to work. Clicking the done button will open terminal to install the tools. To install, follow the instructions <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">here</a>.<br/><br/>Or read the <a href="https://docs.androidide.com/">documentation</a>]]>.</string>
   <string name="greeting_title">Welcome</string>
   <string name="greeting_subtitle">Learn, build, launch. All on your Android.</string>
   <string name="title_grant">Grant</string>
@@ -432,28 +321,14 @@
   <string name="onboarding_subtitle_permissions">AndroidIDE requires the following permissions</string>
   <string name="msg_grant_permissions">Please grant the permissions to continue.</string>
   <string name="msg_no_internet">It seems you\'re offline. Check your internet connection.</string>
-  <string name="msg_connected_to_cellular">Heads up! You\'re using cellular data.</string>
-  <string name="msg_connected_to_metered_connection">Heads up! You\'re on a metered network.</string>
-  <string name="msg_disable_background_data_restriction">Disable background data restriction to avoid installation failures.</string>
-  <string name="msg_cannot_create_terminal_session">Unable to create terminal session</string>
-  <string name="action_auto_install">Automatic installation</string>
-  <string name="action_manual_install">Manual installation</string>
-  <string name="action_install_git">Install Git</string>
-  <string name="action_install_openssh">Install OpenSSH</string>
   <string name="msg_terminal_new_sessions_disabled">Cannot create session. New sessions are disabled!</string>
   <string name="title_install_location_error">Install location error</string>
   <string name="title_unsupported_user">Unsupported user</string>
   <string name="title_socials">Socials</string>
-  <string name="title_contributors">Contributors</string>
-  <string name="summary_contributors">Top community contributors.</string>
-  <string name="title_github_contributors">GitHub Contributors</string>
-  <string name="title_crowdin_translators">Crowdin Translators</string>
   <string name="title_misc">Misc</string>
   <string name="title_contribute">Contribute</string>
   <string name="summary_contribute">It\'s not just an IDE, it\'s a community. Contribute code, ideas, and passion to AndroidIDE.</string>
   <string name="msg_app_unavailable_for_intent">No application available to handle intent.</string>
-  <string name="title_open_source_licenses">Open source licenses</string>
-  <string name="summary_open_source_licenses">View open source licenses.</string>
   <string name="idepref_jdkVersion_title">JDK version</string>
   <string name="idepref_jdkVersion_summary">Currently selected: %1$s (requires restart if changed)</string>
 </resources>

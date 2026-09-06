@@ -6,9 +6,6 @@
   <string name="text_to_search">खोजने के लिए पाठ</string>
   <string name="about_option_email">ईमेल</string>
   <string name="about_option_website">वेबसाइट</string>
-  <string name="about_footer">%2$s के लिए AndroidIDE %1$s</string>
-  <string name="about_subtitle">बस, एक आईडीई एंड्रॉयड के लिए</string>
-  <string name="msg_get_package_failed">पैकेज का नाम निकालने में विफल रहे !</string>
   <string name="msg_need_help">यदि आपको AndroidIDE का उपयोग करते समय या Android ऐप्स बनाते समय समस्याओं का सामना करना पड़ रहा है, तो आप टेलीग्राम समूह में शामिल हो सकते हैं और वहां सहायता मांग सकते हैं।\n\nआप हमारे ईमेल पर भी सुझाव भेज सकते हैं।</string>
   <string name="need_help">मदद की ज़रूरत है?</string>
   <string name="ide_preferences">IDE प्रेफरेंसेस</string>
@@ -17,7 +14,6 @@
   <string name="msg_empty_view">कोई डेटा नहीं</string>
   <string name="title_terminal">टर्मिनल</string>
   <string name="reset">रिसेट</string>
-  <string name="app_logs">एप लॉग्स</string>
   <string name="ide_logs">IDE लॉग्स</string>
   <!-- LSP, Diagnostics & Completions -->
   <string name="get_started">प्रारंभ करें</string>
@@ -32,7 +28,6 @@
   <!-- Build Tools Installation -->
   <string name="msg_no_references">कोई सन्दर्भ नहीं मिला</string>
   <string name="view_diags">विश्लेषण</string>
-  <string name="title_installation_failed">इंस्टॉल करने में विफल रहा</string>
   <string name="msg_picked_isnt_dir">चुनी गई फ़ाइल एक डायरेक्टरी नहीं है!</string>
   <string name="please_wait">कृपया कुछ क्षण प्रतीक्षा करें…</string>
   <!-- Project Builder -->
@@ -40,9 +35,6 @@
   <string name="msg_unsupported_device">आप %2$s डिवाइस पर AndroidIDE के %1$s संस्करण का उपयोग कर रहे हैं। यह कॉन्फ़िगरेशन समर्थित नहीं है. कृपया AndroidIDE का %2$s संस्करण इंस्टॉल करें।</string>
   <string name="title_clear_output">आउटपुट हटाएँ</string>
   <string name="build_output">बिल्ड आउटपुट</string>
-  <string name="quick_run_debug">क्विक रन</string>
-  <string name="preparing">तैयार कर रहे हैं</string>
-  <string name="preparing_first">तैयार कर रहे हैं। पहले निर्माण में 10–15 मिनट तक लग सकते हैं!</string>
   <string name="run">रन</string>
   <!-- Project -->
   <string name="title_first_build">पहला निर्माण</string>
@@ -75,7 +67,6 @@
   <string name="menu_find_file">फ़ाइल में खोजें</string>
   <string name="menu_find_project">प्रोजेक्ट में खोजें</string>
   <string name="msg_search_modules">मॉड्यूल्स में खोजें</string>
-  <string name="msg_no_modules">प्रोजेक्ट में कोई भी मॉड्यूल नहीं मिला</string>
   <string name="hint_find_project_filter">फ़ाइल एक्सटेंशन्स फ़िल्टर करें (वैकल्पिक)</string>
   <string name="msg_find_project_filter">\'|\' द्वारा अलग किया जा सकता है</string>
   <string name="msg_empty_search_query">कृपया टेक्स्ट दर्ज करें</string>
@@ -115,13 +106,7 @@
   <string name="all_saved">सभी फ़ाइलें सेव की गईं!</string>
   <string name="save_failed">फाइल सेव करने में विफल!</string>
   <string name="msg_newfile_dest">डेस्टिनेशन: %s/</string>
-  <string name="restype_drawable">ड्रावेबल</string>
-  <string name="restype_menu">मेन्यू</string>
-  <string name="restype_other">अन्य</string>
-  <string name="classtype_class">क्लास</string>
-  <string name="classtype_activity">एक्टिविटी</string>
   <string name="title_interface">इंटरफेस</string>
-  <string name="classtype_enum">इनम</string>
   <string name="msg_failed_list_files">प्रोजेक्ट फ़ाइलें लिस्ट करने में विफल! </string>
   <!-- Code Editor -->
   <string name="open_with">बाहरी ऐप के साथ खोलें</string>
@@ -158,7 +143,6 @@
   <string name="msg_editor_font_size">कृपया एडिटर का डिफ़ॉल्ट फ़ॉन्ट साइज चुनें :</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
-  <string name="title_viewaction_delete">डिलीट</string>
   <string name="msg_yesno_def_title">कृपया कन्फर्म करें</string>
   <string name="msg_yesno_def_message">कया आप श्योर हो?</string>
   <string name="msg_swipe_up">बिल्ड आउटपुट, लॉग आदि के लिए ऊपर की ओर स्वाइप करें।</string>
@@ -166,7 +150,6 @@
   <string name="msg_report_crash">कृपया निम्नलिखित स्टैकट्रेस के साथ गिटहब पर एक मुद्दा खोलें :</string>
   <string name="msg_crash_report_hint">लॉग कॉपी करने के लिए नीचे दिए गए बटन पर क्लिक करें और मुद्दों का पेज खोलें।</string>
   <string name="msg_copy_report_action">कॉपी करके रिपोर्ट करे</string>
-  <string name="title_translations">अनुवाद</string>
   <string name="action_expand_selection">चयन का विस्तार करें</string>
   <string name="idepref_java_matchLower_title">कम्पलेशन्स लोअर केस में मिलाये</string>
   <string name="title_common">सामान्य</string>
@@ -188,14 +171,7 @@
   <string name="idepref_visiblePassword_title">दृश्यमान पासवर्ड फ्लेग</string>
   <string name="idepref_visiblePassword_summary">एडिटर में दृश्यमान पासवर्ड इनपुट टाइप फ्लेग के लिए उपयोग करें। यह सुनिश्चित करता है कि सॉफ्ट कीबोर्ड द्वारा कोई सुझाव प्रस्तावित नहीं किया गया है।</string>
   <string name="previous">पहले का</string>
-  <string name="title_gradle_service_notification">ग्रेडल बिल्ड सर्विस</string>
-  <string name="title_cancel_build">बिल्ड रद्द करें</string>
-  <string name="msg_initializing_project">इनिटियलाइजिंग प्रोजेक्ट</string>
-  <string name="msg_project_initialized">प्रोजेक्ट इनिटियलाइज्ड</string>
-  <string name="msg_project_initialization_failed">प्रोजेक्ट इनिटियलाइजेशन विफल रहा</string>
-  <string name="msg_project_not_initialized">प्रोजेक्ट इनिटियालाइज नहीं हुई है</string>
   <string name="msg_replacement">रिप्लेसमेंट</string>
-  <string name="title_sync_project">सिंक प्रोजेक्ट</string>
   <string name="wizard_save_location">सेव लोकेशन</string>
   <string name="wizard_language">प्रोजेक्ट की भाषा</string>
   <string name="next">अगला</string>
@@ -204,10 +180,6 @@
   <string name="idepref_msg_customGradleInstallation">बिल्ड में उपयोग करने के लिए एक कस्टम ग्रेडल इंस्टॉलेशन निर्दिष्ट करें। यह gradle-wrapper.properties में निर्दिष्ट संस्करण को ओवरराइड करता है।</string>
   <string name="msg_gradle_installation_path">ग्रेडल इंस्टॉलेशन पथ</string>
   <string name="msg_gradle_installation_input_help">ग्रेडल रैपर का उपयोग करने के लिए खाली छोड़ दें।</string>
-  <string name="build_status_idle">कोई निर्माण प्रगति पर नहीं है</string>
-  <string name="build_status_in_progress">निर्माण चल रहा है…</string>
-  <string name="build_status_failed">निर्माण विफल रहा। अधिक विवरण के लिए बिल्ड आउटपुट देखें।</string>
-  <string name="build_status_sucess">निर्माण सफल हुआ</string>
   <string name="msg_output_text_extraction_failed">एडिटर से टेक्स्ट प्राप्त करने में विफल रहे</string>
   <string name="err_invalid_data_by_intent">इन्टेंट ने इंवालिड डेटा रिटर्न किया</string>
   <string name="msg_select_from_primary_storage">प्राइमरी स्टोरेज से एक डायरेक्टरी का चयन करें</string>
@@ -227,9 +199,6 @@
   <string name="idepref_buildnrun_summary">ग्रेडल बिल्ड को कॉन्फ़िगर करें।</string>
   <string name="configure">कॉन्फ़िगर</string>
   <string name="about">विवरण</string>
-  <string name="idepref_github_summary">AndroidIDE ओपन सोर्स है!</string>
-  <string name="idepref_channel_summary">नवीनतम अपडेट के लिए सदस्यता लें |</string>
-  <string name="idepref_group_summary">सुविधाओं, बगों और सुधारों पर यहां चर्चा करें।</string>
   <string name="idepref_changelog_summary">इस वर्शन में क्या नया है?</string>
   <string name="idepref_about_summary">AndroidIDE के बारे में अधिक |</string>
   <string name="idepref_general_summary">सामान्य IDE कॉन्फ़िगरेशन |</string>
@@ -269,13 +238,7 @@
   <string name="idepref_customFont_title">कस्टम फ़ॉन्ट का प्रयोग करें</string>
   <string name="idepref_customFont_summary">सक्षम होने पर, \"/data/data/com.itsaky.android/files/home/.androidide/ui/font.ttf\" पर मौजूद फ़ाइल का उपयोग एडिटर फ़ॉन्ट के रूप में किया जाएगा।</string>
   <string name="msg_installing_apk">APK इंस्टॉल हो रहा है...</string>
-  <string name="msg_action_open_application">क्या आप एप्लिकेशन खोलना चाहते हैं?</string>
   <string name="title_gradle_service_notification_channel">AndroidIDE ग्रेडल बिल्ड सर्विस</string>
-  <string name="msg_hex_color_code">हेक्स कलर कोड</string>
-  <string name="msg_color_picker_pick">चुने</string>
-  <string name="msg_chmod_exec">एक्सेक्यूटबले अनुमति सेट कर रहा है…</string>
-  <string name="msg_linking">%2$s %1$s से लिंक हो रहा है</string>
-  <string name="msg_extracting_hooks">hook लाइब्रेरीज एक्सट्रेक्ट हो रही है…</string>
   <string name="msg_empty_package">पैकेज का नाम खाली है</string>
   <string name="msg_package_is_not_valid">पैकेज का नाम मान्य नहीं है</string>
   <string name="msg_package_is_to_long">पैकेज का नाम लंबा है</string>
@@ -283,46 +246,8 @@
   <string name="msg_package_not_use_digit_first">एक अंक पैकेज सेगमेंट में पहला अक्षर नहीं हो सकता</string>
   <string name="msg_package_not_valid_char_2">Android एप्लिकेशन पैकेज नामों में वर्ण \"%1$s\" की अनुमति नहीं है</string>
   <string name="msg_package_mus_have_dot">पैकेज में कम से कम एक \'.\' सेपरेटर होना चाहिए</string>
-  <string name="action_import_classes">इंपोर्ट क्लास/क्लासेज</string>
-  <string name="action_generate_setters_getters">जेनरेट सेटर्स/गेटर्स</string>
-  <string name="action_add_throws">एड \'थ्रोज\'</string>
-  <string name="action_comment_line">कमेंट लाइन</string>
-  <string name="action_create_missing_method">मिसिंग मैथड बनाएं</string>
-  <string name="action_convert_to_block">ब्लॉक में कनवर्ट करें</string>
-  <string name="action_generate_constructor">कंस्ट्रक्टर बनाएं</string>
-  <string name="action_implement_abstract_methods">एब्सट्रेक्ट मैथड/मैथड्स इंप्लीमेंट करे</string>
-  <string name="action_remove_class">क्लास हटाएं</string>
-  <string name="action_remove_method">मैथड हटाएं</string>
-  <string name="action_remove_unused_throws">अप्रयुक्त थ्रोज हटाएं</string>
-  <string name="action_suppress_unchecked_warning">\'अनचेक्ड\' चेतावनी को दबाएं</string>
-  <string name="action_uncomment_line">अनकमेंट लाइन</string>
-  <string name="action_convert_to_statement">स्टेटमेंट में बदलें</string>
-  <string name="msg_select_fields">फ़ील्डस चुनें</string>
-  <string name="msg_no_fields_selected">कोई फ़ील्डस नहीं चुना गया</string>
-  <string name="msg_no_fields_found">कोई फ़ील्डस नहीं मिला</string>
-  <string name="action_override_superclass_methods">सुपरक्लास मैथड्स को ओवरराइड करें</string>
-  <string name="msg_no_methods_selected">कोई मैथड्स नहीं चुना गया</string>
-  <string name="msg_cannot_override_methods">मैथड्स को ओवरराइड करने में असमर्थ</string>
-  <string name="msg_cannot_generate_setters_getters">सेटर्स और गेटर्स जेनरेट करने में असमर्थ</string>
-  <string name="msg_select_methods">ओवरराइड करने के मैथड्स चुनें</string>
-  <string name="msg_no_overridable_methods">किसी भी ओवरीडेबल मैथड को खोजने में असमर्थ</string>
-  <string name="action_goto_definition">परिभाषा पर जाएं</string>
-  <string name="action_find_references">संदर्भ खोजें</string>
-  <string name="action_generate_toString">जेनरेट toString()</string>
-  <string name="action_remove_unused_imports">अनयूज्ड इंपोर्ट्स हटाएं</string>
-  <string name="action_organize_imports">इंपोर्ट्स व्यवस्थित करें</string>
-  <string name="msg_cannot_generate_toString">toString() इंप्लीमेंटेशन जेनरेट करने में असमर्थ</string>
-  <string name="msg_toString_overridden">toString() पहले से ही ओवरराइड है</string>
-  <string name="action_generate_missing_constructor">मिसिंग कंस्ट्रक्टर जेनरेट करें</string>
-  <string name="msg_cannot_generate_constructor">कंस्ट्रक्टर जेनरेट करने में असमर्थ</string>
-  <string name="msg_constructor_available">एक समान पैरामीटर टाइप्स वाला कंस्ट्रक्टर पहले से ही उपलब्ध है</string>
   <string name="replace">बदलें</string>
   <string name="replaceAll">सभी बदलें</string>
-  <string name="hint_search_tasks">टास्कस खोजें</string>
-  <string name="msg_err_select_tasks">कृपया चलाने के लिए टास्कस का चयन करें</string>
-  <string name="title_confirmation">पुष्टीकरण</string>
-  <string name="msg_tasks_to_run">क्रमानुसार निम्न कार्य चलाये जायेंगे। पुष्टि करने के लिए \'चलाएं\' बटन पर फिर से क्लिक करें.\n\n%1$s</string>
-  <string name="msg_loading_tasks">टास्क लोड हो रहे हैं...</string>
   <!-- GIT -->
   <string name="git_clone">क्लोन</string>
   <string name="git_clone_repo">Git रिपॉजिटरी क्लोन करें</string>
@@ -330,7 +255,6 @@
   <string name="git_clone_in_progress">रिपॉजिटरी क्लोन हो रही है</string>
   <string name="git_clone_success">Git क्लोन सफल हुआ</string>
   <string name="git_clone_failed">Git रिपॉजिटरी क्लोन करने में विफल</string>
-  <string name="msg_select_attr">नीचे दी गई सूची से एक एट्रिब्यूट का चयन करें</string>
   <string name="idepref_editor_colorScheme">कलर स्कीम</string>
   <string name="idepref_editor_colorScheme_summary">एडिटर में उपयोग करने के लिए कलर स्कीम चुनें</string>
   <string name="idepref_general_uiMode">UI मोड</string>
@@ -351,54 +275,24 @@
   <string name="idepref_deleteEmptyLines_summary">क्या एडिटर को एकल बैकस्पेस कुंजी ईवेंट पर खाली पंक्तियाँ हटानी चाहिए।</string>
   <string name="idepref_deleteTabs_title">बैकस्पेस पर टैब हटाएं</string>
   <string name="idepref_deleteTabs_summary">सक्षम होने पर, एडिटर बैकस्पेस कुंजी दबाने पर टैब की चौड़ाई के बराबर रिक्त स्थान हटा देगा।</string>
-  <string name="btn_sync">सिंक करे</string>
-  <string name="btn_ignore_changes">इन परिवर्तनों पर ध्यान न दें</string>
-  <string name="title_fix_imports">इम्पोर्ट ठीक करें</string>
-  <string name="msg_no_unresolved_classes">कोई अनसुलझा क्लास का नाम नहीं मिला</string>
-  <string name="title_class_chooser">कौन सा %1$s?</string>
-  <string name="permlab_bind_logger_service">लॉग सेवा से आबद्ध करें</string>
-  <string name="permdesc_bind_logger_service">इस एप्लिकेशन को AndroidIDE की लॉगिंग सेवा से जुड़ने की अनुमति देता है। इस एप्लिकेशन के लॉग पढ़ने के लिए AndroidIDE के लिए यह अनुमति आवश्यक है।</string>
   <string name="wizard_module_name">मॉड्यूल का नाम</string>
   <string name="wizard_module_type">मॉड्यूल प्रकार</string>
   <string name="msg_invalid_module_name">ग्रैडल मॉड्यूल का नाम अमान्य है</string>
   <string name="msg_value_empty">मान रिक्त है</string>
   <string name="msg_file_not_exist">फ़ाइल मौजूद नहीं है</string>
   <string name="msg_path_must_be_file">किसी फ़ाइल का पथ होना चाहिए</string>
-  <string name="msg_classname_with_keywords">क्लास के नाम में कीवर्ड शामिल हैं</string>
   <string name="msg_path_must_be_dir">किसी डायरेक्टरी का पथ होना चाहिए</string>
   <string name="msg_invalid_project_details">प्रोजेक्ट विवरण अमान्य है</string>
   <string name="msg_use_kts">ग्रैडल बिल्ड फ़ाइलों के लिए कोटलिन स्क्रिप्ट (.kts) का उपयोग करें</string>
-  <string name="title_privacy">गोपनीयता नीति</string>
-  <string name="title_androidide_statistics">AndroidIDE सांख्यिकी</string>
-  <string name="msg_androidide_statistics">अनाम आँकड़े प्रदान करके AndroidIDE को बेहतर बनाने में हमारी सहायता करें। हम केवल उपयोगकर्ता आधार आंकड़ों के लिए आपके डिवाइस के बारे में बुनियादी जानकारी एकत्र करते हैं। साझा किया गया सटीक डेटा प्राथमिकताओं में देखा जा सकता है। आपका डेटा सुरक्षित है और तृतीय-पक्ष सेवाओं के साथ साझा नहीं किया जाता है। आप प्राथमिकताओं में किसी भी समय ऑप्ट-आउट कर सकते हैं।</string>
-  <string name="summary_anonymous_usage_stats">अनाम उपयोग आँकड़े</string>
-  <string name="idepref_stats_optIn_title">आँकड़े संग्रह</string>
-  <string name="idepref_stats_optIn_summary">इंस्टॉलेशन मेट्रिक्स और डिवाइस आँकड़े एकत्र करने की अनुमति दें (पूरी तरह से गुमनाम)।</string>
-  <string name="title_unique_id">अनोखा ID</string>
-  <string name="title_device">उपकरण</string>
-  <string name="title_app_version">एप्लिकेशन वर्शन</string>
-  <string name="title_country">देश</string>
-  <string name="title_cpu_arch">सीपीयू आर्किटेक्चर</string>
-  <string name="title_preview_data">डेटा का पूर्वावलोकन</string>
-  <string name="title_android_version">Android वर्शन</string>
-  <string name="btn_opt_in">चयन करें</string>
   <string name="title_developer_options">डेवलपर विकल्प</string>
   <string name="idepref_devOptions_summary">AndroidIDE के लिए प्रायोगिक/डिबगिंग विकल्प</string>
   <string name="idepref_group_debugging">डिबगिंग</string>
   <string name="idepref_devOptions_dumpLogs_title">लॉग डंप करें</string>
   <string name="idepref_devOptions_dumpLogs_summary">AndroidIDE लॉग को $HOME/.androidide/logs डायरेक्टरी में डंप करें</string>
   <string name="msg_emptyview_applogs">अपने एप्लिकेशन के लॉग यहां देखने के लिए उसका डिबग संस्करण चलाएँ।</string>
-  <string name="msg_logsender_disabled">लॉगसेंडर अक्षम है. आप इसे प्रेफरेन्सेस में सक्षम कर सकते हैं.</string>
   <string name="msg_emptyview_idelogs">आईडीई के लॉग यहां दिखाए जाते हैं।</string>
   <string name="msg_emptyview_diagnostics">इसके निदान परिणाम दिखाने के लिए एक फ़ाइल खोलें</string>
   <string name="msg_emptyview_buildoutput">"यहां बिल्ड आउटपुट देखने के लिए एप्लिकेशन बनाएं या कोई कार्य चलाएं।"</string>
-  <string name="msg_codeaction_failed">कोड कार्रवाई करने में विफल</string>
-  <string name="idepref_devOptions_enableLogsender_title">LogSender सक्षम करें</string>
-  <string name="idepref_devOptions_enableLogsender_summary">अक्षम होने पर, एप्लिकेशन के लॉग AndroidIDE में नहीं दिखाए जाएंगे</string>
-  <string name="title_apply">लागू करें</string>
-  <string name="title_discard">रद्द करें</string>
-  <string name="title_choose_application">अप्लिकेशन को चुनें</string>
-  <string name="title_disconnect_log_senders">LogSender को डिस्कनेक्ट करें</string>
   <string name="title_begin_long_select">लंबा चयन प्रारंभ करें</string>
   <string name="idepref_editor_stickScroll_title">स्टिकी स्क्रॉल</string>
   <string name="idepref_editor_stickyScroll_summary">एडिटर को स्क्रॉल करते समय शीर्ष पर वर्तमान स्कोप दिखाएं।</string>
@@ -407,7 +301,6 @@
   <string name="title_run_options">रन विकल्प</string>
   <string name="err_cannot_determine_package">ऐप नहीं चला सकते. पैकेज का नाम निर्धारित करने में असमर्थ.</string>
   <string name="msg_launch_failure_no_app_module">एप्लिकेशन नहीं चला सकते. प्रोजेक्ट में कोई एप्लिकेशन मॉड्यूल नहीं मिला.</string>
-  <string name="title_launch_app">ऐप को लांच करें</string>
   <string name="title_experiment_flavor">प्रयोगात्मक</string>
   <string name="msg_experimental_flavor">आप %2$s डिवाइस पर AndroidIDE के %1$s संस्करण का उपयोग कर रहे हैं। यह कॉन्फ़िगरेशन काम कर सकता है, लेकिन इसके परिणामस्वरूप प्रदर्शन में कमी आएगी और संभावित सुरक्षा कमजोरियाँ होंगी। कृपया जब भी संभव हो इस कॉन्फ़िगरेशन का उपयोग करने से बचें।</string>
   <string name="idepref_editor_pinLineNumbers_title">पिन लाइन नंबर</string>
@@ -418,11 +311,7 @@
   <string name="idepref_general_localeSelector_title">भाषा</string>
   <string name="idepref_general_localeSelector_summary">AndroidIDE के लिए एक भाषा चुनें.</string>
   <string name="locale_system_default">सिस्टम निर्धारित</string>
-  <string name="msg_project_dir_inaccessible">प्रोजेक्ट डायरेक्टरी पहुंच योग्य नहीं है</string>
-  <string name="msg_file_is_not_dir">चुनी गई फ़ाइल एक डायरेक्टरी नहीं है!</string>
-  <string name="msg_project_dir_doesnt_exist">प्रोजेक्ट डायरेक्टरी मौजूद नहीं है</string>
   <string name="msg_files_being_saved">फ़ाइल सहेजने का कार्य पहले से ही प्रगति पर है!</string>
-  <string name="msg_install_tools">आईडीई के काम करने के लिए विकास उपकरण इनस्टॉल होने चाहिए। डन बटन पर क्लिक करने से उपकरण इनस्टॉल करने के लिए टर्मिनल खुल जाएगा। इंस्टॉल करने के लिए, <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">इन</a > निर्देशों का पालन करें । <br/><br/>या <a href="https://docs.androidide.com/">दस्तावेज़ीकरण</a>]]> पढ़ें।</string>
   <string name="greeting_title">स्वागत है</string>
   <string name="greeting_subtitle">सीखें, निर्माण करें, लॉन्च करें। सभी आपके Android पर.</string>
   <string name="title_grant">अनुमति दें</string>
@@ -432,28 +321,14 @@
   <string name="onboarding_subtitle_permissions">AndroidIDE को निम्नलिखित अनुमतियों की आवश्यकता है</string>
   <string name="msg_grant_permissions">कृपया जारी रखने के लिए अनुमतियाँ प्रदान करें।</string>
   <string name="msg_no_internet">आप ऑफ़लाइन हैं। अपने इंटरनेट कनेक्शन की जांच करें।</string>
-  <string name="msg_connected_to_cellular">ध्यान दें! आप सेल्युलर डेटा का उपयोग कर रहे हैं.</string>
-  <string name="msg_connected_to_metered_connection">ध्यान दें! आप मीटर्ड नेटवर्क पर हैं.</string>
-  <string name="msg_disable_background_data_restriction">इंस्टालेशन विफलता से बचने के लिए बैकग्राउंड डेटा अक्षम करे।</string>
-  <string name="msg_cannot_create_terminal_session">टर्मिनल सेशन बनाने में असमर्थ</string>
-  <string name="action_auto_install">आटोमेटिक इंस्टालेशन</string>
-  <string name="action_manual_install">मैन्युअल इंस्टालेशन</string>
-  <string name="action_install_git">Git इनस्टॉल करें</string>
-  <string name="action_install_openssh">OpenSSH इनस्टॉल करें</string>
   <string name="msg_terminal_new_sessions_disabled">सेशन नहीं बनाया जा सकता. नए सेशन अक्षम हैं!</string>
   <string name="title_install_location_error">इनस्टॉल करने में विफल</string>
   <string name="title_unsupported_user">असमर्थित उपयोगकर्ता</string>
   <string name="title_socials">सामाजिक संपर्क</string>
-  <string name="title_contributors">योगदानकर्ता</string>
-  <string name="summary_contributors">शीर्ष समुदाय योगदानकर्ता.</string>
-  <string name="title_github_contributors">GitHub योगदानकर्ता</string>
-  <string name="title_crowdin_translators">Crowdin अनुवादक</string>
   <string name="title_misc">विविध लिंक</string>
   <string name="title_contribute">योगदान दें</string>
   <string name="summary_contribute">यह सिर्फ एक IDE नहीं है, यह एक समुदाय है। AndroidIDE में कोड, विचार और जुनून का योगदान करें।</string>
   <string name="msg_app_unavailable_for_intent">इंटेंट को संभालने के लिए कोई एप्लिकेशन उपलब्ध नहीं है।</string>
-  <string name="title_open_source_licenses">ओपन सोर्स लाइसेंस</string>
-  <string name="summary_open_source_licenses">ओपन सोर्स लाइसेंस देखें</string>
   <string name="idepref_jdkVersion_title">JDK version</string>
   <string name="idepref_jdkVersion_summary">Currently selected: %1$s (requires restart if changed)</string>
 </resources>

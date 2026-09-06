@@ -60,7 +60,6 @@ dependencies {
     
     implementation(libs.google.material)
 
-    implementation(projects.annotation.annotations)
     implementation(projects.core.actions)
     implementation(projects.core.common)
     implementation(projects.core.lspApi)

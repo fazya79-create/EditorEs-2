@@ -28,8 +28,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 import com.itsaky.androidide.app.BaseIDEActivity;
 import com.termux.R;
-import com.termux.app.activities.HelpActivity;
-import com.termux.app.api.file.FileReceiverActivity;
 import com.termux.app.terminal.TermuxActivityRootView;
 import com.termux.app.terminal.TermuxSessionsListViewController;
 import com.termux.app.terminal.TermuxTerminalSessionActivityClient;
@@ -173,7 +171,6 @@ public class TermuxActivity extends BaseIDEActivity implements ServiceConnection
     protected static final int CONTEXT_MENU_RESET_TERMINAL_ID = 3;
     protected static final int CONTEXT_MENU_KILL_PROCESS_ID = 4;
     protected static final int CONTEXT_MENU_TOGGLE_KEEP_SCREEN_ON = 6;
-    protected static final int CONTEXT_MENU_HELP_ID = 7;
     protected static final int CONTEXT_MENU_REPORT_ID = 9;
 
     protected static final String ARG_TERMINAL_TOOLBAR_TEXT_INPUT = "terminal_toolbar_text_input";
@@ -242,8 +239,6 @@ public class TermuxActivity extends BaseIDEActivity implements ServiceConnection
         setToggleKeyboardView();
 
         registerForContextMenu(mTerminalView);
-
-        FileReceiverActivity.updateFileReceiverActivityComponentsState(this);
 
         try {
             // Start the {@link TermuxService} and make it run regardless of who is bound to it
@@ -691,7 +686,6 @@ public class TermuxActivity extends BaseIDEActivity implements ServiceConnection
         menu.add(Menu.NONE, CONTEXT_MENU_RESET_TERMINAL_ID, Menu.NONE, R.string.action_reset_terminal);
         menu.add(Menu.NONE, CONTEXT_MENU_KILL_PROCESS_ID, Menu.NONE, getResources().getString(R.string.action_kill_process, getCurrentSession().getPid())).setEnabled(currentSession.isRunning());
         menu.add(Menu.NONE, CONTEXT_MENU_TOGGLE_KEEP_SCREEN_ON, Menu.NONE, R.string.action_toggle_keep_screen_on).setCheckable(true).setChecked(mPreferences.shouldKeepScreenOn());
-        menu.add(Menu.NONE, CONTEXT_MENU_HELP_ID, Menu.NONE, R.string.action_open_help);
         menu.add(Menu.NONE, CONTEXT_MENU_REPORT_ID, Menu.NONE, R.string.action_report_issue);
     }
 
@@ -727,9 +721,6 @@ public class TermuxActivity extends BaseIDEActivity implements ServiceConnection
                 return true;
             case CONTEXT_MENU_TOGGLE_KEEP_SCREEN_ON:
                 toggleKeepScreenOn();
-                return true;
-            case CONTEXT_MENU_HELP_ID:
-                ActivityUtils.startActivity(this, new Intent(this, HelpActivity.class));
                 return true;
             case CONTEXT_MENU_REPORT_ID:
                 mTermuxTerminalViewClient.reportIssueFromTranscript();
@@ -972,8 +963,6 @@ public class TermuxActivity extends BaseIDEActivity implements ServiceConnection
 
         setMargins();
         setTerminalToolbarHeight();
-
-        FileReceiverActivity.updateFileReceiverActivityComponentsState(this);
 
         if (mTermuxTerminalSessionActivityClient != null)
             mTermuxTerminalSessionActivityClient.onReloadActivityStyling();

@@ -51,7 +51,6 @@ import com.itsaky.androidide.adapters.EditorBottomSheetTabAdapter
 import com.itsaky.androidide.adapters.SearchListAdapter
 import com.itsaky.androidide.databinding.LayoutEditorBottomSheetBinding
 import com.itsaky.androidide.fragments.output.ShareableOutputFragment
-import com.itsaky.androidide.models.LogLine
 import com.itsaky.androidide.resources.R.string
 import com.itsaky.androidide.tasks.TaskExecutor.CallbackWithError
 import com.itsaky.androidide.tasks.TaskExecutor.executeAsync
@@ -267,10 +266,6 @@ constructor(
 
   fun setActionProgress(progress: Int) {
     binding.bottomAction.progress.setProgressCompat(progress, true)
-  }
-
-  fun appendApkLog(line: LogLine) {
-    pagerAdapter.logFragment?.appendLog(line)
   }
 
   fun appendBuildOut(str: String?) {

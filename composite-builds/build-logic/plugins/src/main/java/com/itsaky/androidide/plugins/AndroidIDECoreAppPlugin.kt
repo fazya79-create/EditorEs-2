@@ -25,6 +25,10 @@ import org.gradle.api.Project
  *
  * @author Akash Yadav
  */
+/**
+ * Marker plugin: AndroidModuleConf enables ABI splits and legacy jniLibs packaging only for the
+ * project that applies it.
+ */
 class AndroidIDECoreAppPlugin : Plugin<Project> {
   override fun apply(target: Project) {}
 }

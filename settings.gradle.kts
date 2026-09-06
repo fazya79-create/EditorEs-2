@@ -111,7 +111,6 @@ rootProject.name = "AndroidIDE"
 
 // keep this sorted alphabetically
 include(
-  ":annotation:annotations",
   ":annotation:processors",
   ":core:actions",
   ":core:app",
@@ -128,14 +127,11 @@ include(
   ":event:eventbus",
   ":event:eventbus-android",
   ":event:eventbus-events",
-  ":logging:idestats",
   ":logging:logger",
-  ":logging:logsender",
   ":termux:application",
   ":termux:emulator",
   ":termux:shared",
   ":termux:view",
-  ":testing:androidTest",
   ":testing:commonTest",
   ":testing:unitTest",
   ":utilities:build-info",

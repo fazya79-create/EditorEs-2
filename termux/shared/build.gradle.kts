@@ -15,25 +15,13 @@
  *   along with AndroidIDE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-import com.itsaky.androidide.build.config.BuildConfig
-
 plugins {
     id ("com.android.library")
     id("kotlin-android")
 }
 
-
-
 android {
     namespace = "com.termux.shared"
-    ndkVersion = BuildConfig.ndkVersion
-
-    externalNativeBuild {
-        ndkBuild {
-            path = file("src/main/cpp/Android.mk")
-        }
-    }
 }
 
 dependencies {
@@ -50,7 +38,6 @@ dependencies {
     // Do not increment version higher than 1.0.0-alpha09 since it will break ViewUtils and needs to be looked into
     // noinspection GradleDependency
     implementation(libs.common.io)
-    implementation(libs.common.termuxAmLib)
 
     implementation(projects.core.common)
     implementation(projects.core.resources)
@@ -59,5 +46,4 @@ dependencies {
     implementation(projects.utilities.preferences)
 
     testImplementation(projects.testing.unitTest)
-    testImplementation(projects.testing.androidTest)
 }

@@ -10,7 +10,6 @@
 # keep jgit whole: R8 crashes optimizing its bytecode
 -keep class org.eclipse.jgit.** { *; }
 
-
 # Services
 -keep @com.google.auto.service.AutoService class ** {
 }
@@ -32,23 +31,16 @@
     io.github.rosemoe.sora.widget.component.EditorCompletionAdapter adapter;
     int currentSelection;
 }
--keep class com.itsaky.androidide.projects.util.StringSearch {
-    packageName(java.nio.file.Path);
-}
 -keep class * implements org.antlr.v4.runtime.Lexer {
     <init>(...);
 }
 -keep class com.itsaky.androidide.editor.api.IEditor { *; }
 -keep class com.itsaky.androidide.utils.DialogUtils {  public <methods>; }
 
-# APK Metadata
-
 # Parcelable
 -keepclassmembers class * implements android.os.Parcelable {
   public static final android.os.Parcelable$Creator CREATOR;
 }
-
-# Used in preferences
 
 # Lots of native methods in tree-sitter
 # There are some fields as well that are accessed from native field
@@ -57,22 +49,6 @@
 }
 
 -keep class com.itsaky.androidide.treesitter.** { *; }
-
-# Retrofit 2
--dontwarn retrofit2.**
--keep class retrofit2.** { *; }
-
--keepclasseswithmembers class * {
-    @retrofit2.http.* <methods>;
-}
-
-# OkHttp3
--keep class okhttp3.** { *; }
--keep interface okhttp3.** { *; }
--dontwarn okhttp3.**
-
-# Stat uploader
--keep class com.itsaky.androidide.stats.** { *; }
 
 # Gson
 -keep class * extends com.google.gson.TypeAdapter
@@ -90,11 +66,6 @@
 
 ## Themes
 -keep enum com.itsaky.androidide.ui.themes.IDETheme {
-  *;
-}
-
-## Contributor models - deserialized with GSON
--keep class * implements com.itsaky.androidide.contributors.Contributor {
   *;
 }
 

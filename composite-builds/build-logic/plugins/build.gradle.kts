@@ -34,15 +34,12 @@ tasks.withType<KotlinCompile> {
 dependencies {
   implementation(projects.buildLogic.common)
   implementation(projects.buildLogic.desugaring)
-  implementation(projects.buildLogic.propertiesParser)
 
-  implementation("com.android.tools.build:gradle:${libs.versions.agp.asProvider().get()}")
+  implementation("com.android.tools.build:gradle:${libs.versions.agp.get()}")
   implementation(libs.maven.publish)
 
   implementation(libs.common.jkotlin)
   implementation(libs.common.antlr4)
-  implementation(libs.google.gson)
-  implementation(libs.google.java.format)
 }
 
 gradlePlugin {
@@ -54,10 +51,6 @@ gradlePlugin {
     create("com.itsaky.androidide.core-app") {
       id = "com.itsaky.androidide.core-app"
       implementationClass = "com.itsaky.androidide.plugins.AndroidIDECoreAppPlugin"
-    }
-    create("com.itsaky.androidide.build.propsparser") {
-      id = "com.itsaky.androidide.build.propsparser"
-      implementationClass = "com.itsaky.androidide.plugins.PropertiesParserPlugin"
     }
     create("com.itsaky.androidide.build.lexergenerator") {
       id = "com.itsaky.androidide.build.lexergenerator"

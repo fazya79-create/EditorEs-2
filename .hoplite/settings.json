@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "ports": {"preview": 3000, "additional": {}},
+  "scripts": {
+    "setup": {"enabled": true, "command": "bash .hoplite/setup.sh"},
+    "run": {"enabled": false, "command": null},
+    "archive": {"enabled": true, "command": null},
+    "check": {"enabled": true, "command": "ANDROID_HOME=/opt/android-sdk ./gradlew --no-daemon :core:app:assembleDebug -x lint"}
+  },
+  "mcpServers": []
+}

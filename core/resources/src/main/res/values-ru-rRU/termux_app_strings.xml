@@ -48,8 +48,6 @@
   <string name="action_kill_process">Завершить процесс (%d)</string>
   <string name="title_confirm_kill_process">Действительно завершить сессию?</string>
   <string name="action_toggle_keep_screen_on">Не отключать экран</string>
-  <string name="action_open_help">Помощь</string>
-  <string name="action_open_settings">Настройки</string>
   <string name="action_report_issue">Сообщить о проблеме</string>
   <string name="msg_generating_report">Генерация отчета</string>
   <string name="msg_add_termux_debug_info">Добавить отладочную информацию Termux в отчет?</string>
@@ -69,11 +67,8 @@
   <string name="termux_preferences_summary">Настройки терминала Termux.</string>
   <!-- Debugging Preferences -->
   <string name="termux_debugging_preferences_title">Отладка</string>
-  <string name="termux_debugging_preferences_summary">Настройки для отладки</string>
   <!-- Logging Category -->
-  <string name="termux_logging_header">Логирование</string>
   <!-- Log Level -->
-  <string name="termux_log_level_title">Уровень логирования</string>
   <!-- Terminal View Key Logging -->
   <string name="termux_terminal_view_key_logging_enabled_title">Логи виртуальных клавиш</string>
   <string name="termux_terminal_view_key_logging_enabled_off">В логи не будет добавляться информация о виртуальных клавишах терминала. (По умолчанию)</string>
@@ -83,8 +78,6 @@
   <string name="termux_crash_report_notifications_enabled_off">Отключить уведомления об отчетах об ошибках.</string>
   <string name="termux_crash_report_notifications_enabled_on">Показывать уведомления об отчетах об ошибках. (По умолчанию)</string>
   <!-- Terminal IO Preferences -->
-  <string name="termux_terminal_io_preferences_title">Настройки ввода</string>
-  <string name="termux_terminal_io_preferences_summary">Настройки ввода для терминала</string>
   <!-- Keyboard Category -->
   <string name="termux_keyboard_header">Клавиатура</string>
   <!-- Soft Keyboard -->
@@ -96,8 +89,6 @@
   <string name="termux_soft_keyboard_enabled_only_if_no_hardware_off">Soft keyboard will be enabled even if hardware keyboard is connected. (Default)</string>
   <string name="termux_soft_keyboard_enabled_only_if_no_hardware_on">Soft keyboard will be enabled only if no hardware keyboard is connected.</string>
   <!-- Terminal View Preferences -->
-  <string name="termux_terminal_view_preferences_title">Отображение</string>
-  <string name="termux_terminal_view_preferences_summary">Настройки отображения терминала</string>
   <!-- View Category -->
   <string name="termux_terminal_view_view_header">Отображение</string>
   <!-- Terminal View Margin Adjustment -->

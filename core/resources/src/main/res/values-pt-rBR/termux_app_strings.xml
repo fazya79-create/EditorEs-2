@@ -48,8 +48,6 @@
   <string name="action_kill_process">Matar processo (%d)</string>
   <string name="title_confirm_kill_process">Quer mesmo encerrar esta sessão?</string>
   <string name="action_toggle_keep_screen_on">Manter a tela ligada</string>
-  <string name="action_open_help">Ajuda</string>
-  <string name="action_open_settings">Configurações</string>
   <string name="action_report_issue">Reportar um Problema</string>
   <string name="msg_generating_report">Criando relatório</string>
   <string name="msg_add_termux_debug_info">Adicionar informações de depuração do Termux ao relatório?</string>
@@ -69,11 +67,8 @@
   <string name="termux_preferences_summary">Preferências para o terminal de Termux.</string>
   <!-- Debugging Preferences -->
   <string name="termux_debugging_preferences_title">Depuração</string>
-  <string name="termux_debugging_preferences_summary">Preferências para depuração</string>
   <!-- Logging Category -->
-  <string name="termux_logging_header">Conectando</string>
   <!-- Log Level -->
-  <string name="termux_log_level_title">Nível dos Logs</string>
   <!-- Terminal View Key Logging -->
   <string name="termux_terminal_view_key_logging_enabled_title">Registro de chave da visualização Terminal</string>
   <string name="termux_terminal_view_key_logging_enabled_off">Logs não terão entradas para as chaves de exibição do terminal. (Padrão)</string>
@@ -83,8 +78,6 @@
   <string name="termux_crash_report_notifications_enabled_off">Desativar notificações para relatórios de falhas.</string>
   <string name="termux_crash_report_notifications_enabled_on">Mostrar notificações para relatórios de falhas. (Padrão)</string>
   <!-- Terminal IO Preferences -->
-  <string name="termux_terminal_io_preferences_title">Terminal E/S</string>
-  <string name="termux_terminal_io_preferences_summary">Preferências para E/S do terminal</string>
   <!-- Keyboard Category -->
   <string name="termux_keyboard_header">Teclado</string>
   <!-- Soft Keyboard -->
@@ -96,8 +89,6 @@
   <string name="termux_soft_keyboard_enabled_only_if_no_hardware_off">Soft keyboard will be enabled even if hardware keyboard is connected. (Default)</string>
   <string name="termux_soft_keyboard_enabled_only_if_no_hardware_on">Soft keyboard will be enabled only if no hardware keyboard is connected.</string>
   <!-- Terminal View Preferences -->
-  <string name="termux_terminal_view_preferences_title">Visualização do Terminal</string>
-  <string name="termux_terminal_view_preferences_summary">Preferências para a exibição do terminal</string>
   <!-- View Category -->
   <string name="termux_terminal_view_view_header">Visualização</string>
   <!-- Terminal View Margin Adjustment -->

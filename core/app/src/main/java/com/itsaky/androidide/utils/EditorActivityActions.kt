@@ -27,7 +27,6 @@ import com.itsaky.androidide.actions.editor.ExpandSelectionAction
 import com.itsaky.androidide.actions.editor.LongSelectAction
 import com.itsaky.androidide.actions.editor.PasteAction
 import com.itsaky.androidide.actions.editor.SelectAllAction
-import com.itsaky.androidide.actions.etc.DisconnectLogSendersAction
 import com.itsaky.androidide.actions.etc.FindActionMenu
 import com.itsaky.androidide.actions.etc.ReloadColorSchemesAction
 import com.itsaky.androidide.actions.build.CmakeBuildAction
@@ -67,7 +66,6 @@ class EditorActivityActions {
       registry.registerAction(CmakeBuildAction(context, order++))
       registry.registerAction(FindActionMenu(context, order++))
       registry.registerAction(ReloadColorSchemesAction(context, order++))
-      registry.registerAction(DisconnectLogSendersAction(context, order++))
 
       // editor text actions
       registry.registerAction(ExpandSelectionAction(context, order++))

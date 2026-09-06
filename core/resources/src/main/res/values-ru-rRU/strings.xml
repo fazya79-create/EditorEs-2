@@ -6,9 +6,6 @@
   <string name="text_to_search">Текст для поиска</string>
   <string name="about_option_email">Электронная почта</string>
   <string name="about_option_website">Вебсайт</string>
-  <string name="about_footer">AndroidIDE %1$s для %2$s</string>
-  <string name="about_subtitle">Просто IDE для Android</string>
-  <string name="msg_get_package_failed">Ошибка распаковки имени пакета!</string>
   <string name="msg_need_help">Если вы столкнулись с какими-либо проблемами при использовании AndroidIDE или при сборке Android приложений, вы можете присоединиться к нашей группе в Telegram и попросить о помощи там.\n\nВы также можете присылать нам свои пожелания и предложения на наш электронный адрес.</string>
   <string name="need_help">Нужна помощь?</string>
   <string name="ide_preferences">Настройки IDE</string>
@@ -17,7 +14,6 @@
   <string name="msg_empty_view">Нет данных</string>
   <string name="title_terminal">Терминал</string>
   <string name="reset">Сброс</string>
-  <string name="app_logs">Логи приложения</string>
   <string name="ide_logs">Логи IDE</string>
   <!-- LSP, Diagnostics & Completions -->
   <string name="get_started">Давайте начнём!</string>
@@ -32,7 +28,6 @@
   <!-- Build Tools Installation -->
   <string name="msg_no_references">Ссылок не найдено</string>
   <string name="view_diags">Диагностика</string>
-  <string name="title_installation_failed">Установка не удалась</string>
   <string name="msg_picked_isnt_dir">Выбранный файл не является директорией!</string>
   <string name="please_wait">Пожалуйста, подождите немного&#8230;</string>
   <!-- Project Builder -->
@@ -40,9 +35,6 @@
   <string name="msg_unsupported_device">Вы используете сборку AndroidIDE для архитектуры %1$s на устройстве, поддерживающем только приложения для %2$s. AndroidIDE не будет работать в такой конфигурации. Пожалуйста, установите сборку AndroidIDE для архитектуры %2$s.</string>
   <string name="title_clear_output">Очистить выходные файлы</string>
   <string name="build_output">Результат сборки</string>
-  <string name="quick_run_debug">Быстрая сборка</string>
-  <string name="preparing">Подготовка</string>
-  <string name="preparing_first">Выполняется подготовка. Первая сборка может занять 10–15 минут!</string>
   <string name="run">Запустить</string>
   <!-- Project -->
   <string name="title_first_build">Первая сборка</string>
@@ -75,7 +67,6 @@
   <string name="menu_find_file">Найти в файле</string>
   <string name="menu_find_project">Найти в проекте</string>
   <string name="msg_search_modules">Искать в модулях</string>
-  <string name="msg_no_modules">В проекте не найдено модулей</string>
   <string name="hint_find_project_filter">Фильтровать файлы по расширению (необязательно)</string>
   <string name="msg_find_project_filter">Разделять при помощи \'|\'</string>
   <string name="msg_empty_search_query">Пожалуйста, введите текст</string>
@@ -115,13 +106,7 @@
   <string name="all_saved">Все файлы сохранены!</string>
   <string name="save_failed">Не удалось сохранить файл</string>
   <string name="msg_newfile_dest">Место расположения: %s/</string>
-  <string name="restype_drawable">Рисунок</string>
-  <string name="restype_menu">Меню</string>
-  <string name="restype_other">Другое</string>
-  <string name="classtype_class">Класс</string>
-  <string name="classtype_activity">Активность</string>
   <string name="title_interface">Интерфейс</string>
-  <string name="classtype_enum">Перечисление (Enum)</string>
   <string name="msg_failed_list_files">Не удалось получить список проектов!</string>
   <!-- Code Editor -->
   <string name="open_with">Открыть с помощью...</string>
@@ -158,7 +143,6 @@
   <string name="msg_editor_font_size">Пожалуйста, выберите размер шрифта по умолчанию для редактора:</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
-  <string name="title_viewaction_delete">Удалить</string>
   <string name="msg_yesno_def_title">Пожалуйста, подтвердите</string>
   <string name="msg_yesno_def_message">Вы уверены?</string>
   <string name="msg_swipe_up">Провведите вверх, для просмотра сообщений сборки, логов и прочего.</string>
@@ -166,7 +150,6 @@
   <string name="msg_report_crash">Пожалуйста, создайте issue на нашем GitHub, прикрепив сообщение ниже:</string>
   <string name="msg_crash_report_hint">Нажмите на кнопку ниже, чтобы скопировать лог и открыть страницу создания issue.</string>
   <string name="msg_copy_report_action">Копировать и сообщить</string>
-  <string name="title_translations">Переводчики</string>
   <string name="action_expand_selection">Расширить выделение</string>
   <string name="idepref_java_matchLower_title">Искать совпадения в строчном регистре</string>
   <string name="title_common">Общее</string>
@@ -188,14 +171,7 @@
   <string name="idepref_visiblePassword_title">Флаг видимого пароля</string>
   <string name="idepref_visiblePassword_summary">Используйте флаг видимого типа ввода пароля в редакторе. Это гарантирует, что программная клавиатура не предложит никаких предложений.</string>
   <string name="previous">Назад</string>
-  <string name="title_gradle_service_notification">Служба сборки Gradle</string>
-  <string name="title_cancel_build">Отменить сборку</string>
-  <string name="msg_initializing_project">Инициализация проекта</string>
-  <string name="msg_project_initialized">Проект инициализирован</string>
-  <string name="msg_project_initialization_failed">Сбой инициализации проекта</string>
-  <string name="msg_project_not_initialized">Проект не инициализирован</string>
   <string name="msg_replacement">Замена</string>
-  <string name="title_sync_project">Синхронизация проекта</string>
   <string name="wizard_save_location">Место сохранения</string>
   <string name="wizard_language">Язык проекта</string>
   <string name="next">Далее</string>
@@ -204,10 +180,6 @@
   <string name="idepref_msg_customGradleInstallation">Укажите пользовательскую установку Gradle для использования при сборке. Это ПЕРЕОПРЕДЕЛЯЕТ версию, указанную в gradle-wrapper.properties.</string>
   <string name="msg_gradle_installation_path">Путь установки Gradle</string>
   <string name="msg_gradle_installation_input_help">Оставьте пустым, чтобы использовать Gradle wrapper.</string>
-  <string name="build_status_idle">Сборки не выполняются</string>
-  <string name="build_status_in_progress">Сборка в процессе&#8230;</string>
-  <string name="build_status_failed">Сборка завершилась неудачей. Дополнительные сведения см. в выводе сборки.</string>
-  <string name="build_status_sucess">Сборка прошла успешно</string>
   <string name="msg_output_text_extraction_failed">Не удалось получить текст из редактора</string>
   <string name="err_invalid_data_by_intent">Намерение вернуло недопустимые данные</string>
   <string name="msg_select_from_primary_storage">Выберите каталог из основного хранилища</string>
@@ -228,9 +200,6 @@
   <string name="idepref_buildnrun_summary">Настройте сборку Gradle.</string>
   <string name="configure">Настройки</string>
   <string name="about">О приложении</string>
-  <string name="idepref_github_summary">AndroidIDE - проект с открытым исходным кодом!</string>
-  <string name="idepref_channel_summary">Узнавайте о новых обновлениях!</string>
-  <string name="idepref_group_summary">Сообщайте об ошибках, предлагайте новые функции и обсуждайте нововведения здесь.</string>
   <string name="idepref_changelog_summary">Что нового в этой версии?</string>
   <string name="idepref_about_summary">Узнайте больше об AndroidIDE.</string>
   <string name="idepref_general_summary">Общие параметры IDE.</string>
@@ -270,13 +239,7 @@
   <string name="idepref_customFont_title">Использовать сторонний шрифт</string>
   <string name="idepref_customFont_summary">Если активно, файл \"/data/data/com.itsaky.androidide/files/home/.androidide/ui/font.ttf\" будет использован в качестве шрифта редактора.</string>
   <string name="msg_installing_apk">Установка APK...</string>
-  <string name="msg_action_open_application">Хотите открыть установленное приложение?</string>
   <string name="title_gradle_service_notification_channel">Служба сборки AndroidIDE Gradle</string>
-  <string name="msg_hex_color_code">HEX-код</string>
-  <string name="msg_color_picker_pick">Выбрать</string>
-  <string name="msg_chmod_exec">Настройка разрешений для исполняемого файла&#8230;</string>
-  <string name="msg_linking">Связывание %1$s с %2$s</string>
-  <string name="msg_extracting_hooks">Извлечение hook-библиотек&#8230;</string>
   <string name="msg_empty_package">Пустое имя пакета</string>
   <string name="msg_package_is_not_valid">Недопустимое имя пакета</string>
   <string name="msg_package_is_to_long">Длинное имя пакета</string>
@@ -284,46 +247,8 @@
   <string name="msg_package_not_use_digit_first">Цифра не может быть первым символом в сегменте пакета</string>
   <string name="msg_package_not_valid_char_2">Символ \"%1$s\" не допускается в именах пакетов приложений Android</string>
   <string name="msg_package_mus_have_dot">В пакете должен быть хотя бы один разделитель \'.\'</string>
-  <string name="action_import_classes">Импорт класса(ов)</string>
-  <string name="action_generate_setters_getters">Генерировать сеттеры/геттеры</string>
-  <string name="action_add_throws">Добавить \'throws\'</string>
-  <string name="action_comment_line">Закомментировать строку</string>
-  <string name="action_create_missing_method">Создать отсутствующий метод</string>
-  <string name="action_convert_to_block">Преобразовать в блок</string>
-  <string name="action_generate_constructor">Создать конструктор</string>
-  <string name="action_implement_abstract_methods">Реализовать абстрактный метод(ы)</string>
-  <string name="action_remove_class">Удалить класс</string>
-  <string name="action_remove_method">Удалить метод</string>
-  <string name="action_remove_unused_throws">Удалить неиспользуемые throws</string>
-  <string name="action_suppress_unchecked_warning">Подавить \'непроверенное\' предупреждение</string>
-  <string name="action_uncomment_line">Раскомментировать строку</string>
-  <string name="action_convert_to_statement">Преобразовать в оператор</string>
-  <string name="msg_select_fields">Выберите поля</string>
-  <string name="msg_no_fields_selected">Поля не выбраны</string>
-  <string name="msg_no_fields_found">Поля не найдены</string>
-  <string name="action_override_superclass_methods">Переопределение методов суперкласса</string>
-  <string name="msg_no_methods_selected">Методы не выбраны</string>
-  <string name="msg_cannot_override_methods">Невозможно переопределить методы</string>
-  <string name="msg_cannot_generate_setters_getters">Невозможно сгенерировать сеттеры и геттеры</string>
-  <string name="msg_select_methods">Выберите методы для переопределения</string>
-  <string name="msg_no_overridable_methods">Не удалось найти какой-либо переопределяемый метод</string>
-  <string name="action_goto_definition">Перейти к определению</string>
-  <string name="action_find_references">Найти ссылки</string>
-  <string name="action_generate_toString">Сгенерировать toString()</string>
-  <string name="action_remove_unused_imports">Удалить неиспользуемые импорты</string>
-  <string name="action_organize_imports">Организовать импорты</string>
-  <string name="msg_cannot_generate_toString">Не удалось сгенерировать реализацию toString()</string>
-  <string name="msg_toString_overridden">toString() уже переопределен</string>
-  <string name="action_generate_missing_constructor">Сгенерировать отсутствующий конструктор</string>
-  <string name="msg_cannot_generate_constructor">Не удалось сгенерировать конструктор</string>
-  <string name="msg_constructor_available">Конструктор с теми же типами параметров уже доступен</string>
   <string name="replace">Заменить</string>
   <string name="replaceAll">Заменить все</string>
-  <string name="hint_search_tasks">Поиск задач</string>
-  <string name="msg_err_select_tasks">Пожалуйста, выберите задачи для запуска</string>
-  <string name="title_confirmation">Подтверждение</string>
-  <string name="msg_tasks_to_run">Следующие задачи будут выполнены по порядку. Нажмите кнопку \'Запустить\' снова для подтверждения.\n\n%1$s</string>
-  <string name="msg_loading_tasks">Загрузка задач...</string>
   <!-- GIT -->
   <string name="git_clone">Клонировать</string>
   <string name="git_clone_repo">Клонировать репозиторий Git</string>
@@ -331,7 +256,6 @@
   <string name="git_clone_in_progress">Клонирования репозитория</string>
   <string name="git_clone_success">Клонирование Git успешно завершено</string>
   <string name="git_clone_failed">Ошибка клонирования репозитория Git</string>
-  <string name="msg_select_attr">Выберите атрибут из списка ниже</string>
   <string name="idepref_editor_colorScheme">Цветовая схема</string>
   <string name="idepref_editor_colorScheme_summary">Выберите цветовую схему редактора</string>
   <string name="idepref_general_uiMode">Тема</string>
@@ -352,54 +276,24 @@
   <string name="idepref_deleteEmptyLines_summary">Должен ли редактор удалять пустые строки при одиночном нажатии клавиши \"backspace\".</string>
   <string name="idepref_deleteTabs_title">Удалять табуляцию при нажатии клавиши \"backspace\"</string>
   <string name="idepref_deleteTabs_summary">Когда включено, редактор удалит пробелы, равные ширине табуляции при нажатии клавиши \"backspace\".</string>
-  <string name="btn_sync">Синхронизация</string>
-  <string name="btn_ignore_changes">Игнорировать эти изменения</string>
-  <string name="title_fix_imports">Исправить импорты</string>
-  <string name="msg_no_unresolved_classes">Неразрешенные имена классов не найдены</string>
-  <string name="title_class_chooser">Который %1$s?</string>
-  <string name="permlab_bind_logger_service">привязать к службе логирования</string>
-  <string name="permdesc_bind_logger_service">Позволяет этому приложению подключиться к службе логирования AndroidIDE. Это разрешение требуется AndroidIDE, чтобы читать логи этого приложения.</string>
   <string name="wizard_module_name">Имя модуля</string>
   <string name="wizard_module_type">Тип модуля</string>
   <string name="msg_invalid_module_name">Неверное имя модуля Gradle</string>
   <string name="msg_value_empty">Пустое значение</string>
   <string name="msg_file_not_exist">Файл не существует</string>
   <string name="msg_path_must_be_file">Должен быть путь к файлу</string>
-  <string name="msg_classname_with_keywords">Имя класса содержит ключевые слова</string>
   <string name="msg_path_must_be_dir">Должен быть путь к директории</string>
   <string name="msg_invalid_project_details">Неверные сведения о проекте</string>
   <string name="msg_use_kts">Использовать Kotlin Script (.kts) для файлов сборки Gradle</string>
-  <string name="title_privacy">Конфиденциальность</string>
-  <string name="title_androidide_statistics">Статистика AndroidIDE</string>
-  <string name="msg_androidide_statistics">Помогите нам улучшить AndroidIDE, предоставив анонимную статистику. Мы собираем основную информацию о вашем устройстве только для статистики базы пользователей. Точные данные, которые передаются, можно посмотреть в настройках. Ваши данные надёжно защищены и не передаются сторонним сервисам. Вы можете отказаться от этой услуги в любое время в настройках.</string>
-  <string name="summary_anonymous_usage_stats">Анонимная статистика использования</string>
-  <string name="idepref_stats_optIn_title">Сбор статистики</string>
-  <string name="idepref_stats_optIn_summary">Разрешить сбор метрик установки и статистики устройств (полностью анонимно).</string>
-  <string name="title_unique_id">Уникальный идентификатор</string>
-  <string name="title_device">Устройство</string>
-  <string name="title_app_version">Версия приложения</string>
-  <string name="title_country">Страна</string>
-  <string name="title_cpu_arch">Архитектура ЦП</string>
-  <string name="title_preview_data">Предпросмотр данных</string>
-  <string name="title_android_version">Версия Android</string>
-  <string name="btn_opt_in">Присоединиться</string>
   <string name="title_developer_options">Настройки разработчика</string>
   <string name="idepref_devOptions_summary">Экспериментальные/отладочные опции для AndroidIDE</string>
   <string name="idepref_group_debugging">Отладка</string>
   <string name="idepref_devOptions_dumpLogs_title">Дамп логов</string>
   <string name="idepref_devOptions_dumpLogs_summary">Дамп логов AndroidIDE в $HOME/.androidide/logs</string>
   <string name="msg_emptyview_applogs">Запустите отладочный вариант вашего приложения, чтобы увидеть его логи здесь.</string>
-  <string name="msg_logsender_disabled">LogSender отключен. Вы можете включить его в настройках.</string>
   <string name="msg_emptyview_idelogs">Логи IDE отображаются здесь.</string>
   <string name="msg_emptyview_diagnostics">Откройте файл, чтобы показать результаты его диагностики</string>
   <string name="msg_emptyview_buildoutput">"Соберите приложение или запустите задачу, чтобы увидеть результаты сборки здесь. "</string>
-  <string name="msg_codeaction_failed">Не удалось выполнить действие с кодом</string>
-  <string name="idepref_devOptions_enableLogsender_title">Включить LogSender</string>
-  <string name="idepref_devOptions_enableLogsender_summary">Если отключено, журналы из приложений не будут отображаться в AndroidIDE</string>
-  <string name="title_apply">Применить</string>
-  <string name="title_discard">Отменить</string>
-  <string name="title_choose_application">Выберите приложение</string>
-  <string name="title_disconnect_log_senders">Отключить модуль отправки логов</string>
   <string name="title_begin_long_select">Начать длинное выделение</string>
   <string name="idepref_editor_stickScroll_title">Липкая прокрутка</string>
   <string name="idepref_editor_stickyScroll_summary">Показывать текущую область видимости вверху при прокрутке редактора.</string>
@@ -408,7 +302,6 @@
   <string name="title_run_options">Опции запуска</string>
   <string name="err_cannot_determine_package">Невозможно запустить приложение. Не удалось определить имя пакета.</string>
   <string name="msg_launch_failure_no_app_module">Невозможно запустить приложение. В проекте не найдены модули приложения.</string>
-  <string name="title_launch_app">Запустить приложение</string>
   <string name="title_experiment_flavor">Экспериментальная функция</string>
   <string name="msg_experimental_flavor">Вы используете сборку AndroidIDE для архитектуры %1$s на устройстве с %2$s. AndroidIDE скорее всего сможет функционировать в такой конфигурации, но это приведет к ухудшению производительности и сделает ваше устройство потенциально уязвимым. Пожалуйста, не используйте AndroidIDE в такой конфигурации, если это возможно.</string>
   <string name="idepref_editor_pinLineNumbers_title">Закрепить номера строк</string>
@@ -419,11 +312,7 @@
   <string name="idepref_general_localeSelector_title">Язык</string>
   <string name="idepref_general_localeSelector_summary">Выберите язык AndroidIDE.</string>
   <string name="locale_system_default">Как в системе</string>
-  <string name="msg_project_dir_inaccessible">Директория проекта недоступна</string>
-  <string name="msg_file_is_not_dir">Выбранный файл не является директорией</string>
-  <string name="msg_project_dir_doesnt_exist">Директории проекта не существует</string>
   <string name="msg_files_being_saved">Сохранение файла уже в процессе!</string>
-  <string name="msg_install_tools">Для работы IDE требуется установить инструменты разработки (SDK). Кнопка ниже запустит терминал для дальнейшей установки SDK. Следуйте <![CDATA[ <a href="https://docs.androidide.com/tutorials/get-started.html">инструкциям</a>.<br/><br/>Вы также можете ознакомиться с <a href="https://docs.androidide.com/">документацией</a>]]>.</string>
   <string name="greeting_title">Добро пожаловать!</string>
   <string name="greeting_subtitle">Изучайте, создавайте и запускайте. Полноценное IDE на вашем Android!</string>
   <string name="title_grant">Предоставить</string>
@@ -433,28 +322,14 @@
   <string name="onboarding_subtitle_permissions">AndroidIDE требуются следующие разрешения</string>
   <string name="msg_grant_permissions">Пожалуйста, предоставьте разрешения, чтобы продолжить.</string>
   <string name="msg_no_internet">Похоже, вы не в сети. Проверьте подключение к интернету.</string>
-  <string name="msg_connected_to_cellular">Внимание! Вы используете мобильные данные.</string>
-  <string name="msg_connected_to_metered_connection">Внимание! К сети, которую вы используете, скорее всего, применяется тарификация.</string>
-  <string name="msg_disable_background_data_restriction">Отключите ограничения на доступ к сети в фоновом режиме, чтобы избежать ошибок при установке.</string>
-  <string name="msg_cannot_create_terminal_session">Не удалось создать сессию терминала</string>
-  <string name="action_auto_install">Автоматическая установка</string>
-  <string name="action_manual_install">Установка вручную</string>
-  <string name="action_install_git">Установить Git</string>
-  <string name="action_install_openssh">Установить OpenSSH</string>
   <string name="msg_terminal_new_sessions_disabled">Невозможно создать сессию. Новые сессии отключены!</string>
   <string name="title_install_location_error">Недопустимая локация для установки</string>
   <string name="title_unsupported_user">Недопустимый пользователь</string>
   <string name="title_socials">Свяжитесь с нами</string>
-  <string name="title_contributors">Разработчики</string>
-  <string name="summary_contributors">Лучшие разработчики из сообщества.</string>
-  <string name="title_github_contributors">Разработчики на GitHub</string>
-  <string name="title_crowdin_translators">Переводчики на Crowdin</string>
   <string name="title_misc">Прочее</string>
   <string name="title_contribute">Внести свой вклад</string>
   <string name="summary_contribute">AndroidIDE - это не только инструмент, но и сообщество вокруг него. Внесите свой вклад, предложив идею, код, или оставаясь преданным нашему проекту.</string>
   <string name="msg_app_unavailable_for_intent">Приложений для этого действия не найдено.</string>
-  <string name="title_open_source_licenses">Лицензии открытого ПО</string>
-  <string name="summary_open_source_licenses">Просмотр лицензий открытого ПО.</string>
   <string name="idepref_jdkVersion_title">Версия JDK</string>
   <string name="idepref_jdkVersion_summary">Выбрано: %1$s (перезапустите приложение после изменения)</string>
 </resources>

@@ -28,7 +28,6 @@ plugins {
 dependencies {
   implementation(kotlin("stdlib"))
 
-  implementation(projects.annotation.annotations)
   implementation(projects.event.eventbus)
 
   implementation(libs.androidx.annotation)
