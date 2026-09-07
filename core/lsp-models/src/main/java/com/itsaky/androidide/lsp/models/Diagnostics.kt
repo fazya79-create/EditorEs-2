@@ -59,8 +59,8 @@ data class DiagnosticItem(
     DiagnosticRegion(range.start.requireIndex(), range.end.requireIndex(), mapSeverity(severity))
 
   fun asDiagnosticRegion(content: io.github.rosemoe.sora.text.Content): DiagnosticRegion {
-    val startIndex = if (range.start.index != -1) range.start.index else content.getCharIndex(range.start.line, range.start.column)
-    val endIndex = if (range.end.index != -1) range.end.index else content.getCharIndex(range.end.line, range.end.column)
+    val startIndex = if (range.start.index != -1) range.start.index else runCatching { content.getCharIndex(range.start.line, range.start.column) }.getOrNull() ?: 0
+    val endIndex = if (range.end.index != -1) range.end.index else runCatching { content.getCharIndex(range.end.line, range.end.column) }.getOrNull() ?: 0
     return DiagnosticRegion(startIndex, endIndex, mapSeverity(severity))
   }
 }
