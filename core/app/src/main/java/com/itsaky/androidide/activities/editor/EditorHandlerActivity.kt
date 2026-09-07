@@ -43,12 +43,14 @@ import com.itsaky.androidide.editor.schemes.IDEColorSchemeProvider
 import com.itsaky.androidide.editor.ui.IDEEditor
 import com.itsaky.androidide.eventbus.events.editor.DocumentChangeEvent
 import com.itsaky.androidide.eventbus.events.file.FileRenameEvent
+import com.itsaky.androidide.eventbus.events.project.ProjectInitializedEvent
 import com.itsaky.androidide.interfaces.IEditorHandler
 import com.itsaky.androidide.models.FileExtension
 import com.itsaky.androidide.models.OpenedFile
 import com.itsaky.androidide.models.OpenedFilesCache
 import com.itsaky.androidide.models.Range
 import com.itsaky.androidide.models.SaveResult
+import com.itsaky.androidide.projects.IProjectManager
 import com.itsaky.androidide.tasks.executeAsync
 import com.itsaky.androidide.ui.CodeEditorView
 import com.itsaky.androidide.utils.DialogUtils.newYesNoDialog
@@ -622,6 +624,18 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
         invokeAfter.run()
       }
     builder.show()
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  fun onProjectInitialized(event: ProjectInitializedEvent) {
+    if (editorViewModel.getOpenedFileCount() != 0) {
+      return
+    }
+    val projectDir = runCatching { IProjectManager.getInstance().projectDir }.getOrNull() ?: return
+    val mainFile = File(projectDir, "main.cpp")
+    if (mainFile.isFile) {
+      openFile(mainFile)
+    }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

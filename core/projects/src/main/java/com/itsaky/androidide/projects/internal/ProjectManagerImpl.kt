@@ -23,11 +23,13 @@ import com.itsaky.androidide.eventbus.events.EventReceiver
 import com.itsaky.androidide.eventbus.events.file.FileCreationEvent
 import com.itsaky.androidide.eventbus.events.file.FileDeletionEvent
 import com.itsaky.androidide.eventbus.events.file.FileRenameEvent
+import com.itsaky.androidide.eventbus.events.project.ProjectInitializedEvent
 import com.itsaky.androidide.projects.CppModule
 import com.itsaky.androidide.projects.IProjectManager
 import com.itsaky.androidide.projects.IWorkspace
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.slf4j.LoggerFactory
@@ -65,6 +67,9 @@ class ProjectManagerImpl : IProjectManager, EventReceiver {
     _workspace = WorkspaceImpl(dir, discoverModules(dir))
     projectInitialized = true
     log.info("Workspace ready with {} module(s)", _workspace!!.getModules().size)
+    val event = ProjectInitializedEvent()
+    event.put(IWorkspace::class.java, _workspace)
+    EventBus.getDefault().post(event)
   }
 
   override fun destroy() {
