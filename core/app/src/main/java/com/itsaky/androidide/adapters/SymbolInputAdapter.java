@@ -19,10 +19,10 @@ package com.itsaky.androidide.adapters;
 
 import static com.itsaky.androidide.utils.ResourceUtilsKt.resolveAttr;
 
-import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.itsaky.androidide.R;
 import com.itsaky.androidide.databinding.LayoutSymbolItemBinding;
@@ -70,17 +70,46 @@ public class SymbolInputAdapter extends RecyclerView.Adapter<SymbolInputAdapter.
     this.symbols.removeIf(Objects::isNull);
   }
 
-  @SuppressLint("NotifyDataSetChanged")
   public void refresh(IDEEditor editor, List<Symbol> newSymbols) {
     this.editor = Objects.requireNonNull(editor);
 
+    if (newSymbols == null) {
+      newSymbols = new ArrayList<>();
+    }
+
     if (this.symbols.equals(newSymbols)) {
-      // no need to update symbols
       return;
     }
 
-    updateItems(newSymbols);
-    notifyDataSetChanged();
+    final List<Symbol> oldList = new ArrayList<>(this.symbols);
+    final List<Symbol> newList = new ArrayList<>(newSymbols);
+    newList.removeIf(Objects::isNull);
+
+    DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+      @Override
+      public int getOldListSize() {
+        return oldList.size();
+      }
+
+      @Override
+      public int getNewListSize() {
+        return newList.size();
+      }
+
+      @Override
+      public boolean areItemsTheSame(int oldPos, int newPos) {
+        return oldList.get(oldPos).equals(newList.get(newPos));
+      }
+
+      @Override
+      public boolean areContentsTheSame(int oldPos, int newPos) {
+        return oldList.get(oldPos).equals(newList.get(newPos));
+      }
+    });
+
+    this.symbols.clear();
+    this.symbols.addAll(newList);
+    diff.dispatchUpdatesTo(this);
   }
 
   @NonNull

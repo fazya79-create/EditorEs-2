@@ -232,20 +232,36 @@ class CodeEditorView(
     return true
   }
 
+  private var lastProgressUpdateMs = 0L
+  private var lastProgressValue = -1
+
   private fun updateReadWriteProgress(progress: Int) {
-    val binding = this.binding
-    runOnUiThread {
-      if (binding.rwProgress.isVisible && (progress < 0 || progress >= 100)) {
-        binding.rwProgress.isVisible = false
-        return@runOnUiThread
-      }
-
-      if (!binding.rwProgress.isVisible) {
-        binding.rwProgress.isVisible = true
-      }
-
-      binding.rwProgress.progress = progress
+    if (progress == lastProgressValue) {
+      return
     }
+    val now = android.os.SystemClock.uptimeMillis()
+    if (progress in 0..99 && now - lastProgressUpdateMs < 32L && progress != 0) {
+      return
+    }
+    lastProgressValue = progress
+    lastProgressUpdateMs = now
+    if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+      applyProgress(progress)
+      return
+    }
+    runOnUiThread { applyProgress(progress) }
+  }
+
+  private fun applyProgress(progress: Int) {
+    val binding = _binding ?: return
+    if (binding.rwProgress.isVisible && (progress < 0 || progress >= 100)) {
+      binding.rwProgress.isVisible = false
+      return
+    }
+    if (!binding.rwProgress.isVisible) {
+      binding.rwProgress.isVisible = true
+    }
+    binding.rwProgress.progress = progress
   }
 
   private inline fun <R : Any?> withEditingDisabled(action: () -> R): R {

@@ -61,6 +61,8 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.eclipse.lsp4j.DidChangeTextDocumentParams
 import org.eclipse.lsp4j.DidCloseTextDocumentParams
 import org.eclipse.lsp4j.DidOpenTextDocumentParams
@@ -193,6 +195,10 @@ class CppLanguageServer(
     if (params == null) {
       return CompletionResult.EMPTY
     }
+    if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+      log.warn("CppLanguageServer.complete called on Main thread — returning empty to avoid ANR")
+      return CompletionResult.EMPTY
+    }
     val file = params.file.toFile()
     val server = ensureStarted(rootFor(file)) ?: return CompletionResult.EMPTY
     return try {
@@ -216,10 +222,10 @@ class CppLanguageServer(
     }
   }
 
-  override suspend fun findReferences(params: ReferenceParams): ReferenceResult {
+  override suspend fun findReferences(params: ReferenceParams): ReferenceResult = withContext(Dispatchers.IO) {
     val file = params.file.toFile()
-    val server = ensureStarted(rootFor(file)) ?: return ReferenceResult(emptyList())
-    return try {
+    val server = ensureStarted(rootFor(file)) ?: return@withContext ReferenceResult(emptyList())
+    try {
       val uri = file.toURI().toString()
       syncDocument(file, uri, null)
       val lspParams = org.eclipse.lsp4j.ReferenceParams(
@@ -235,10 +241,10 @@ class CppLanguageServer(
     }
   }
 
-  override suspend fun findDefinition(params: DefinitionParams): DefinitionResult {
+  override suspend fun findDefinition(params: DefinitionParams): DefinitionResult = withContext(Dispatchers.IO) {
     val file = params.file.toFile()
-    val server = ensureStarted(rootFor(file)) ?: return DefinitionResult(emptyList())
-    return try {
+    val server = ensureStarted(rootFor(file)) ?: return@withContext DefinitionResult(emptyList())
+    try {
       val uri = file.toURI().toString()
       syncDocument(file, uri, null)
       val lspParams = org.eclipse.lsp4j.DefinitionParams(
@@ -268,10 +274,10 @@ class CppLanguageServer(
     return SignatureHelp(emptyList(), -1, -1)
   }
 
-  override suspend fun analyze(file: Path): DiagnosticResult {
+  override suspend fun analyze(file: Path): DiagnosticResult = withContext(Dispatchers.IO) {
     val ioFile = file.toFile()
-    ensureStarted(rootFor(ioFile)) ?: return DiagnosticResult.NO_UPDATE
-    return try {
+    ensureStarted(rootFor(ioFile)) ?: return@withContext DiagnosticResult.NO_UPDATE
+    try {
       val uri = ioFile.toURI().toString()
       val key = diagnosticsKey(uri)
       syncDocument(ioFile, uri, runCatching { ioFile.readText() }.getOrNull())
