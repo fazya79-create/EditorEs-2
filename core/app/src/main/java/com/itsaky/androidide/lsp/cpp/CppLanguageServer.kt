@@ -63,6 +63,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.eclipse.lsp4j.DidChangeTextDocumentParams
@@ -192,7 +193,7 @@ class CppLanguageServer(
         root = dir
         // Warm-up clangd early at project-load time
         if (isBackendReady()) {
-          kotlinx.coroutines.Dispatchers.IO.launch {
+          GlobalScope.launch(Dispatchers.IO) {
             ensureStarted(dir)
           }
         }
@@ -213,7 +214,7 @@ class CppLanguageServer(
       if (server == null || process?.isAlive != true) {
         // In-flight guard: only launch one warm-up at a time
         if (warmUpJob == null || !warmUpJob!!.isActive) {
-          warmUpJob = kotlinx.coroutines.CoroutineScope(Dispatchers.IO).launch {
+          warmUpJob = GlobalScope.launch(Dispatchers.IO) {
             ensureStarted(rootFor(file))
           }
           // Clear the job reference when done (success or failure)
