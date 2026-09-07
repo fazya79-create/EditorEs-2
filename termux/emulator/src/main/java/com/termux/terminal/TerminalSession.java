@@ -139,10 +139,11 @@ public final class TerminalSession extends TerminalOutput {
                         int read = termIn.read(buffer);
                         if (read == -1) return;
                         if (!mProcessToTerminalIOQueue.write(buffer, 0, read)) return;
-                        mMainThreadHandler.sendEmptyMessage(MSG_NEW_INPUT);
+                        if (!mMainThreadHandler.hasMessages(MSG_NEW_INPUT)) {
+                            mMainThreadHandler.sendEmptyMessage(MSG_NEW_INPUT);
+                        }
                     }
                 } catch (Exception e) {
-                    // Ignore, just shutting down.
                 }
             }
         }.start();
@@ -337,13 +338,28 @@ public final class TerminalSession extends TerminalOutput {
     class MainThreadHandler extends Handler {
 
         final byte[] mReceiveBuffer = new byte[4 * 1024];
+        private boolean mPendingInvalidate = false;
+        private final Runnable mInvalidateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mPendingInvalidate = false;
+                notifyScreenUpdate();
+            }
+        };
 
         @Override
         public void handleMessage(Message msg) {
-            int bytesRead = mProcessToTerminalIOQueue.read(mReceiveBuffer, false);
-            if (bytesRead > 0) {
+            int totalBytes = 0;
+            int bytesRead;
+            while ((bytesRead = mProcessToTerminalIOQueue.read(mReceiveBuffer, false)) > 0) {
                 mEmulator.append(mReceiveBuffer, bytesRead);
-                notifyScreenUpdate();
+                totalBytes += bytesRead;
+            }
+            if (totalBytes > 0) {
+                if (!mPendingInvalidate) {
+                    mPendingInvalidate = true;
+                    post(mInvalidateRunnable);
+                }
             }
 
             if (msg.what == MSG_PROCESS_EXITED) {

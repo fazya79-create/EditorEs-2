@@ -118,41 +118,43 @@ public class IDELanguageClientImpl implements ILanguageClient {
   @Override
   public void publishDiagnostics(DiagnosticResult result) {
     if (result == DiagnosticResult.NO_UPDATE || !canUseActivity()) {
-      // No update is expected
       return;
     }
 
     boolean error = result == null;
-    activity.handleDiagnosticsResultVisibility(error || result.getDiagnostics().isEmpty());
-
-    if (error) {
-      return;
-    }
-
-    File file = result.getFile().toFile();
-    if (!file.exists() || !file.isFile()) {
-      return;
-    }
-
-    final var editorView = activity.getEditorForFile(file);
-    if (editorView != null) {
-      final var editor = editorView.getEditor();
-      if (editor != null) {
-        final var container = new DiagnosticsContainer();
-        try {
-          container.addDiagnostics(
-              result.getDiagnostics().stream()
-                  .map(DiagnosticItem::asDiagnosticRegion)
-                  .collect(Collectors.toList()));
-        } catch (Throwable err) {
-          LOG.error("Unable to map DiagnosticItem to DiagnosticRegion", err);
-        }
-        editor.setDiagnostics(container);
+    final boolean isError = error || (result != null && result.getDiagnostics().isEmpty());
+    final DiagnosticResult captured = result;
+    activity.runOnUiThread(() -> {
+      if (!canUseActivity()) {
+        return;
       }
-    }
-
-    diagnostics.put(file, result.getDiagnostics());
-    activity.setDiagnosticsAdapter(newDiagnosticsAdapter());
+      activity.handleDiagnosticsResultVisibility(isError);
+      if (captured == null) {
+        return;
+      }
+      File file = captured.getFile().toFile();
+      if (!file.exists() || !file.isFile()) {
+        return;
+      }
+      final var editorView = activity.getEditorForFile(file);
+      if (editorView != null) {
+        final var editor = editorView.getEditor();
+        if (editor != null) {
+          final var container = new DiagnosticsContainer();
+          try {
+            container.addDiagnostics(
+                captured.getDiagnostics().stream()
+                    .map(DiagnosticItem::asDiagnosticRegion)
+                    .collect(Collectors.toList()));
+          } catch (Throwable err) {
+            LOG.error("Unable to map DiagnosticItem to DiagnosticRegion", err);
+          }
+          editor.setDiagnostics(container);
+        }
+      }
+      diagnostics.put(file, captured.getDiagnostics());
+      activity.setDiagnosticsAdapter(newDiagnosticsAdapter());
+    });
   }
 
   @Nullable

@@ -416,6 +416,9 @@ public final class TerminalView extends View {
         onScreenUpdated(false);
     }
 
+    private static final long ACCESSIBILITY_UPDATE_THROTTLE_MS = 350L;
+    private long mLastAccessibilityUpdateMs = 0;
+
     public void onScreenUpdated(boolean skipScrolling) {
         if (mEmulator == null) return;
 
@@ -423,12 +426,8 @@ public final class TerminalView extends View {
         if (mTopRow < -rowsInHistory) mTopRow = -rowsInHistory;
 
         if (isSelectingText() || mEmulator.isAutoScrollDisabled()) {
-
-            // Do not scroll when selecting text.
             int rowShift = mEmulator.getScrollCounter();
             if (-mTopRow + rowShift > rowsInHistory) {
-                // .. unless we're hitting the end of history transcript, in which
-                // case we abort text selection and scroll to end.
                 if (isSelectingText())
                     stopTextSelectionMode();
 
@@ -444,11 +443,7 @@ public final class TerminalView extends View {
         }
 
         if (!skipScrolling && mTopRow != 0) {
-            // Scroll down if not already there.
             if (mTopRow < -3) {
-                // Awaken scroll bars only if scrolling a noticeable amount
-                // - we do not want visible scroll bars during normal typing
-                // of one row at a time.
                 awakenScrollBars();
             }
             mTopRow = 0;
@@ -457,7 +452,13 @@ public final class TerminalView extends View {
         mEmulator.clearScrollCounter();
 
         invalidate();
-        if (mAccessibilityEnabled) setContentDescription(getText());
+        if (mAccessibilityEnabled) {
+            long now = SystemClock.uptimeMillis();
+            if (now - mLastAccessibilityUpdateMs >= ACCESSIBILITY_UPDATE_THROTTLE_MS) {
+                mLastAccessibilityUpdateMs = now;
+                setContentDescription(getText());
+            }
+        }
     }
 
     /** This must be called by the hosting activity in {@link Activity#onContextMenuClosed(Menu)}
