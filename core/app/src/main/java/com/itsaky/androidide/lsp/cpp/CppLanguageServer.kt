@@ -62,6 +62,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.eclipse.lsp4j.DidChangeTextDocumentParams
 import org.eclipse.lsp4j.DidCloseTextDocumentParams
@@ -200,6 +202,15 @@ class CppLanguageServer(
       return CompletionResult.EMPTY
     }
     val file = params.file.toFile()
+    synchronized(lock) {
+      if (server == null || process?.isAlive != true) {
+        val root = rootFor(file)
+        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+          ensureStarted(root)
+        }
+        return CompletionResult.EMPTY
+      }
+    }
     val server = ensureStarted(rootFor(file)) ?: return CompletionResult.EMPTY
     return try {
       val uri = file.toURI().toString()

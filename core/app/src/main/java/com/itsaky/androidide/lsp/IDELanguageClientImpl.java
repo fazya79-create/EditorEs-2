@@ -142,9 +142,10 @@ public class IDELanguageClientImpl implements ILanguageClient {
         if (editor != null) {
           final var container = new DiagnosticsContainer();
           try {
+            final var content = editor.getText();
             container.addDiagnostics(
                 captured.getDiagnostics().stream()
-                    .map(DiagnosticItem::asDiagnosticRegion)
+                    .map(item -> item.asDiagnosticRegion(content))
                     .collect(Collectors.toList()));
           } catch (Throwable err) {
             LOG.error("Unable to map DiagnosticItem to DiagnosticRegion", err);
