@@ -69,11 +69,12 @@ class ProjectManagerImpl : IProjectManager, EventReceiver {
     log.info("Workspace ready with {} module(s)", _workspace!!.getModules().size)
     val event = ProjectInitializedEvent()
     event.put(IWorkspace::class.java, _workspace)
-    EventBus.getDefault().post(event)
+    EventBus.getDefault().postSticky(event)
   }
 
   override fun destroy() {
     log.info("Destroying project manager")
+    EventBus.getDefault().removeStickyEvent(ProjectInitializedEvent::class.java)
 
     this._workspace = null
     this._projectDir = null

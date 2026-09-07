@@ -2,6 +2,7 @@ package com.itsaky.androidide.backend.build
 
 import android.content.Context
 import com.itsaky.androidide.backend.proot.ProotConfig
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -70,6 +71,15 @@ class BuildRunner(
             }
 
             execute(projectDir, script, onEvent)
+        } catch (e: CancellationException) {
+            process?.destroy()
+            process = null
+            throw e
+        } catch (e: InterruptedException) {
+            process?.destroy()
+            process = null
+            Thread.currentThread().interrupt()
+            throw CancellationException(e.message)
         } catch (e: Exception) {
             process = null
             onEvent(BuildEvent.Failed(e.message ?: "Build failed"))

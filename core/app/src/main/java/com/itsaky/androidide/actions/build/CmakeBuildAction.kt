@@ -33,6 +33,7 @@ import com.itsaky.androidide.tasks.runOnUiThread
 import com.itsaky.androidide.utils.flashError
 import com.itsaky.androidide.utils.flashSuccess
 import org.slf4j.LoggerFactory
+import java.util.concurrent.atomic.AtomicBoolean
 
 class CmakeBuildAction(context: Context, override val order: Int) : EditorActivityAction() {
 
@@ -40,6 +41,10 @@ class CmakeBuildAction(context: Context, override val order: Int) : EditorActivi
 
   companion object {
     private val log = LoggerFactory.getLogger(CmakeBuildAction::class.java)
+
+    @Volatile
+    private var currentRunner: BuildRunner? = null
+    private val buildLock = AtomicBoolean(false)
   }
 
   init {
@@ -56,16 +61,34 @@ class CmakeBuildAction(context: Context, override val order: Int) : EditorActivi
     }
 
     visible = true
-    enabled = ProjectManagerImpl.getInstance().projectInitialized &&
-      !activity.editorViewModel.isBuildInProgress
+    enabled = ProjectManagerImpl.getInstance().projectInitialized
+    if (activity.editorViewModel.isBuildInProgress) {
+      label = activity.getString(R.string.action_cancel_build)
+    } else {
+      label = activity.getString(R.string.action_build_cmake)
+    }
   }
 
   override suspend fun execAction(data: ActionData): Any {
     val activity = data.getActivity() ?: return BuildResult(false, 0)
     val appContext = activity.applicationContext
 
+    if (activity.editorViewModel.isBuildInProgress) {
+      currentRunner?.stop()
+      return BuildResult(false, 0, "Build cancelled")
+    }
+
     if (!ProotConfig.isInstalled(appContext)) {
       return BuildResult(false, 0, "Ubuntu environment is not installed")
+    }
+
+    if (!buildLock.compareAndSet(false, true)) {
+      return BuildResult(false, 0, "Build already in progress")
+    }
+
+    runOnUiThread {
+      activity.editorViewModel.isBuildInProgress = true
+      activity.invalidateOptionsMenu()
     }
 
     return try {
@@ -76,6 +99,7 @@ class CmakeBuildAction(context: Context, override val order: Int) : EditorActivi
         BackendPreferences.buildApiLevel,
         BackendPreferences.buildType()
       )
+      currentRunner = runner
       val configs = RunConfigurations(projectDir, runner)
       if (!configs.hasPresets()) {
         configs.bootstrap()
@@ -84,7 +108,6 @@ class CmakeBuildAction(context: Context, override val order: Int) : EditorActivi
         ?: return BuildResult(false, 0, "No CMake presets found")
 
       runOnUiThread {
-        activity.editorViewModel.isBuildInProgress = true
         activity.appendBuildOutput("> build $preset")
       }
 
@@ -101,6 +124,9 @@ class CmakeBuildAction(context: Context, override val order: Int) : EditorActivi
     } catch (error: Throwable) {
       log.error("CMake build failed", error)
       BuildResult(false, 0, error.message)
+    } finally {
+      buildLock.set(false)
+      currentRunner = null
     }
   }
 

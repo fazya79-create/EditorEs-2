@@ -295,6 +295,7 @@
   <string name="idepref_backend_buildtype">Build type</string>
   <string name="idepref_backend_current">Current: %1$s</string>
   <string name="action_build_cmake">Build</string>
+  <string name="action_cancel_build">Cancel build</string>
   <string name="msg_build_finished">Build finished with exit code %1$d</string>
   <string name="template_cpp_executable">C++ Executable</string>
 </resources>

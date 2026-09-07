@@ -60,6 +60,7 @@ import com.itsaky.androidide.utils.flashSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.io.File
@@ -626,8 +627,9 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
     builder.show()
   }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
+  @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
   fun onProjectInitialized(event: ProjectInitializedEvent) {
+    EventBus.getDefault().removeStickyEvent(event)
     if (editorViewModel.getOpenedFileCount() != 0) {
       return
     }
