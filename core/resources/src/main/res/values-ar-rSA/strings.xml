@@ -4,13 +4,9 @@
   <string name="copy" tools:override="true">نسخ</string>
   <string name="terminal_more">المزيد…</string>
   <string name="text_to_search">البحث عن نص</string>
-  <string name="about_option_email">البريد الإلكتروني</string>
-  <string name="about_option_website">الموقع الإلكتروني</string>
   <string name="msg_need_help">إذا كنت تواجه مشكلات أثناء استخدام AndroidIDE أو مع بناء التطبيقات ، يمكنك الانضمام إلى مجموعة التيليغرام وطلب المساعدة هناك.\n\nيمكنك أيضًا إرسال ملاحظات متضمنة على بريدنا الإلكتروني.</string>
   <string name="need_help">تحتاج للمساعدة؟</string>
   <string name="ide_preferences">إعدادات IDE</string>
-  <string name="discussions_on_telegram">المناقشات على التيليغرام</string>
-  <string name="official_tg_channel">قناة التيليغرام الرسمية</string>
   <string name="msg_empty_view">لا يوجد بيانات</string>
   <string name="title_terminal">التيرمنال</string>
   <string name="reset">إعادة تعيين</string>
@@ -99,7 +95,6 @@
   <string name="redo">إعادة</string>
   <!-- Preferences -->
   <string name="title_change_text_size">حجم خط المحرر</string>
-  <string name="idepref_about_title">حول AndroidIDE</string>
   <string name="idepref_editor_fontsize_title">حجم الخط</string>
   <string name="idepref_editor_fontsize_summary">حجم خط المحرر</string>
   <string name="idepref_editor_paintingflags_title">أعلام الرسوم غير المطبوعة</string>
@@ -119,7 +114,6 @@
   <string name="title_tab_size">حجم التبويبة</string>
   <string name="msg_tab_size">حدد عدد المسافات لـ TAB</string>
   <string name="msg_preferences">الإعدادات</string>
-  <string name="pref_changelog">سِجل التغييرات</string>
   <string name="msg_editor_font_size">الرجاء اختيار حجم الخط الافتراضي للمحرر :</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
@@ -162,15 +156,10 @@
   <string name="msg_swipe_for_output">مرر لأعلى لعرض @@مخرجات البناء@@</string>
   <string name="idepref_editor_useSoftTabs_title">استخدام علامة التبويب الناعمة</string>
   <string name="idepref_editor_useSoftTabs_summary">اختر ما إذا كان سيتم استخدام المسافات بدلاً من حرف التبويب (\\t).</string>
-  <string name="btn_donate">تبرع</string>
-  <string name="btn_docs">إرشادات الإستخدام</string>
   <string name="btn_close">إغلاق</string>
   <string name="msg_ignore_case">تجاهل الحالة</string>
   <string name="msg_use_regex">استخدم التعبير النصي (regex)</string>
   <string name="configure">تهيئة</string>
-  <string name="about">عن التطبيق</string>
-  <string name="idepref_changelog_summary">ما الجديد في هذا الإصدار؟ </string>
-  <string name="idepref_about_summary">المزيد عن AndroidIDE.</string>
   <string name="idepref_general_summary">إعدادات IDE العامة.</string>
   <string name="idepref_editor_summary">تهيئة المحرر.</string>
   <string name="idepref_customFont_title">استخدام خط مخصص</string>
@@ -215,11 +204,6 @@
   <string name="msg_path_must_be_file">يجب أن يكون مسار إلى ملف</string>
   <string name="msg_path_must_be_dir">يجب أن يكون المسار إلى مجلد</string>
   <string name="msg_invalid_project_details">تفاصيل المشروع غير صالحة</string>
-  <string name="title_developer_options">خيارات المطور</string>
-  <string name="idepref_devOptions_summary">خيارات تجريبية/تصحيح أخطاء AndroidIDE</string>
-  <string name="idepref_group_debugging">تصحيح الأخطاء</string>
-  <string name="idepref_devOptions_dumpLogs_title">تفريغ السجلات</string>
-  <string name="idepref_devOptions_dumpLogs_summary">تفريغ سجلات AndroidIDE إلى $HOME/.androidide/logs</string>
   <string name="msg_emptyview_idelogs">تظهر سجلات من بيئة التطوير المتكاملة هنا.</string>
   <string name="msg_emptyview_diagnostics">افتح ملف لعرض نتائج التشخيص الخاصة به</string>
   <string name="msg_emptyview_buildoutput">"قم ببناء التطبيق أو تشغيل مهمة لرؤية نتائج بنائه هنا. "</string>
@@ -248,9 +232,4 @@
   <string name="msg_terminal_new_sessions_disabled">Cannot create session. New sessions are disabled!</string>
   <string name="title_install_location_error">Install location error</string>
   <string name="title_unsupported_user">Unsupported user</string>
-  <string name="title_socials">Socials</string>
-  <string name="title_misc">Misc</string>
-  <string name="title_contribute">Contribute</string>
-  <string name="summary_contribute">It\'s not just an IDE, it\'s a community. Contribute code, ideas, and passion to AndroidIDE.</string>
-  <string name="msg_app_unavailable_for_intent">No application available to handle intent.</string>
 </resources>

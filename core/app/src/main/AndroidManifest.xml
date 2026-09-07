@@ -61,7 +61,6 @@
       android:launchMode="singleTop"
       android:name=".activities.editor.EditorActivityKt"/>
     <activity android:name=".activities.PreferencesActivity" />
-    <activity android:name=".activities.AboutActivity" />
     <activity
       android:name=".activities.TerminalActivity"
       android:windowSoftInputMode="adjustResize" />

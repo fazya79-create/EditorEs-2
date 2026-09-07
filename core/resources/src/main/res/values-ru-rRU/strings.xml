@@ -4,13 +4,9 @@
   <string name="copy" tools:override="true">Копировать</string>
   <string name="terminal_more">Ещё…</string>
   <string name="text_to_search">Текст для поиска</string>
-  <string name="about_option_email">Электронная почта</string>
-  <string name="about_option_website">Вебсайт</string>
   <string name="msg_need_help">Если вы столкнулись с какими-либо проблемами при использовании AndroidIDE или при сборке Android приложений, вы можете присоединиться к нашей группе в Telegram и попросить о помощи там.\n\nВы также можете присылать нам свои пожелания и предложения на наш электронный адрес.</string>
   <string name="need_help">Нужна помощь?</string>
   <string name="ide_preferences">Настройки IDE</string>
-  <string name="discussions_on_telegram">Обсуждение в Telegram</string>
-  <string name="official_tg_channel">Официальный канал в Telegram</string>
   <string name="msg_empty_view">Нет данных</string>
   <string name="title_terminal">Терминал</string>
   <string name="reset">Сброс</string>
@@ -99,7 +95,6 @@
   <string name="redo">Повтор действия</string>
   <!-- Preferences -->
   <string name="title_change_text_size">Размер шрифта редактора</string>
-  <string name="idepref_about_title">Об AndroidIDE</string>
   <string name="idepref_editor_fontsize_title">Размер шрифта</string>
   <string name="idepref_editor_fontsize_summary">Размер шрифта редактора</string>
   <string name="idepref_editor_paintingflags_title">Визуализировать непечатаемые символы</string>
@@ -119,7 +114,6 @@
   <string name="title_tab_size">Размер TAB</string>
   <string name="msg_tab_size">Укажите, сколько пробелов будет напечатано при нажатии TAB.</string>
   <string name="msg_preferences">Настройки</string>
-  <string name="pref_changelog">Список изменений</string>
   <string name="msg_editor_font_size">Пожалуйста, выберите размер шрифта по умолчанию для редактора:</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
@@ -163,15 +157,10 @@
   <string name="msg_swipe_for_output">Проведите вверх для просмотра @@вывода сборки@@.</string>
   <string name="idepref_editor_useSoftTabs_title">Используйте программную вкладку</string>
   <string name="idepref_editor_useSoftTabs_summary">Выберите, следует ли использовать пробелы вместо символа табуляции (\\t).</string>
-  <string name="btn_donate">Пожертвовать</string>
-  <string name="btn_docs">Документация</string>
   <string name="btn_close">Закрыть</string>
   <string name="msg_ignore_case">Игнорировать регистр</string>
   <string name="msg_use_regex">Использовать REGEX</string>
   <string name="configure">Настройки</string>
-  <string name="about">О приложении</string>
-  <string name="idepref_changelog_summary">Что нового в этой версии?</string>
-  <string name="idepref_about_summary">Узнайте больше об AndroidIDE.</string>
   <string name="idepref_general_summary">Общие параметры IDE.</string>
   <string name="idepref_editor_summary">Настройте редактор.</string>
   <string name="idepref_customFont_title">Использовать сторонний шрифт</string>
@@ -216,11 +205,6 @@
   <string name="msg_path_must_be_file">Должен быть путь к файлу</string>
   <string name="msg_path_must_be_dir">Должен быть путь к директории</string>
   <string name="msg_invalid_project_details">Неверные сведения о проекте</string>
-  <string name="title_developer_options">Настройки разработчика</string>
-  <string name="idepref_devOptions_summary">Экспериментальные/отладочные опции для AndroidIDE</string>
-  <string name="idepref_group_debugging">Отладка</string>
-  <string name="idepref_devOptions_dumpLogs_title">Дамп логов</string>
-  <string name="idepref_devOptions_dumpLogs_summary">Дамп логов AndroidIDE в $HOME/.androidide/logs</string>
   <string name="msg_emptyview_idelogs">Логи IDE отображаются здесь.</string>
   <string name="msg_emptyview_diagnostics">Откройте файл, чтобы показать результаты его диагностики</string>
   <string name="msg_emptyview_buildoutput">"Соберите приложение или запустите задачу, чтобы увидеть результаты сборки здесь. "</string>
@@ -249,9 +233,4 @@
   <string name="msg_terminal_new_sessions_disabled">Невозможно создать сессию. Новые сессии отключены!</string>
   <string name="title_install_location_error">Недопустимая локация для установки</string>
   <string name="title_unsupported_user">Недопустимый пользователь</string>
-  <string name="title_socials">Свяжитесь с нами</string>
-  <string name="title_misc">Прочее</string>
-  <string name="title_contribute">Внести свой вклад</string>
-  <string name="summary_contribute">AndroidIDE - это не только инструмент, но и сообщество вокруг него. Внесите свой вклад, предложив идею, код, или оставаясь преданным нашему проекту.</string>
-  <string name="msg_app_unavailable_for_intent">Приложений для этого действия не найдено.</string>
 </resources>

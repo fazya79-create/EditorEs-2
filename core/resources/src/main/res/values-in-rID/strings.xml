@@ -4,13 +4,9 @@
   <string name="copy" tools:override="true">Salin</string>
   <string name="terminal_more">Lagi…</string>
   <string name="text_to_search">Teks untuk mencari</string>
-  <string name="about_option_email">Email</string>
-  <string name="about_option_website">Situs Web</string>
   <string name="msg_need_help">Jika anda mengalami masalah ketika menggunakan AndroidIDE atau dengan pembuatan Aplikasi Android, anda dapat bergabung ke Grup Telegram dan bertanya disana.\n\nAnda juga dapat mengirim saran pada Email kami.</string>
   <string name="need_help">Butuh Bantuan?</string>
   <string name="ide_preferences">Preferensi IDE</string>
-  <string name="discussions_on_telegram">Diskusi di Telegram</string>
-  <string name="official_tg_channel">Channel Telegram Resmi</string>
   <string name="msg_empty_view">Tidak ada data</string>
   <string name="title_terminal">Terminal</string>
   <string name="reset">Setel ulang</string>
@@ -99,7 +95,6 @@
   <string name="redo">Redo</string>
   <!-- Preferences -->
   <string name="title_change_text_size">Ukuran huruf editor</string>
-  <string name="idepref_about_title">Tentang AndroidIDE</string>
   <string name="idepref_editor_fontsize_title">Ukuran huruf</string>
   <string name="idepref_editor_fontsize_summary">Ukuran huruf pada editor</string>
   <string name="idepref_editor_paintingflags_title">Gambaran editor yang tidak tercetak</string>
@@ -119,7 +114,6 @@
   <string name="title_tab_size">Ukuran tab</string>
   <string name="msg_tab_size">Menentukan jumlah spasi pada tab</string>
   <string name="msg_preferences">Preferensi</string>
-  <string name="pref_changelog">Log Perubahan</string>
   <string name="msg_editor_font_size">Mohon pilih ukuran huruf bawaan dari editor :</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
@@ -162,15 +156,10 @@
   <string name="msg_swipe_for_output">Geser ke atas untuk @@build output@@.</string>
   <string name="idepref_editor_useSoftTabs_title">Gunakan soft tab</string>
   <string name="idepref_editor_useSoftTabs_summary">Pilih apakah akan menggunakan spasi alih-alih karakter tab (\\t).</string>
-  <string name="btn_donate">Donasi</string>
-  <string name="btn_docs">Dokumentasi</string>
   <string name="btn_close">Tutup</string>
   <string name="msg_ignore_case">Abaikan kasus</string>
   <string name="msg_use_regex">Gunakan regex</string>
   <string name="configure">Konfigurasikan</string>
-  <string name="about">Tentang</string>
-  <string name="idepref_changelog_summary">Apa yang baru di versi ini?</string>
-  <string name="idepref_about_summary">Lebih lanjut tentang AndroidIDE.</string>
   <string name="idepref_general_summary">Konfigurasi IDE umum.</string>
   <string name="idepref_editor_summary">Konfigurasikan editornya.</string>
   <string name="idepref_customFont_title">Gunakan custom font</string>
@@ -215,11 +204,6 @@
   <string name="msg_path_must_be_file">Harus jalur ke file</string>
   <string name="msg_path_must_be_dir">Harus jalur ke direktori</string>
   <string name="msg_invalid_project_details">Detail proyek tidak valid</string>
-  <string name="title_developer_options">Opsi pengembang</string>
-  <string name="idepref_devOptions_summary">Opsi eksperimental/debug untuk AndroidIDE</string>
-  <string name="idepref_group_debugging">Men-debug</string>
-  <string name="idepref_devOptions_dumpLogs_title">Dump log</string>
-  <string name="idepref_devOptions_dumpLogs_summary">Dump log AndroidIDE ke $HOME/.androidide/logs</string>
   <string name="msg_emptyview_idelogs">Log dari IDE ditampilkan di sini.</string>
   <string name="msg_emptyview_diagnostics">Buka file untuk menampilkan hasil diagnosisnya</string>
   <string name="msg_emptyview_buildoutput">"Buat aplikasi atau jalankan tugas untuk melihat hasil pembuatannya di sini. "</string>
@@ -248,9 +232,4 @@
   <string name="msg_terminal_new_sessions_disabled">Tidak dapat membuat sesi. Sesi baru dinonaktifkan!</string>
   <string name="title_install_location_error">Kesalahan lokasi pemasangan</string>
   <string name="title_unsupported_user">Pengguna tidak didukung</string>
-  <string name="title_socials">Sosial</string>
-  <string name="title_misc">Lain-lain</string>
-  <string name="title_contribute">Menyumbang</string>
-  <string name="summary_contribute">Ini bukan hanya sebuah IDE, ini adalah sebuah komunitas. Kontribusikan kode, ide, dan semangat ke AndroidIDE.</string>
-  <string name="msg_app_unavailable_for_intent">Tidak ada aplikasi yang tersedia untuk menangani maksud.</string>
 </resources>

@@ -4,13 +4,9 @@
   <string name="copy" tools:override="true">Copier</string>
   <string name="terminal_more">Plus…</string>
   <string name="text_to_search">Texte à chercher</string>
-  <string name="about_option_email">Émail</string>
-  <string name="about_option_website">Site Web</string>
   <string name="msg_need_help">Si vous rencontrez des problémes lorsque vous utilisez AndroidIDE (ex: pendant la compilation d\'une application), vous pouvez demandez de l\'aide sur le groupe Telegram (Anglais).\n\nVous pouvez également demander de l\'aide sur notre émail.</string>
   <string name="need_help">Besoin d\'aide ?</string>
   <string name="ide_preferences">Préférences de l\'IDE</string>
-  <string name="discussions_on_telegram">Discuter sur Telegram (anglais)</string>
-  <string name="official_tg_channel">Channel Telegram Officiel</string>
   <string name="msg_empty_view">Aucune donnée</string>
   <string name="title_terminal">Terminal</string>
   <string name="reset">Réinitialiser</string>
@@ -100,7 +96,6 @@ Dernier projet ouvert : \n%s</string>
   <string name="redo">refaire</string>
   <!-- Preferences -->
   <string name="title_change_text_size">Taille des caractères</string>
-  <string name="idepref_about_title">À propos de AndroidIDE</string>
   <string name="idepref_editor_fontsize_title">Taille des caractères</string>
   <string name="idepref_editor_fontsize_summary">Taille des caractères de l\'éditeur</string>
   <string name="idepref_editor_paintingflags_title">Non-printable painting flags </string>
@@ -120,7 +115,6 @@ Dernier projet ouvert : \n%s</string>
   <string name="title_tab_size">Taille de l\'onglet</string>
   <string name="msg_tab_size">Spécifier la taille de l\'onglet</string>
   <string name="msg_preferences">Paramètres</string>
-  <string name="pref_changelog">Changelog</string>
   <string name="msg_editor_font_size">Veuillez choisir la taille des caractères par défaut de l\'éditeur :</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
@@ -163,15 +157,10 @@ Dernier projet ouvert : \n%s</string>
   <string name="msg_swipe_for_output">Tirez du bas vers le haut pour accéder aux @@consoles (application, ide et compilation)@@.</string>
   <string name="idepref_editor_useSoftTabs_title">Use soft tab</string>
   <string name="idepref_editor_useSoftTabs_summary">Choose whether to use spaces instead of tab character (\\t).</string>
-  <string name="btn_donate">Faire un don</string>
-  <string name="btn_docs">Documentation</string>
   <string name="btn_close">Fermer</string>
   <string name="msg_ignore_case">Ignore case</string>
   <string name="msg_use_regex">Use regex</string>
   <string name="configure">Configure</string>
-  <string name="about">À propos</string>
-  <string name="idepref_changelog_summary">What\'s new in this version?</string>
-  <string name="idepref_about_summary">More about AndroidIDE.</string>
   <string name="idepref_general_summary">Préférences principales (mode sombre, terminal)</string>
   <string name="idepref_editor_summary">Configurer l\'éditeur (tailles des caractères, thème, ...)</string>
   <string name="idepref_customFont_title">Use custom font</string>
@@ -216,11 +205,6 @@ Dernier projet ouvert : \n%s</string>
   <string name="msg_path_must_be_file">Le chemin du fichier doit être valide</string>
   <string name="msg_path_must_be_dir">Doit être un chemin à un dossier</string>
   <string name="msg_invalid_project_details">Détails du projet incorrects</string>
-  <string name="title_developer_options">Options développeur</string>
-  <string name="idepref_devOptions_summary">Options Expérimental/Débogage d\'AndroidIDE</string>
-  <string name="idepref_group_debugging">Débogage</string>
-  <string name="idepref_devOptions_dumpLogs_title">Vider les logs</string>
-  <string name="idepref_devOptions_dumpLogs_summary">Dump AndroidIDE logs to $HOME/.androidide/logs</string>
   <string name="msg_emptyview_idelogs">Logs from the IDE are shown here.</string>
   <string name="msg_emptyview_diagnostics">Open a file to show its diagnostic results</string>
   <string name="msg_emptyview_buildoutput">"Build the application or run a task to see its build output here. "</string>
@@ -249,9 +233,4 @@ Dernier projet ouvert : \n%s</string>
   <string name="msg_terminal_new_sessions_disabled">Cannot create session. New sessions are disabled!</string>
   <string name="title_install_location_error">Install location error</string>
   <string name="title_unsupported_user">Unsupported user</string>
-  <string name="title_socials">Socials</string>
-  <string name="title_misc">Misc</string>
-  <string name="title_contribute">Contribute</string>
-  <string name="summary_contribute">It\'s not just an IDE, it\'s a community. Contribute code, ideas, and passion to AndroidIDE.</string>
-  <string name="msg_app_unavailable_for_intent">No application available to handle intent.</string>
 </resources>

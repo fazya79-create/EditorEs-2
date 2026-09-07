@@ -4,13 +4,9 @@
   <string name="copy" tools:override="true">Kopyala</string>
   <string name="terminal_more">Daha…</string>
   <string name="text_to_search">Aranacak metin</string>
-  <string name="about_option_email">Email</string>
-  <string name="about_option_website">Web Sitesi</string>
   <string name="msg_need_help">Eğer AndroidIDE\'yi kullanırken sorunlar yaşıyorsan veya uygulama inşa ederken, soeu sormak için Telegram Grubumuza katılabilirsin.\n\nVe yine öneriler için email gönderebilirsin.</string>
   <string name="need_help">Yardım mı lazım?</string>
   <string name="ide_preferences">IDE tercihleri</string>
-  <string name="discussions_on_telegram">Telegram\'daki Tartışmalar</string>
-  <string name="official_tg_channel">Resmi Telegram Kanalı</string>
   <string name="msg_empty_view">Veri bulunamadı</string>
   <string name="title_terminal">Uçbirim</string>
   <string name="reset">Sıfırla</string>
@@ -99,7 +95,6 @@
   <string name="redo">Yinele</string>
   <!-- Preferences -->
   <string name="title_change_text_size">Editör yazı tipi boyutu</string>
-  <string name="idepref_about_title">AndroidIDE Hakkında</string>
   <string name="idepref_editor_fontsize_title">Font büyüklüğü</string>
   <string name="idepref_editor_fontsize_summary">Editörün font büyüklüğü</string>
   <string name="idepref_editor_paintingflags_title">Yazdırılamaz çizim bayrakları</string>
@@ -119,7 +114,6 @@
   <string name="title_tab_size">Boşluk boyutu</string>
   <string name="msg_tab_size">TAB için boşluk sayısını ayarla</string>
   <string name="msg_preferences">Ayarlar</string>
-  <string name="pref_changelog">Değişiklikler</string>
   <string name="msg_editor_font_size">Lütfen editörün varsayılan font büyüklüğünü seçin:</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
@@ -162,15 +156,10 @@
   <string name="msg_swipe_for_output">\@@İnşa çıktısı@@ için yukarı kaydırın.</string>
   <string name="idepref_editor_useSoftTabs_title">Yumuşak tab kullan</string>
   <string name="idepref_editor_useSoftTabs_summary">Tab karakteri (\\t) yerine boşluklar kullanmak isteyip istemediğinizi seçin.</string>
-  <string name="btn_donate">Bağış yap</string>
-  <string name="btn_docs">Dökümantasyon</string>
   <string name="btn_close">Kapat</string>
   <string name="msg_ignore_case">Büyük küçük harfi yoksay</string>
   <string name="msg_use_regex">Düzenli ifadeler kullan</string>
   <string name="configure">Yapılandır</string>
-  <string name="about">Hakkında</string>
-  <string name="idepref_changelog_summary">Bu sürümde yeni ne var?</string>
-  <string name="idepref_about_summary">AndroidIDE hakkında daha fazlası.</string>
   <string name="idepref_general_summary">Genel IDE yapılandırması.</string>
   <string name="idepref_editor_summary">Düzenleyiciyi yapılandır.</string>
   <string name="idepref_customFont_title">Kişisel yazı tipi kullan</string>
@@ -215,11 +204,6 @@
   <string name="msg_path_must_be_file">Bir dosyaya yol olması gerekir</string>
   <string name="msg_path_must_be_dir">Bir dizine yol olması gerekir</string>
   <string name="msg_invalid_project_details">Geçersiz proje detayları</string>
-  <string name="title_developer_options">Geliştirici seçenekleri</string>
-  <string name="idepref_devOptions_summary">AndroidIDE için deneysel/hata ayıklama seçenekleri</string>
-  <string name="idepref_group_debugging">Hata ayıklama</string>
-  <string name="idepref_devOptions_dumpLogs_title">Günlükleri kaydet</string>
-  <string name="idepref_devOptions_dumpLogs_summary">$HOME/.androidide/logs içine AndroidIDE günlüklerini kaydet</string>
   <string name="msg_emptyview_idelogs">IDE\'den günlükler burada görünür.</string>
   <string name="msg_emptyview_diagnostics">Bir dosyanın analiz raporlarını görmek için dosyayı açın</string>
   <string name="msg_emptyview_buildoutput">"İnşa çıktısını burada görmek için uygulamayı inşa edin ya da bir görev çalıştırın. "</string>
@@ -248,9 +232,4 @@
   <string name="msg_terminal_new_sessions_disabled">Oturum oluşturulamıyor. Yeni oturumlar devre dışı bırakıldı!</string>
   <string name="title_install_location_error">Yükleme konumu hatası</string>
   <string name="title_unsupported_user">Desteklenmeyen kullanıcı</string>
-  <string name="title_socials">Sosyal Medya</string>
-  <string name="title_misc">Diğerleri</string>
-  <string name="title_contribute">Katkıda bulun</string>
-  <string name="summary_contribute">Bu sadece bir IDE değil, aynı zamanda bir topluluktur. Android IDE\'ye kod, fikirler ve tutku ile katkıda bulunun.</string>
-  <string name="msg_app_unavailable_for_intent">Bu çağrıyı işleyebilecek bir uygulama yok.</string>
 </resources>

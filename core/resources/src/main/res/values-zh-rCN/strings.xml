@@ -4,13 +4,9 @@
   <string name="copy" tools:override="true">复制</string>
   <string name="terminal_more">更多…</string>
   <string name="text_to_search">要搜索的文本</string>
-  <string name="about_option_email">发电子邮件</string>
-  <string name="about_option_website">网站</string>
   <string name="msg_need_help">如果您在使用 AndroidIDE 或构建 Android 应用时遇到问题，您可以加入 Telegram 群组寻求帮助。\n\n您也可以发送建议到我们的电子邮件地址。</string>
   <string name="need_help">需要帮助？</string>
   <string name="ide_preferences">IDE 首选项</string>
-  <string name="discussions_on_telegram">在 Telegram 上讨论</string>
-  <string name="official_tg_channel">官方 Telegram 频道</string>
   <string name="msg_empty_view">没有数据</string>
   <string name="title_terminal">终端</string>
   <string name="reset">重置</string>
@@ -99,7 +95,6 @@
   <string name="redo">重做</string>
   <!-- Preferences -->
   <string name="title_change_text_size">编辑器字体大小</string>
-  <string name="idepref_about_title">关于 AndroidIDE</string>
   <string name="idepref_editor_fontsize_title">字体大小</string>
   <string name="idepref_editor_fontsize_summary">编辑器的字体大小</string>
   <string name="idepref_editor_paintingflags_title">绘制不可打印字符标志</string>
@@ -119,7 +114,6 @@
   <string name="title_tab_size">Tab 宽度</string>
   <string name="msg_tab_size">指定制表符代表的空格数</string>
   <string name="msg_preferences">首选项</string>
-  <string name="pref_changelog">变更日志</string>
   <string name="msg_editor_font_size">请选择编辑器的默认字体大小：</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
@@ -162,15 +156,10 @@
   <string name="msg_swipe_for_output">上滑查看 @@构建输出@@</string>
   <string name="idepref_editor_useSoftTabs_title">使用空格代替制表符</string>
   <string name="idepref_editor_useSoftTabs_summary">设置是否使用多个空格代替制表符 (\\t)</string>
-  <string name="btn_donate">捐助</string>
-  <string name="btn_docs">文档</string>
   <string name="btn_close">关闭</string>
   <string name="msg_ignore_case">忽略大小写</string>
   <string name="msg_use_regex">使用正则表达式</string>
   <string name="configure">配置</string>
-  <string name="about">关于</string>
-  <string name="idepref_changelog_summary">此版本有什么新内容?</string>
-  <string name="idepref_about_summary">有关 AndroidIDE 的更多信息。</string>
   <string name="idepref_general_summary">常规 IDE 配置。</string>
   <string name="idepref_editor_summary">配置编辑器。</string>
   <string name="idepref_customFont_title">使用自定义字体</string>
@@ -215,11 +204,6 @@
   <string name="msg_path_must_be_file">必须是文件路径</string>
   <string name="msg_path_must_be_dir">必须是目录路径</string>
   <string name="msg_invalid_project_details">项目信息无效</string>
-  <string name="title_developer_options">开发者选项</string>
-  <string name="idepref_devOptions_summary">AndroidIDE 的实验和调试选项</string>
-  <string name="idepref_group_debugging">调试</string>
-  <string name="idepref_devOptions_dumpLogs_title">转储日志</string>
-  <string name="idepref_devOptions_dumpLogs_summary">将 AndroidIDE 日志转储到 $HOME/.androidide/logs</string>
   <string name="msg_emptyview_idelogs">IDE 中的日志显示在这里。</string>
   <string name="msg_emptyview_diagnostics">打开文件以显示其诊断结果</string>
   <string name="msg_emptyview_buildoutput">"构建应用或运行任务以在此处查看其构建输出。"</string>
@@ -248,9 +232,4 @@
   <string name="msg_terminal_new_sessions_disabled">无法创建会话，新会话被禁用！</string>
   <string name="title_install_location_error">安装位置错误</string>
   <string name="title_unsupported_user">不支持的用户</string>
-  <string name="title_socials">社交</string>
-  <string name="title_misc">杂项</string>
-  <string name="title_contribute">贡献</string>
-  <string name="summary_contribute">它不仅仅是一个 IDE，更是一个社区。为 AndroidIDE 贡献代码、想法和热情。</string>
-  <string name="msg_app_unavailable_for_intent">没有可用于处理意图的应用。</string>
 </resources>

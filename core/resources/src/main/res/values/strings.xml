@@ -6,13 +6,9 @@
   <string name="terminal_more">More…</string>
   <string name="text_to_search">Text to search</string>
   <string name="app_name" translatable="false">AndroidIDE</string>
-  <string name="about_option_email">Email</string>
-  <string name="about_option_website">Website</string>
   <string name="msg_need_help">If you\'re facing issues while using AndroidIDE or with building Android Apps, you can join the Telegram Group ask for help there.\n\nYou can also send suggesstions on our email.</string>
   <string name="need_help">Need Help?</string>
   <string name="ide_preferences">IDE preferences</string>
-  <string name="discussions_on_telegram">Discussions on Telegram</string>
-  <string name="official_tg_channel">Official Telegram Channel</string>
   <string name="msg_empty_view">No data</string>
   <string name="title_terminal">Terminal</string>
   <string name="reset">Reset</string>
@@ -110,7 +106,6 @@
 
   <!-- Preferences -->
   <string name="title_change_text_size">Editor font size</string>
-  <string name="idepref_about_title">About AndroidIDE</string>
   <string name="idepref_editor_fontsize_title">Font size</string>
   <string name="idepref_editor_fontsize_summary">Font size of the editor</string>
   <string name="idepref_editor_paintingflags_title">Non-printable painting flags</string>
@@ -130,7 +125,6 @@
   <string name="title_tab_size">Tab size</string>
   <string name="msg_tab_size">Specify number of spaces for TAB</string>
   <string name="msg_preferences">Preferences</string>
-  <string name="pref_changelog">Changelog</string>
   <string name="msg_editor_font_size">Please choose default font size of editor :</string>
 
   <!-- Layout preview and designer -->
@@ -177,15 +171,10 @@
   <string name="msg_swipe_for_output">Swipe up for @@build output@@.</string>
   <string name="idepref_editor_useSoftTabs_title">Use soft tab</string>
   <string name="idepref_editor_useSoftTabs_summary">Choose whether to use spaces instead of tab character (\\t).</string>
-  <string name="btn_donate">Donate</string>
-  <string name="btn_docs">Documentation</string>
   <string name="btn_close">Close</string>
   <string name="msg_ignore_case">Ignore case</string>
   <string name="msg_use_regex">Use regex</string>
   <string name="configure">Configure</string>
-  <string name="about">About</string>
-  <string name="idepref_changelog_summary">What\'s new in this version?</string>
-  <string name="idepref_about_summary">More about AndroidIDE.</string>
   <string name="idepref_general_summary">General IDE configuration.</string>
   <string name="idepref_editor_summary">Configure the editor.</string>
   <string name="idepref_customFont_title">Use custom font</string>
@@ -238,11 +227,6 @@
   <string name="msg_path_must_be_file">Must be path to a file</string>
   <string name="msg_path_must_be_dir">Must be path to a directory</string>
   <string name="msg_invalid_project_details">Invalid project details</string>
-  <string name="title_developer_options">Developer options</string>
-  <string name="idepref_devOptions_summary">Experimental/debugging options for AndroidIDE</string>
-  <string name="idepref_group_debugging">Debugging</string>
-  <string name="idepref_devOptions_dumpLogs_title">Dump logs</string>
-  <string name="idepref_devOptions_dumpLogs_summary">Dump AndroidIDE logs to $HOME/.androidide/logs</string>
   <string name="msg_emptyview_idelogs">Logs from the IDE are shown here.</string>
   <string name="msg_emptyview_diagnostics">Open a file to show its diagnostic results</string>
   <string name="msg_emptyview_buildoutput">"Build the application or run a task to see its build output here. "</string>
@@ -273,11 +257,6 @@
   <string name="msg_terminal_new_sessions_disabled">Cannot create session. New sessions are disabled!</string>
   <string name="title_install_location_error">Install location error</string>
   <string name="title_unsupported_user">Unsupported user</string>
-  <string name="title_socials">Socials</string>
-  <string name="title_misc">Misc</string>
-  <string name="title_contribute">Contribute</string>
-  <string name="summary_contribute">It\'s not just an IDE, it\'s a community. Contribute code, ideas, and passion to AndroidIDE.</string>
-  <string name="msg_app_unavailable_for_intent">No application available to handle intent.</string>
   <string name="idepref_backend_title">Native backend</string>
   <string name="idepref_backend_summary">Ubuntu environment, toolchains and CMake build options.</string>
   <string name="idepref_backend_env">Environment</string>

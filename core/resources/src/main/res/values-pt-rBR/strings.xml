@@ -4,13 +4,9 @@
   <string name="copy" tools:override="true">Copiar</string>
   <string name="terminal_more">Mais…</string>
   <string name="text_to_search">Texto a pesquisar</string>
-  <string name="about_option_email">E-mail</string>
-  <string name="about_option_website">Site</string>
   <string name="msg_need_help">Se você estiver enfrentando problemas durante o uso do AndroidIDE ou com a construção de aplicativos Android, você pode se juntar ao Grupo do Telegram para pedir ajuda lá.\n\nVocê também pode enviar sugestões em nosso e-mail.</string>
   <string name="need_help">Precisa de ajuda?</string>
   <string name="ide_preferences">Configurações da IDE</string>
-  <string name="discussions_on_telegram">Discussões no Telegram</string>
-  <string name="official_tg_channel">Canal oficial do Telegram</string>
   <string name="msg_empty_view">Sem dados</string>
   <string name="title_terminal">Terminal</string>
   <string name="reset">Redefinir</string>
@@ -99,7 +95,6 @@
   <string name="redo">Refazer</string>
   <!-- Preferences -->
   <string name="title_change_text_size">Tamanho da fonte do editor</string>
-  <string name="idepref_about_title">Sobre o AndroidIDE</string>
   <string name="idepref_editor_fontsize_title">Tamanho da fonte</string>
   <string name="idepref_editor_fontsize_summary">Tamanho da fonte do editor</string>
   <string name="idepref_editor_paintingflags_title">Sinalizador de caracteres não exibíveis</string>
@@ -119,7 +114,6 @@
   <string name="title_tab_size">Tamanho da tabulação</string>
   <string name="msg_tab_size">Especifique o número de espaços para o TAB</string>
   <string name="msg_preferences">Configurações</string>
-  <string name="pref_changelog">Registro de alterações</string>
   <string name="msg_editor_font_size">Por favor, escolha o tamanho da fonte padrão do editor:</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
@@ -162,15 +156,10 @@
   <string name="msg_swipe_for_output">Deslize à cima para @@saída de compilação@@.</string>
   <string name="idepref_editor_useSoftTabs_title">Usar tabulação suave</string>
   <string name="idepref_editor_useSoftTabs_summary">Escolha se deseja usar espaços em vez de caracteres de tabulação (\\t).</string>
-  <string name="btn_donate">Doar</string>
-  <string name="btn_docs">Documentação</string>
   <string name="btn_close">Fechar</string>
   <string name="msg_ignore_case">Ignorar maiúsculas/minúsculas</string>
   <string name="msg_use_regex">Usar regex</string>
   <string name="configure">Configurações</string>
-  <string name="about">Sobre</string>
-  <string name="idepref_changelog_summary">O que há de novo nesta versão?</string>
-  <string name="idepref_about_summary">Mais sobre o AndroidIDE.</string>
   <string name="idepref_general_summary">Configurações gerais da IDE.</string>
   <string name="idepref_editor_summary">Configurações do editor.</string>
   <string name="idepref_customFont_title">Usar fonte personalizada</string>
@@ -215,11 +204,6 @@
   <string name="msg_path_must_be_file">Deve ter um caminho para um arquivo</string>
   <string name="msg_path_must_be_dir">Deve ser o caminho para um diretório</string>
   <string name="msg_invalid_project_details">Detalhes do projeto inválidos</string>
-  <string name="title_developer_options">Opções do desenvolvedor</string>
-  <string name="idepref_devOptions_summary">Opções experimentais/de depuração para AndroidIDE</string>
-  <string name="idepref_group_debugging">Depuração</string>
-  <string name="idepref_devOptions_dumpLogs_title">Despejar registros</string>
-  <string name="idepref_devOptions_dumpLogs_summary">Despejar registros do AndroidIDE para $HOME/.androidide/logs</string>
   <string name="msg_emptyview_idelogs">Os logs da IDE são exibidos aqui.</string>
   <string name="msg_emptyview_diagnostics">Abra um arquivo para exibir os resultados do diagnóstico</string>
   <string name="msg_emptyview_buildoutput">"Construa o aplicativo ou execute uma tarefa para ver sua saída de compilação aqui. "</string>
@@ -248,9 +232,4 @@
   <string name="msg_terminal_new_sessions_disabled">Não foi possível criar a sessão. Novas sessões estão desativadas!</string>
   <string name="title_install_location_error">Erro no local de instalação</string>
   <string name="title_unsupported_user">Usuário não suportado</string>
-  <string name="title_socials">Sociais</string>
-  <string name="title_misc">Outros</string>
-  <string name="title_contribute">Contribuir</string>
-  <string name="summary_contribute">Não é apenas um IDE, é uma comunidade. Contribua com código, ideias e paixão pelo AndroidIDE.</string>
-  <string name="msg_app_unavailable_for_intent">Nenhum aplicativo disponível para lidar com a intenção.</string>
 </resources>

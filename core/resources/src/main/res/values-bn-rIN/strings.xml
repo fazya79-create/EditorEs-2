@@ -4,13 +4,9 @@
   <string name="copy" tools:override="true">অনুকরন</string>
   <string name="terminal_more">আরও…</string>
   <string name="text_to_search">অনুসন্ধান করার জন্য পাঠ্য</string>
-  <string name="about_option_email">ইমেল</string>
-  <string name="about_option_website">ওয়েবসাইট</string>
   <string name="msg_need_help">আপনি যদি AndroidIDE ব্যবহার করার সময় বা অ্যান্ড্রয়েড অ্যাপস তৈরি করার সময় সমস্যার সম্মুখীন হন, তাহলে আপনি টেলিগ্রাম গ্রুপে যোগ দিতে পারেন সেখানে সাহায্য চাইতে পারেন।\n\nআপনি আমাদের ইমেলে পরামর্শও পাঠাতে পারেন।</string>
   <string name="need_help">সাহায্য প্রয়োজন?</string>
   <string name="ide_preferences">IDE-এর পছন্দ</string>
-  <string name="discussions_on_telegram">টেলিগ্রামে আলোচনা</string>
-  <string name="official_tg_channel">অফিসিয়াল টেলিগ্রাম চ্যানেল</string>
   <string name="msg_empty_view">কোনো তথ্য নেই</string>
   <string name="title_terminal">টার্মিনাল</string>
   <string name="reset">রিসেট করুন</string>
@@ -100,7 +96,6 @@
   <string name="redo">রিডু</string>
   <!-- Preferences -->
   <string name="title_change_text_size">এডিটর ফন্ট সাইজ</string>
-  <string name="idepref_about_title">AndroidIDE সম্পর্কে</string>
   <string name="idepref_editor_fontsize_title">ফন্টের আকার</string>
   <string name="idepref_editor_fontsize_summary">সম্পাদকের ফন্টের আকার</string>
   <string name="idepref_editor_paintingflags_title">অমুদ্রণযোগ্য অক্ষরগুলি</string>
@@ -120,7 +115,6 @@
   <string name="title_tab_size">ট্যাবের আকার</string>
   <string name="msg_tab_size">TAB এর জন্য স্পেস সংখ্যা নির্দিষ্ট করুন</string>
   <string name="msg_preferences">পছন্দ</string>
-  <string name="pref_changelog">চেঞ্জলগ</string>
   <string name="msg_editor_font_size">দয়া করে সম্পাদকের ডিফল্ট ফন্ট সাইজ বেছে নিন :</string>
   <!-- Error Messages used while Logging -->
   <!-- Layout preview and designer -->
@@ -163,15 +157,10 @@
   <string name="msg_swipe_for_output">\@@বিল্ড আউটপুট@@ এর জন্য উপরে সোয়াইপ করুন।</string>
   <string name="idepref_editor_useSoftTabs_title">সফ্ট ট্যাব ব্যবহার করুন</string>
   <string name="idepref_editor_useSoftTabs_summary">ট্যাব অক্ষরের (\\t) পরিবর্তে স্পেস ব্যবহার করবেন কিনা তা বেছে নিন।</string>
-  <string name="btn_donate">দান করুন</string>
-  <string name="btn_docs">ডকুমেন্টেশন</string>
   <string name="btn_close">বন্ধ করুন</string>
   <string name="msg_ignore_case">Case উপেক্ষা করুন</string>
   <string name="msg_use_regex">regex ব্যবহার করুন</string>
   <string name="configure">কনফিগার করুন</string>
-  <string name="about">সম্বন্ধে</string>
-  <string name="idepref_changelog_summary">এই সংস্করণে নতুন কি আছে?</string>
-  <string name="idepref_about_summary">AndroidIDE সম্পর্কে আরো কিছু।</string>
   <string name="idepref_general_summary">সাধারণ IDE কনফিগারেশন।</string>
   <string name="idepref_editor_summary">সম্পাদক কনফিগার করুন৷</string>
   <string name="idepref_customFont_title">কাস্টম ফন্ট ব্যবহার করুন</string>
@@ -216,11 +205,6 @@
   <string name="msg_path_must_be_file">একটি ফাইল পাথ হতে হবে</string>
   <string name="msg_path_must_be_dir">একটি ডিরেক্টরির পথ হতে হবে</string>
   <string name="msg_invalid_project_details">প্রকল্পের বিবরণ অবৈধ</string>
-  <string name="title_developer_options">বিকাশকারী অপশনগুলি</string>
-  <string name="idepref_devOptions_summary">AndroidIDE-এর জন্য পরীক্ষামূলক/ডিবাগিং অপশনগুলি</string>
-  <string name="idepref_group_debugging">ডিবাগিং</string>
-  <string name="idepref_devOptions_dumpLogs_title">ডাম্প লগ</string>
-  <string name="idepref_devOptions_dumpLogs_summary">AndroidIDE লগ ডাম্প করুন $HOME/.androidide/logs এ</string>
   <string name="msg_emptyview_idelogs">IDE লগস্ এখানে দেখানো হয়.</string>
   <string name="msg_emptyview_diagnostics">কোনো ফাইল এর ডায়গনিস্টিক ফলাফল দেখার জন্য, সেটিকে খুলুন</string>
   <string name="msg_emptyview_buildoutput">"এখানে বিল্ড আউটপুট দেখতে অ্যাপ্লিকেশনটি তৈরি করুন বা একটি টাস্ক চালান। "</string>
@@ -249,9 +233,4 @@
   <string name="msg_terminal_new_sessions_disabled">সেশন তৈরি করা যাবে না। নতুন সেশন তৈরি করা নিষ্ক্রিয়!</string>
   <string name="title_install_location_error">ইনস্টল করার অবস্থানে ত্রুটি</string>
   <string name="title_unsupported_user">অসমর্থিত ব্যবহার</string>
-  <string name="title_socials">সামাজিক মাধ্যম গুলি</string>
-  <string name="title_misc">বিবিধ</string>
-  <string name="title_contribute">অবদান করুন</string>
-  <string name="summary_contribute">এটি শুধুমাত্র একটি IDE নয়, এটি একটি কমিউনিটি। AndroidIDE-এ কোড, ধারনা এবং আবেগ অবদান করুন।</string>
-  <string name="msg_app_unavailable_for_intent">Intent গ্রহন করার জন্য কোনো অ্যাপ্লিকেশন উপলব্ধ নেই৷</string>
 </resources>

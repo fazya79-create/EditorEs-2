@@ -6,7 +6,6 @@
   <color name="primaryIconColor">#ffffff</color>
   <color name="rippleHighlightColor">#85121212</color>
 
-  <color name="color_success">@color/green_500</color>
   <color name="color_warning">#ff9800</color>
   <color name="color_error">#f44336</color>
 

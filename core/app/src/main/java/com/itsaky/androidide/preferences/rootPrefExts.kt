@@ -22,8 +22,6 @@ import kotlinx.parcelize.Parcelize
 
 internal fun IDEPreferences.addRootPreferences() {
   addPreference(ConfigurationPreferences())
-  addPreference(DeveloperOptionsPreferences())
-  addPreference(AboutPreferences())
 }
 
 @Parcelize
@@ -38,30 +36,5 @@ class ConfigurationPreferences(
     addPreference(EditorPreferencesScreen())
     addPreference(BackendPreferencesScreen())
     addPreference(TermuxPreferences())
-  }
-}
-
-@Parcelize
-class DeveloperOptionsPreferences(
-  override val key: String = "idepref_devOpts",
-  override val title: Int = string.title_developer_options,
-  override val children: List<IPreference> = mutableListOf()
-) : IPreferenceGroup() {
-
-  init {
-    addPreference(DeveloperOptionsScreen())
-  }
-}
-
-@Parcelize
-class AboutPreferences(
-  override val key: String = "idepref_category_about",
-  override val title: Int = string.about,
-  override val children: List<IPreference> = mutableListOf()
-) : IPreferenceGroup() {
-
-  init {
-    addPreference(changelog)
-    addPreference(about)
   }
 }
