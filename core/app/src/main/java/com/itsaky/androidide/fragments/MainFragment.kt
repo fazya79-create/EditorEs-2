@@ -16,6 +16,7 @@ import com.itsaky.androidide.adapters.MainActionsListAdapter
 import com.itsaky.androidide.app.BaseIDEActivity
 import com.itsaky.androidide.common.databinding.LayoutDialogProgressBinding
 import com.itsaky.androidide.databinding.FragmentMainBinding
+import com.itsaky.androidide.fragments.sheets.ProjectListSheet
 import com.itsaky.androidide.models.MainScreenAction
 import com.itsaky.androidide.preferences.databinding.LayoutDialogTextInputBinding
 import com.itsaky.androidide.resources.R.string
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.CancellationException
 
-class MainFragment : BaseFragment() {
+class MainFragment : BaseFragment(), ProjectListSheet.Callback {
 
   private val viewModel by viewModels<MainViewModel>(
     ownerProducer = { requireActivity() })
@@ -44,6 +45,7 @@ class MainFragment : BaseFragment() {
   companion object {
 
     private val log = LoggerFactory.getLogger(MainFragment::class.java)
+    private const val TAG_PROJECT_LIST_SHEET = "project_list_sheet"
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -60,7 +62,7 @@ class MainFragment : BaseFragment() {
       val onClick = { action: MainScreenAction, _: View ->
         when (action.id) {
           MainScreenAction.ACTION_CREATE_PROJECT -> showCreateProject()
-          MainScreenAction.ACTION_OPEN_PROJECT -> pickDirectory()
+          MainScreenAction.ACTION_OPEN_PROJECT -> showProjectList()
           MainScreenAction.ACTION_CLONE_REPO -> cloneGitRepo()
           MainScreenAction.ACTION_OPEN_TERMINAL -> startActivity(
             Intent(requireActivity(), TerminalActivity::class.java))
@@ -94,6 +96,18 @@ class MainFragment : BaseFragment() {
 
   private fun pickDirectory() {
     pickDirectory(this::openProject)
+  }
+
+  private fun showProjectList() {
+    ProjectListSheet().show(childFragmentManager, TAG_PROJECT_LIST_SHEET)
+  }
+
+  override fun onProjectSelected(project: File) {
+    openProject(project)
+  }
+
+  override fun onBrowseProjects() {
+    pickDirectory()
   }
 
   private fun showCreateProject() {

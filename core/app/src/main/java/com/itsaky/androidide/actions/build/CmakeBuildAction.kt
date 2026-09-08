@@ -18,6 +18,7 @@
 package com.itsaky.androidide.actions.build
 
 import android.content.Context
+import android.graphics.ColorFilter
 import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
 import com.itsaky.androidide.actions.ActionData
@@ -41,7 +42,7 @@ open class CmakeBuildAction(context: Context, override val order: Int) : EditorA
   override val id: String = "ide.editor.build.cmake"
 
   private val buildIcon: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_run)
-  private val cancelIcon: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_close)
+  private val cancelIcon: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_stop_circle)
 
   companion object {
     private val log = LoggerFactory.getLogger(CmakeBuildAction::class.java)
@@ -75,6 +76,13 @@ open class CmakeBuildAction(context: Context, override val order: Int) : EditorA
       label = activity.getString(R.string.action_build_cmake)
       icon = buildIcon
     }
+  }
+
+  override fun createColorFilter(data: ActionData): ColorFilter? {
+    if (icon === cancelIcon) {
+      return null
+    }
+    return super.createColorFilter(data)
   }
 
   override suspend fun execAction(data: ActionData): Any {

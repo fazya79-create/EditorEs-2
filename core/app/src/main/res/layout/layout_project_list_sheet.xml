@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:orientation="vertical"
+  android:paddingStart="16dp"
+  android:paddingTop="8dp"
+  android:paddingEnd="16dp"
+  android:paddingBottom="8dp">
+
+  <TextView
+    android:id="@+id/title"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="8dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="8dp"
+    android:text="@string/msg_open_existing_project"
+    android:textAppearance="@style/TextAppearance.Material3.TitleLarge" />
+
+  <TextView
+    android:id="@+id/empty"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:gravity="center"
+    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+    android:visibility="gone"
+    tools:text="@string/msg_no_projects_found"
+    tools:visibility="visible" />
+
+  <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/list"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:overScrollMode="never" />
+
+  <include
+    android:id="@+id/browse"
+    layout="@layout/layout_optionssheet_item" />
+
+</LinearLayout>
