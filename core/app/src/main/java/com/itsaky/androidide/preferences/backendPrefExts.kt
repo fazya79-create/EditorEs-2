@@ -188,28 +188,23 @@ private class InstallCmakePreference(
 
 private fun installToolchain(preference: Preference, kind: ToolchainKind) {
   val context = preference.context
-  val activity = context as? android.app.Activity
   val label = if (kind == ToolchainKind.Ndk) {
     context.getString(string.idepref_backend_install_ndk)
   } else {
     context.getString(string.idepref_backend_install_cmake)
   }
-  val progress = activity?.let { InstallFlashbar(it, label) }
   executeAsyncProvideError({
     runBlocking { ToolchainRepository.fetchReleases(kind) }
   }) { releases, error ->
     if (error != null || releases == null) {
       val reason = error?.cause?.message ?: error?.message ?: ""
-      val message = context.getString(string.idepref_backend_fetch_failed, reason)
-      if (progress == null) flashError(message) else progress.failed(message)
+      flashError(context.getString(string.idepref_backend_fetch_failed, reason))
       return@executeAsyncProvideError
     }
     if (releases.isEmpty()) {
-      val message = context.getString(string.idepref_backend_no_releases)
-      if (progress == null) flashError(message) else progress.failed(message)
+      flashError(string.idepref_backend_no_releases)
       return@executeAsyncProvideError
     }
-    progress?.dismiss()
     val installed = ToolchainPaths.installedVersion(context.applicationContext, kind)
     val choices = releases.map { release ->
       "${release.tag} (${"%.1f".format(release.sizeMb)} MB)"

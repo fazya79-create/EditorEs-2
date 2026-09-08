@@ -29,8 +29,7 @@ fun cppSharedLibraryProject() = baseProjectImpl {
     val projectDir = data.projectDir
     val projectName = data.name.replace(Regex("[^A-Za-z0-9_]"), "_")
     save(cmakeListsSrc(projectName), File(projectDir, "CMakeLists.txt"))
-    save(libraryHeaderSrc(projectName), File(projectDir, "include/$projectName.h"))
-    save(libraryCppSrc(projectName), File(projectDir, "src/$projectName.cpp"))
+    save(mainCppSrc(projectName), File(projectDir, "main.cpp"))
     save(readmeSrc(data.name, projectName), File(projectDir, "README.md"))
   }
 }
@@ -39,40 +38,20 @@ private fun cmakeListsSrc(projectName: String): String {
   return """
     cmake_minimum_required(VERSION 3.22)
     project($projectName LANGUAGES C CXX)
-    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD 20)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    add_library($projectName SHARED src/$projectName.cpp)
-    target_include_directories($projectName PUBLIC ${'$'}{CMAKE_CURRENT_SOURCE_DIR}/include)
+    add_library($projectName SHARED main.cpp)
   """.trimIndent() + "\n"
 }
 
-private fun libraryHeaderSrc(projectName: String): String {
-  val guard = "${projectName.uppercase()}_H"
+private fun mainCppSrc(projectName: String): String {
   return """
-    #ifndef $guard
-    #define $guard
+    #include <string>
 
-    #ifdef __cplusplus
-    extern "C" {
-    #endif
-
-    __attribute__((visibility("default")))
-    const char* ${projectName}_greet(void);
-
-    #ifdef __cplusplus
-    }
-    #endif
-
-    #endif
-  """.trimIndent() + "\n"
-}
-
-private fun libraryCppSrc(projectName: String): String {
-  return """
-    #include "$projectName.h"
-
-    const char* ${projectName}_greet(void) {
-      return "Hello from $projectName!";
+    extern "C" __attribute__((visibility("default")))
+    const char* ${projectName}_greet() {
+      static const std::string message = "Hello from $projectName!";
+      return message.c_str();
     }
   """.trimIndent() + "\n"
 }
