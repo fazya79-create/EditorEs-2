@@ -261,6 +261,16 @@
   <string name="title_unsupported_user">Unsupported user</string>
   <string name="idepref_backend_title">Native backend</string>
   <string name="idepref_backend_summary">Ubuntu environment, toolchains and CMake build options.</string>
+  <string name="idepref_codestyle_title">Code style</string>
+  <string name="idepref_codestyle_summary">clang-format options for the current project\'s .clang-format file.</string>
+  <string name="idepref_codestyle_group">clang-format</string>
+  <string name="idepref_codestyle_based_on_style">Based on style</string>
+  <string name="idepref_codestyle_indent_width">Indent width</string>
+  <string name="idepref_codestyle_tab_width">Tab width</string>
+  <string name="idepref_codestyle_use_tab">Use tab</string>
+  <string name="idepref_codestyle_column_limit">Column limit</string>
+  <string name="idepref_codestyle_no_project">Open a C/C++ project to edit its code style</string>
+  <string name="idepref_codestyle_invalid_number">Enter a whole number between %1$d and %2$d</string>
   <string name="idepref_backend_env">Environment</string>
   <string name="idepref_backend_install_ubuntu">Install Ubuntu (required)</string>
   <string name="idepref_backend_install_ndk">Install NDK (optional)</string>

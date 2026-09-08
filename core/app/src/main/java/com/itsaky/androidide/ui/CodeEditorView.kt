@@ -29,6 +29,7 @@ import com.itsaky.androidide.activities.editor.BaseEditorActivity
 import com.itsaky.androidide.app.BaseApplication
 import com.itsaky.androidide.editor.api.IEditor
 import com.itsaky.androidide.editor.databinding.LayoutCodeEditorBinding
+import com.itsaky.androidide.editor.language.cpp.CppLanguage
 import com.itsaky.androidide.editor.ui.EditorSearchLayout
 import com.itsaky.androidide.editor.ui.IDEEditor
 import com.itsaky.androidide.editor.ui.IDEEditor.Companion.createInputTypeFlags
@@ -336,8 +337,8 @@ class CodeEditorView(
       return null
     }
 
-    val serverID: String = when (file.extension) {
-      "c", "h", "cpp", "hpp", "cc", "cxx" -> CppLanguageServer.SERVER_ID
+    val serverID: String = when (file.extension.lowercase()) {
+      in CppLanguage.EXTENSIONS -> CppLanguageServer.SERVER_ID
       else -> return null
     }
 

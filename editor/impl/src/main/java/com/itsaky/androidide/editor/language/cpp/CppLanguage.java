@@ -31,6 +31,10 @@ import io.github.rosemoe.sora.widget.SymbolPairMatch;
 import java.io.File;
 import java.io.StringReader;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
@@ -40,6 +44,9 @@ public class CppLanguage extends IDELanguage {
 
   /** Server ID of the C/C++ language server; must match {@code CppLanguageServer.SERVER_ID}. */
   public static final String SERVER_ID = "ide.lsp.cpp";
+
+  public static final Set<String> EXTENSIONS = Collections.unmodifiableSet(
+      new HashSet<>(Arrays.asList("c", "h", "cc", "cpp", "cxx", "hpp", "hh", "hxx")));
 
   private static final Logger LOG = LoggerFactory.getLogger(CppLanguage.class);
   private final NewlineHandler[] newlineHandlers =

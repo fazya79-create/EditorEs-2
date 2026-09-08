@@ -35,6 +35,7 @@ class ConfigurationPreferences(
     addPreference(GeneralPreferencesScreen())
     addPreference(EditorPreferencesScreen())
     addPreference(BackendPreferencesScreen())
+    addPreference(CodeStylePreferencesScreen())
     addPreference(TermuxPreferences())
   }
 }

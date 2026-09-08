@@ -17,6 +17,7 @@
 
 package com.itsaky.androidide.templates.impl.cppSharedLibrary
 
+import com.itsaky.androidide.projects.ClangFormat
 import com.itsaky.androidide.templates.impl.R
 import com.itsaky.androidide.templates.impl.base.createRecipe
 import com.itsaky.androidide.templates.impl.baseProjectImpl
@@ -30,6 +31,7 @@ fun cppSharedLibraryProject() = baseProjectImpl {
     val projectName = data.name.replace(Regex("[^A-Za-z0-9_]"), "_")
     save(cmakeListsSrc(projectName), File(projectDir, "CMakeLists.txt"))
     save(mainCppSrc(projectName), File(projectDir, "main.cpp"))
+    save(ClangFormat.defaultContent(), File(projectDir, ClangFormat.FILE_NAME))
     save(readmeSrc(data.name, projectName), File(projectDir, "README.md"))
   }
 }

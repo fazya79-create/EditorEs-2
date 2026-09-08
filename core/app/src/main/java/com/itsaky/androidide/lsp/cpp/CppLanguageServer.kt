@@ -140,8 +140,6 @@ class CppLanguageServer(
     private const val REQUEST_TIMEOUT_SECONDS = 20L
     private const val DIAGNOSTICS_WAIT_MS = 3000L
 
-    private val CppExtensions = setOf("c", "h", "cc", "cpp", "cxx", "hpp", "hh", "hxx")
-
     /**
      * Compile flags clangd uses for files that are not covered by a compilation database (i.e.
      * before the first CMake configure). Without a target and sysroot clangd falls back to the
@@ -162,7 +160,7 @@ class CppLanguageServer(
     }
 
     private fun isCppFile(file: Path): Boolean {
-      return file.toFile().extension.lowercase() in CppExtensions
+      return file.toFile().extension.lowercase() in CppLanguage.EXTENSIONS
     }
   }
 

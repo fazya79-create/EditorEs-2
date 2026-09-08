@@ -638,8 +638,8 @@ open class IDEEditor @JvmOverloads constructor(
 
     // 3 -> Check if we have ANTLR4 lexer-based languages for this file,
     //      return the language if we do, otherwise return an empty language
-    val lang = when (FileUtils.getFileExtension(file)) {
-      "c", "h", "cc", "cpp", "cxx" -> CppLanguage(file)
+    val lang = when (FileUtils.getFileExtension(file).lowercase()) {
+      in CppLanguage.EXTENSIONS -> CppLanguage(file)
       else -> EmptyLanguage()
     }
 

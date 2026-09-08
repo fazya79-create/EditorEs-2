@@ -49,6 +49,7 @@ import com.itsaky.androidide.models.OpenedFile
 import com.itsaky.androidide.models.OpenedFilesCache
 import com.itsaky.androidide.models.Range
 import com.itsaky.androidide.models.SaveResult
+import com.itsaky.androidide.projects.ClangFormat
 import com.itsaky.androidide.projects.IProjectManager
 import com.itsaky.androidide.tasks.executeAsync
 import com.itsaky.androidide.ui.CodeEditorView
@@ -629,10 +630,15 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
   @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
   fun onProjectInitialized(event: ProjectInitializedEvent) {
     EventBus.getDefault().removeStickyEvent(event)
+    val projectDir = runCatching { IProjectManager.getInstance().projectDir }.getOrNull() ?: return
+    editorActivityScope.launch {
+      if (ClangFormat.isCppProject(projectDir)) {
+        ClangFormat.ensureDefault(projectDir)
+      }
+    }
     if (editorViewModel.getOpenedFileCount() != 0) {
       return
     }
-    val projectDir = runCatching { IProjectManager.getInstance().projectDir }.getOrNull() ?: return
     val mainFile = File(projectDir, "main.cpp")
     if (mainFile.isFile) {
       openFile(mainFile)

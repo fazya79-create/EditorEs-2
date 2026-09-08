@@ -17,6 +17,7 @@
 
 package com.itsaky.androidide.templates.impl.cppExecutable
 
+import com.itsaky.androidide.projects.ClangFormat
 import com.itsaky.androidide.templates.impl.R
 import com.itsaky.androidide.templates.impl.base.createRecipe
 import com.itsaky.androidide.templates.impl.baseProjectImpl
@@ -30,6 +31,7 @@ fun cppExecutableProject() = baseProjectImpl {
     val projectName = data.name.replace(Regex("[^A-Za-z0-9_]"), "_")
     save(cmakeListsSrc(projectName), File(projectDir, "CMakeLists.txt"))
     save(mainCppSrc(projectName), File(projectDir, "main.cpp"))
+    save(ClangFormat.defaultContent(), File(projectDir, ClangFormat.FILE_NAME))
     save(readmeSrc(data.name), File(projectDir, "README.md"))
   }
 }
