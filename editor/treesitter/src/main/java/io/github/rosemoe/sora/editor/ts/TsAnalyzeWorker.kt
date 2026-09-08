@@ -24,7 +24,6 @@ import com.itsaky.androidide.treesitter.api.TreeSitterInputEdit
 import com.itsaky.androidide.treesitter.api.TreeSitterQueryCapture
 import com.itsaky.androidide.treesitter.api.safeExecQueryCursor
 import com.itsaky.androidide.treesitter.string.UTF16String
-import io.github.rosemoe.sora.data.ObjectAllocator
 import io.github.rosemoe.sora.editor.ts.spans.TsSpanFactory
 import io.github.rosemoe.sora.lang.analysis.StyleReceiver
 import io.github.rosemoe.sora.lang.styling.CodeBlock
@@ -206,11 +205,28 @@ class TsAnalyzeWorker(
     }
 
     val tree = tree!!
-    val scopedVariables = TsScopedVariables(tree, text, languageSpec)
+    val scopedVariables = try {
+      TsScopedVariables(tree, text, languageSpec) {
+        isDestroyed || messageChannel.isNotEmpty()
+      }
+    } catch (err: TsScopedVariables.AnalysisCanceledException) {
+      return
+    }
+
+    if (isDestroyed || messageChannel.isNotEmpty() || !tree.canAccess()) {
+      return
+    }
+
     val oldTree = (styles.spans as? LineSpansGenerator?)?.tree
     val copied = tree.copy()
 
-    styles.spans = LineSpansGenerator(
+    val receiver = stylesReceiver
+    if (receiver == null) {
+      copied.close()
+      return
+    }
+
+    val newSpans = LineSpansGenerator(
       copied,
       reference.lineCount,
       reference.reference,
@@ -220,15 +236,18 @@ class TsAnalyzeWorker(
       spanFactory
     )
 
-    val oldBlocks = styles.blocks
     updateCodeBlocks()
-    oldBlocks?.also { ObjectAllocator.recycleBlockLines(it) }
 
-    stylesReceiver?.setStyles(analyzer, styles) {
+    receiver.setStyles(analyzer, styles) {
+      if (isDestroyed) {
+        copied.close()
+      } else {
+        styles.spans = newSpans
+      }
       oldTree?.close()
     }
 
-    stylesReceiver?.updateBracketProvider(analyzer, TsBracketPairs(copied, languageSpec))
+    receiver.updateBracketProvider(analyzer, TsBracketPairs(copied, languageSpec))
   }
 
   private fun updateCodeBlocks() {
@@ -260,7 +279,7 @@ class TsAnalyzeWorker(
         }
 
         match.captures.forEach { capture ->
-          val block = ObjectAllocator.obtainBlockLine()
+          val block = CodeBlock()
           var node = capture.node
           val start = node.startPoint
 

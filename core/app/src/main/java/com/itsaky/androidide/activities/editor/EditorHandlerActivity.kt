@@ -24,7 +24,6 @@ import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup.LayoutParams
-import androidx.annotation.DrawableRes
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.collection.MutableIntObjectMap
 import androidx.core.content.res.ResourcesCompat
@@ -677,7 +676,7 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
     editorActivityScope.launch {
       val files = editorViewModel.getOpenedFiles()
       val dupliCount = mutableMapOf<String, Int>()
-      val names = MutableIntObjectMap<Pair<String, @DrawableRes Int>>()
+      val names = MutableIntObjectMap<Pair<String, Int>>()
       val nameBuilder = UniqueNameBuilder<File>("", File.separator)
 
       files.forEach {

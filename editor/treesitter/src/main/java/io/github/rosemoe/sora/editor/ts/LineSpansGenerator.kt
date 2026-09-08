@@ -112,7 +112,7 @@ class LineSpansGenerator(internal var tree: TSTree, internal var lineCount: Int,
       cursor.setByteRange(startIndex * 2, endIndex * 2)
 
       cursor.safeExecQueryCursor(query = languageSpec.tsQuery, tree = tree,
-        recycleNodeAfterUse = true, debugLogging = false,
+        recycleNodeAfterUse = true, allowChangedNodes = true, debugLogging = false,
         debugName = "LineSpansGenerator.captureRegion()") { match ->
         if (languageSpec.queryPredicator.doPredicate(languageSpec.predicates, content, match)) {
           captures.addAll(match.captures)
@@ -238,11 +238,13 @@ class LineSpansGenerator(internal var tree: TSTree, internal var lineCount: Int,
       try {
         val cached = queryCache(line)
         if (cached != null) {
-          return ArrayList(cached)
+          return cached.toMutableList()
         }
         val start = content.indexer.getCharPosition(line, 0).index
         val end = start + content.getColumnCount(line)
-        return captureRegion(start, end)
+        val captured = captureRegion(start, end)
+        pushCache(line, captured)
+        return captured.toMutableList()
       } catch (err: Throwable) {
         err.printStackTrace()
         throw err

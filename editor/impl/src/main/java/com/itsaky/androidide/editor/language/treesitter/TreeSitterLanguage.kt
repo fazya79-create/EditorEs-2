@@ -105,7 +105,7 @@ abstract class TreeSitterLanguage(
     return INTERRUPTION_LEVEL_STRONG
   }
 
-  open fun getIndentAdvance(
+  override fun getIndentAdvance(
     content: ContentReference,
     line: Int,
     column: Int,

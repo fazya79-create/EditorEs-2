@@ -48,8 +48,35 @@ private fun TSNode.indices(): TSNodeIndices {
  * @param tree The parsed tree
  * @param text The current text for tree
  * @param spec Language specification, which should the same as highlighter's
+ * @param cancellationToken Cancellation token for early cancellation.
+ * @throws AnalysisCanceledException when the operation is canceled
  */
-class TsScopedVariables(tree: TSTree, text: UTF16String, val spec: TsLanguageSpec) {
+class TsScopedVariables(
+  tree: TSTree,
+  text: UTF16String,
+  val spec: TsLanguageSpec,
+  cancellationToken: CancellationToken = CancellationToken.NoCancellation
+) {
+
+  /**
+   * Token for cancellation of operation
+   */
+  fun interface CancellationToken {
+
+    companion object {
+      /**
+       * Never cancel the operation
+       */
+      val NoCancellation = CancellationToken { false }
+    }
+
+    /**
+     * Check if the operation is now canceled.
+     */
+    fun isCanceled(): Boolean
+  }
+
+  class AnalysisCanceledException : RuntimeException()
 
   private val rootScope: Scope
 
@@ -71,6 +98,7 @@ class TsScopedVariables(tree: TSTree, text: UTF16String, val spec: TsLanguageSpe
           query = spec.tsQuery,
           tree = tree,
           recycleNodeAfterUse = true,
+          whileTrue = { !cancellationToken.isCanceled() },
           onClosedOrEdited = { captures.clear() },
           debugName = "TsScopedVariables.init()"
         ) { match ->
@@ -89,6 +117,9 @@ class TsScopedVariables(tree: TSTree, text: UTF16String, val spec: TsLanguageSpe
 
         scopeStack.push(rootScope)
         for (capture in captures) {
+          if (cancellationToken.isCanceled()) {
+            break
+          }
           val startIndex = capture.node.startByte / 2
           val endIndex = capture.node.endByte / 2
           while (startIndex >= scopeStack.peek().endIndex) {
@@ -133,6 +164,10 @@ class TsScopedVariables(tree: TSTree, text: UTF16String, val spec: TsLanguageSpe
     }
 
     (rootNode as? TreeSitterNode?)?.recycle()
+
+    if (cancellationToken.isCanceled()) {
+      throw AnalysisCanceledException()
+    }
   }
 
   data class Scope(

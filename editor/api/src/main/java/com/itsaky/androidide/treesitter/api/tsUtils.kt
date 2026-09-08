@@ -38,6 +38,7 @@ inline fun <ResultT> TSQueryCursor.safeExecQueryCursor(
   query: TSQuery,
   tree: TSTree?,
   recycleNodeAfterUse: Boolean = true,
+  allowChangedNodes: Boolean = false,
   crossinline matchCondition: (TSQueryMatch?) -> Boolean = { true },
   crossinline whileTrue: (TSQueryMatch?) -> Boolean = { true },
   crossinline onClosedOrEdited: () -> Unit = {},
@@ -55,7 +56,7 @@ inline fun <ResultT> TSQueryCursor.safeExecQueryCursor(
   }
 
   val rootNode = tree.rootNode
-  if (!rootNode.canAccess() || rootNode.hasChanges()) {
+  if (!rootNode.canAccess() || (!allowChangedNodes && rootNode.hasChanges())) {
     if (debugLogging) {
       log.debug(
         "$debugName, Cannot execute query, tree's root node is not accessible or has been edited",
@@ -69,6 +70,7 @@ inline fun <ResultT> TSQueryCursor.safeExecQueryCursor(
     query = query,
     node = rootNode,
     recycleNodeAfterUse = recycleNodeAfterUse,
+    allowChangedNodes = allowChangedNodes,
     matchCondition = {
       val result = tree.canAccess() && matchCondition(it)
       if (!result && debugLogging) {
@@ -95,6 +97,7 @@ inline fun <ResultT> TSQueryCursor.safeExecQueryCursor(
   query: TSQuery,
   node: TSNode,
   recycleNodeAfterUse: Boolean = true,
+  allowChangedNodes: Boolean = false,
   crossinline matchCondition: (TSQueryMatch?) -> Boolean = { true },
   crossinline whileTrue: (TSQueryMatch?) -> Boolean = { true },
   crossinline onClosedOrEdited: () -> Unit = {},
@@ -107,8 +110,9 @@ inline fun <ResultT> TSQueryCursor.safeExecQueryCursor(
     query = query,
     node = node,
     recycleNodeAfterUse = recycleNodeAfterUse,
+    allowChangedNodes = allowChangedNodes,
     matchCondition = { match ->
-      match != null && canAccess() && node.canAccess() && !node.hasChanges() && matchCondition(
+      match != null && canAccess() && node.canAccess() && (allowChangedNodes || !node.hasChanges()) && matchCondition(
         match)
     },
     whileTrue = whileTrue,
@@ -123,6 +127,7 @@ internal inline fun <ResultT> TSQueryCursor.doSafeExecQueryCursor(
   query: TSQuery,
   node: TSNode,
   recycleNodeAfterUse: Boolean = true,
+  allowChangedNodes: Boolean = false,
   crossinline matchCondition: (TSQueryMatch?) -> Boolean,
   crossinline whileTrue: (TSQueryMatch?) -> Boolean,
   crossinline onClosedOrEdited: () -> Unit,
@@ -138,7 +143,7 @@ internal inline fun <ResultT> TSQueryCursor.doSafeExecQueryCursor(
     return null
   }
 
-  if (!node.canAccess() || node.hasChanges()) {
+  if (!node.canAccess() || (!allowChangedNodes && node.hasChanges())) {
     if (debugLogging) {
       log.debug("$debugName: Cannot execute query, node is not accessible or has been edited",
         "node.canAccess=${node.canAccess()}",
@@ -147,6 +152,7 @@ internal inline fun <ResultT> TSQueryCursor.doSafeExecQueryCursor(
     return null
   }
 
+  isAllowChangedNodes = allowChangedNodes
   exec(query, node)
   var match = nextMatch()
   while (matchCondition(match) && whileTrue(match)) {
