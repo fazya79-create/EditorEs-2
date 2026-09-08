@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:orientation="vertical"
+  android:paddingHorizontal="24dp">
+
+  <com.google.android.material.textfield.TextInputLayout
+    android:id="@+id/browse_apk"
+    style="@style/Widget.Material3.TextInputEditText.OutlinedBox.Dense"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="@string/hint_native_injection_apk"
+    app:endIconDrawable="@drawable/ic_folder"
+    app:endIconMode="custom"
+    app:endIconContentDescription="@string/action_browse_apk">
+
+    <com.google.android.material.textfield.TextInputEditText
+      android:id="@+id/apk_path"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:inputType="textUri" />
+  </com.google.android.material.textfield.TextInputLayout>
+
+  <com.google.android.material.textfield.TextInputLayout
+    style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    android:hint="@string/hint_native_injection_arm">
+
+    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+      android:id="@+id/arm_libraries"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:inputType="none" />
+  </com.google.android.material.textfield.TextInputLayout>
+
+  <com.google.android.material.textfield.TextInputLayout
+    style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    android:hint="@string/hint_native_injection_arm64">
+
+    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+      android:id="@+id/arm64_libraries"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:inputType="none" />
+  </com.google.android.material.textfield.TextInputLayout>
+
+  <androidx.core.widget.NestedScrollView
+    android:id="@+id/log_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:layout_marginTop="16dp"
+    android:background="?attr/colorSurfaceContainerHigh">
+    <com.google.android.material.textview.MaterialTextView
+      android:id="@+id/log"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:fontFamily="monospace"
+      android:padding="12dp"
+      android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+  </androidx.core.widget.NestedScrollView>
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:gravity="end"
+    android:orientation="horizontal">
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/patch"
+      style="@style/Widget.Material3.Button.TextButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:enabled="false"
+      android:text="@string/action_native_injection_patch" />
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/install"
+      style="@style/Widget.Material3.Button.TextButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:enabled="false"
+      android:text="@string/action_native_injection_install" />
+  </LinearLayout>
+</LinearLayout>

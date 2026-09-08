@@ -70,6 +70,10 @@ android {
     generateLocaleConfig = true
   }
 
+  packaging {
+    resources.excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+  }
+
   buildTypes {
     release {
       isShrinkResources = true
@@ -114,6 +118,10 @@ dependencies {
   implementation(libs.google.auto.service.annotations)
   implementation(libs.google.gson)
   implementation(libs.google.guava)
+  implementation(libs.android.apksig)
+  implementation(libs.smali.dexlib2)
+  implementation(libs.bouncycastle.prov)
+  implementation(libs.bouncycastle.pkix)
 
   // Git
   implementation(libs.git.jgit)

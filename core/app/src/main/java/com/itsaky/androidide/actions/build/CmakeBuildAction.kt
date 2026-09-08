@@ -118,24 +118,24 @@ open class CmakeBuildAction(context: Context, override val order: Int) : EditorA
       )
       currentRunner = runner
       val configs = RunConfigurations(projectDir, runner)
-      if (!configs.hasPresets()) {
-        configs.bootstrap()
-      }
-      val preset = configs.activePreset()
-        ?: return BuildResult(false, 0, "No CMake presets found")
-
-      runOnUiThread {
-        activity.appendBuildOutput("> build $preset")
-      }
-
       var exitCode = 1
       var failure: String? = null
-      runner.run(projectDir, createRequest(preset)) { event ->
-        when (event) {
-          is BuildEvent.Line -> runOnUiThread { activity.appendBuildOutput(event.text) }
-          is BuildEvent.Finished -> exitCode = event.exitCode
-          is BuildEvent.Failed -> failure = event.message
+      val presets = configs.activePresets()
+      if (presets.isEmpty()) {
+        return BuildResult(false, 0, "No CMake presets found")
+      }
+      for (preset in presets) {
+        runOnUiThread {
+          activity.appendBuildOutput("> build $preset")
         }
+        runner.run(projectDir, createRequest(preset)) { event ->
+          when (event) {
+            is BuildEvent.Line -> runOnUiThread { activity.appendBuildOutput(event.text) }
+            is BuildEvent.Finished -> exitCode = event.exitCode
+            is BuildEvent.Failed -> failure = event.message
+          }
+        }
+        if (failure != null || exitCode != 0) break
       }
       BuildResult(failure == null && exitCode == 0, exitCode, failure)
     } catch (error: Throwable) {

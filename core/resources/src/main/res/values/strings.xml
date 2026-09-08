@@ -11,6 +11,13 @@
   <string name="ide_preferences">IDE preferences</string>
   <string name="msg_empty_view">No data</string>
   <string name="title_terminal">Terminal</string>
+  <string name="title_native_library_injection">Inject native libraries</string>
+  <string name="hint_native_injection_apk">APK path</string>
+  <string name="action_browse_apk">Browse for an APK</string>
+  <string name="hint_native_injection_arm">arm library</string>
+  <string name="hint_native_injection_arm64">arm64 library</string>
+  <string name="action_native_injection_patch">Patch</string>
+  <string name="action_native_injection_install">Install</string>
   <string name="reset">Reset</string>
   <string name="ide_logs">IDE Logs</string>
 

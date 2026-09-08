@@ -76,6 +76,10 @@ google-auto-service-annotations = { module = "com.google.auto.service:auto-servi
 google-auto-service = { module = "com.google.auto.service:auto-service", version = "1.1.1" }
 google-flexbox = { module = "com.google.android.flexbox:flexbox", version = "3.0.0" }
 apache-commons-compress = { module = "org.apache.commons:commons-compress", version = "1.28.0" }
+android-apksig = { module = "com.android.tools.build:apksig", version = "8.5.0" }
+smali-dexlib2 = { module = "org.smali:dexlib2", version = "2.5.2" }
+bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on", version = "1.78.1" }
+bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version = "1.78.1" }
 tukaani-xz = { module = "org.tukaani:xz", version = "1.12" }
 common-lsp4j = { module = "org.eclipse.lsp4j:org.eclipse.lsp4j", version = "0.22.0" }
 

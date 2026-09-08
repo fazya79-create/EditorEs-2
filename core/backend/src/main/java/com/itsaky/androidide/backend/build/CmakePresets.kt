@@ -25,42 +25,50 @@ object CmakePresets {
         buildType: String,
         ninjaPath: String
     ) {
-        val configurePresets = JSONArray()
-        val buildPresets = JSONArray()
+        ensurePresets(projectDir, abis, apiLevel, buildType, ninjaPath)
+    }
+
+    fun ensurePresets(
+        projectDir: File,
+        abis: List<String>,
+        apiLevel: Int,
+        buildType: String,
+        ninjaPath: String
+    ) {
+        val file = projectFile(projectDir)
+        val root = if (file.isFile) JSONObject(file.readText()) else JSONObject().put("version", SchemaVersion)
+        val configurePresets = root.optJSONArray("configurePresets") ?: JSONArray()
+        val buildPresets = root.optJSONArray("buildPresets") ?: JSONArray()
+        val configured = (0 until configurePresets.length()).mapNotNull { index ->
+            configurePresets.optJSONObject(index)?.optString("name")
+        }.toSet()
+        val builds = (0 until buildPresets.length()).mapNotNull { index ->
+            buildPresets.optJSONObject(index)?.optString("name")
+        }.toSet()
         for (abi in abis) {
             val name = presetName(abi, buildType)
-            configurePresets.put(
-                JSONObject()
-                    .put("name", name)
-                    .put("generator", "Ninja")
-                    .put("binaryDir", "\${sourceDir}/build/$name")
-                    .put(
-                        "toolchainFile",
-                        "\$env{ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake"
-                    )
-                    .put(
-                        "cacheVariables",
-                        JSONObject()
+            if (name !in configured) {
+                configurePresets.put(
+                    JSONObject()
+                        .put("name", name)
+                        .put("generator", "Ninja")
+                        .put("binaryDir", "\${sourceDir}/build/$name")
+                        .put("toolchainFile", "\$env{ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake")
+                        .put("cacheVariables", JSONObject()
                             .put("ANDROID_ABI", abi)
                             .put("ANDROID_PLATFORM", "android-$apiLevel")
                             .put("CMAKE_BUILD_TYPE", buildType)
                             .put("CMAKE_EXPORT_COMPILE_COMMANDS", "ON")
-                            .put("CMAKE_MAKE_PROGRAM", ninjaPath)
-                    )
-            )
-            buildPresets.put(
-                JSONObject()
-                    .put("name", name)
-                    .put("configurePreset", name)
-            )
+                            .put("CMAKE_MAKE_PROGRAM", ninjaPath))
+                )
+            }
+            if (name !in builds) {
+                buildPresets.put(JSONObject().put("name", name).put("configurePreset", name))
+            }
         }
-
-        val root = JSONObject()
-            .put("version", SchemaVersion)
-            .put("configurePresets", configurePresets)
-            .put("buildPresets", buildPresets)
-
-        projectFile(projectDir).writeText(root.toString(2) + "\n")
+        root.put("configurePresets", configurePresets)
+        root.put("buildPresets", buildPresets)
+        file.writeText(root.toString(2) + "\n")
         ensureGitIgnore(projectDir)
     }
 

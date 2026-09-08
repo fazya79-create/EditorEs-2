@@ -9,11 +9,9 @@ class RunConfigurations(
     private val runner: BuildRunner
 ) {
 
-    fun hasPresets(): Boolean = CmakePresets.hasAny(projectDir)
-
     fun bootstrap() {
         val abis = runner.abis
-        CmakePresets.bootstrap(
+        CmakePresets.ensurePresets(
             projectDir = projectDir,
             abis = abis,
             apiLevel = runner.apiLevel,
@@ -26,11 +24,13 @@ class RunConfigurations(
     }
 
     suspend fun activePresets(): List<String> = withContext(Dispatchers.IO) {
+        bootstrap()
+        val expected = runner.abis.map { CmakePresets.presetName(it, runner.buildType) }
         val fromCmake = runner.listPresets(projectDir, "build")
         val presets = if (fromCmake.isNotEmpty()) {
-            fromCmake
+            expected.filter { it in fromCmake }
         } else {
-            runner.abis.map { CmakePresets.presetName(it, runner.buildType) }
+            expected
         }
         presets.firstOrNull()?.let { writeClangdDatabase(it) }
         presets
