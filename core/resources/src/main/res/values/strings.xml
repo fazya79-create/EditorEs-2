@@ -268,6 +268,8 @@
   <string name="idepref_backend_install_started">Installation started in background</string>
   <string name="idepref_backend_install_done">Installation finished</string>
   <string name="idepref_backend_install_failed_simple">Installation failed</string>
+  <string name="idepref_backend_fetch_failed">Could not fetch available versions: %1$s</string>
+  <string name="idepref_backend_no_releases">No downloadable versions found</string>
   <string name="idepref_backend_build_options">Build options</string>
   <string name="idepref_backend_abi">Target ABI</string>
   <string name="idepref_backend_api">API level</string>
@@ -277,4 +279,5 @@
   <string name="action_cancel_build">Cancel build</string>
   <string name="msg_build_finished">Build finished with exit code %1$d</string>
   <string name="template_cpp_executable">C++ Executable</string>
+  <string name="template_cpp_shared_library">C++ Shared Library</string>
 </resources>

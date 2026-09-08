@@ -23,6 +23,7 @@ import com.itsaky.androidide.backend.InstallFlashbar
 import com.itsaky.androidide.backend.build.ToolchainInstaller
 import com.itsaky.androidide.backend.build.ToolchainKind
 import com.itsaky.androidide.backend.build.ToolchainPaths
+import com.itsaky.androidide.backend.build.ToolchainRelease
 import com.itsaky.androidide.backend.build.ToolchainRepository
 import com.itsaky.androidide.backend.proot.ProotConfig
 import com.itsaky.androidide.backend.proot.UbuntuInstaller
@@ -34,6 +35,8 @@ import com.itsaky.androidide.preferences.internal.BackendPreferences.cmakeVersio
 import com.itsaky.androidide.preferences.internal.BackendPreferences.ndkVersion
 import com.itsaky.androidide.resources.R.string
 import com.itsaky.androidide.tasks.executeAsync
+import com.itsaky.androidide.tasks.executeAsyncProvideError
+import com.itsaky.androidide.utils.DialogUtils
 import com.itsaky.androidide.utils.flashError
 import com.itsaky.androidide.utils.flashInfo
 import com.itsaky.androidide.utils.flashSuccess
@@ -191,14 +194,47 @@ private fun installToolchain(preference: Preference, kind: ToolchainKind) {
   } else {
     context.getString(string.idepref_backend_install_cmake)
   }
+  val progress = activity?.let { InstallFlashbar(it, label) }
+  executeAsyncProvideError({
+    runBlocking { ToolchainRepository.fetchReleases(kind) }
+  }) { releases, error ->
+    if (error != null || releases == null) {
+      val reason = error?.cause?.message ?: error?.message ?: ""
+      val message = context.getString(string.idepref_backend_fetch_failed, reason)
+      if (progress == null) flashError(message) else progress.failed(message)
+      return@executeAsyncProvideError
+    }
+    if (releases.isEmpty()) {
+      val message = context.getString(string.idepref_backend_no_releases)
+      if (progress == null) flashError(message) else progress.failed(message)
+      return@executeAsyncProvideError
+    }
+    progress?.dismiss()
+    val installed = ToolchainPaths.installedVersion(context.applicationContext, kind)
+    val choices = releases.map { release ->
+      "${release.tag} (${"%.1f".format(release.sizeMb)} MB)"
+    }.toTypedArray<CharSequence>()
+    val checked = releases.indexOfFirst { it.tag == installed }.takeIf { it >= 0 } ?: 0
+    DialogUtils.newSingleChoiceDialog(context, label, choices, checked, true) { which ->
+      releases.getOrNull(which)?.let { installToolchain(preference, kind, it) }
+    }.show()
+  }
+}
+
+private fun installToolchain(preference: Preference, kind: ToolchainKind, release: ToolchainRelease) {
+  val context = preference.context
+  val activity = context as? android.app.Activity
+  val label = if (kind == ToolchainKind.Ndk) {
+    context.getString(string.idepref_backend_install_ndk)
+  } else {
+    context.getString(string.idepref_backend_install_cmake)
+  }
   val progress = activity?.let { InstallFlashbar(it, label) } ?: run {
     flashInfo(string.idepref_backend_install_started)
     null
   }
   executeAsync(callable = {
     runBlocking {
-      val releases = ToolchainRepository.fetchReleases(kind)
-      val release = releases.firstOrNull() ?: return@runBlocking false
       var done = false
       ToolchainInstaller(context.applicationContext, kind).install(release) { phase ->
         progress?.update(phase)

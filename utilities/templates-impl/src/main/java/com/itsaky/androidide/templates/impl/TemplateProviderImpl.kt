@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList
 import com.itsaky.androidide.templates.ITemplateProvider
 import com.itsaky.androidide.templates.Template
 import com.itsaky.androidide.templates.impl.cppExecutable.cppExecutableProject
+import com.itsaky.androidide.templates.impl.cppSharedLibrary.cppSharedLibraryProject
 
 @Suppress("unused")
 @AutoService(ITemplateProvider::class)
@@ -35,7 +36,8 @@ class TemplateProviderImpl : ITemplateProvider {
 
   private fun templates() =
     arrayOf(
-      cppExecutableProject()
+      cppExecutableProject(),
+      cppSharedLibraryProject()
     )
 
   private fun initializeTemplates() {
