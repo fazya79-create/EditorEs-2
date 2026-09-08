@@ -30,6 +30,7 @@ import io.github.rosemoe.sora.lang.format.Formatter
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.ContentReference
 import org.slf4j.LoggerFactory
+import java.nio.file.Path
 import java.nio.file.Paths
 
 /**
@@ -42,6 +43,9 @@ abstract class IDELanguage : Language {
   private var formatter: Formatter? = null
 
   protected open val languageServer: ILanguageServer?
+    get() = null
+
+  protected open val languageFile: Path?
     get() = null
 
   open fun getTabSize(): Int {
@@ -102,7 +106,7 @@ abstract class IDELanguage : Language {
   }
 
   override fun getFormatter(): Formatter {
-    return formatter ?: LSPFormatter(languageServer).also { formatter = it }
+    return formatter ?: LSPFormatter(languageServer, languageFile).also { formatter = it }
   }
 
   override fun getIndentAdvance(

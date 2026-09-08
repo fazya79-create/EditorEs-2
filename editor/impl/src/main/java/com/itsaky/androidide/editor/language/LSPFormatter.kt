@@ -26,13 +26,14 @@ import io.github.rosemoe.sora.lang.format.AsyncFormatter
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.text.TextRange
+import java.nio.file.Path
 
 /**
  * An [AsyncFormatter] implementation which uses the LSP implementation to format code.
  *
  * @author Akash Yadav
  */
-class LSPFormatter(val server: ILanguageServer? = null) : AsyncFormatter() {
+class LSPFormatter(val server: ILanguageServer? = null, val file: Path? = null) : AsyncFormatter() {
   
   override fun formatAsync(text: Content, cursorRange: TextRange): TextRange {
     return doFormat(text, cursorRange)
@@ -62,7 +63,7 @@ class LSPFormatter(val server: ILanguageServer? = null) : AsyncFormatter() {
         }
         end.apply { index = (if (line == 0 && column == 0) 0 else text.getCharIndex(line, column)) }
       }
-    val result = server.formatCode(FormatCodeParams(text, range))
+    val result = server.formatCode(FormatCodeParams(text, range, file))
 
     if (!result.hasEdits() ) {
       // Deselect the selected content

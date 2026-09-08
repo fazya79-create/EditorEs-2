@@ -18,6 +18,7 @@
 package com.itsaky.androidide.lsp.models
 
 import com.itsaky.androidide.models.Range
+import java.nio.file.Path
 
 /**
  * Parameters containing data required to format source code.
@@ -26,7 +27,7 @@ import com.itsaky.androidide.models.Range
  */
 data class FormatCodeParams
 @JvmOverloads
-constructor(val content: CharSequence, val range: Range = Range.NONE)
+constructor(val content: CharSequence, val range: Range = Range.NONE, val file: Path? = null)
 
 /** The code formatting result. */
 data class CodeFormatResult

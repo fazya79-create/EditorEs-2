@@ -28,7 +28,9 @@ import io.github.rosemoe.sora.lang.analysis.AnalyzeManager;
 import io.github.rosemoe.sora.lang.smartEnter.NewlineHandler;
 import io.github.rosemoe.sora.text.ContentReference;
 import io.github.rosemoe.sora.widget.SymbolPairMatch;
+import java.io.File;
 import java.io.StringReader;
+import java.nio.file.Path;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
@@ -43,9 +45,15 @@ public class CppLanguage extends IDELanguage {
   private final NewlineHandler[] newlineHandlers =
       new NewlineHandler[]{new BracketsNewlineHandler(this::getIndentAdvance, this::useTab)};
   private final CommonSymbolPairs symbolPairs = new CommonSymbolPairs();
+  private final Path file;
   private CppAnalyzer analyzer;
 
   public CppLanguage() {
+    this(null);
+  }
+
+  public CppLanguage(@Nullable File file) {
+    this.file = file == null ? null : file.toPath();
     analyzer = new CppAnalyzer();
   }
 
@@ -53,6 +61,12 @@ public class CppLanguage extends IDELanguage {
   @Override
   protected ILanguageServer getLanguageServer() {
     return ILanguageServerRegistry.getDefault().getServer(SERVER_ID);
+  }
+
+  @Nullable
+  @Override
+  protected Path getLanguageFile() {
+    return file;
   }
 
   @Override

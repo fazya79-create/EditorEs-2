@@ -52,6 +52,7 @@ import com.itsaky.androidide.models.Location
 import com.itsaky.androidide.models.Position
 import com.itsaky.androidide.models.Range
 import com.itsaky.androidide.preferences.internal.BackendPreferences
+import com.itsaky.androidide.preferences.internal.EditorPreferences
 import com.itsaky.androidide.projects.IWorkspace
 import java.io.File
 import java.net.URI
@@ -69,6 +70,9 @@ import kotlinx.coroutines.withContext
 import org.eclipse.lsp4j.DidChangeTextDocumentParams
 import org.eclipse.lsp4j.DidCloseTextDocumentParams
 import org.eclipse.lsp4j.DidOpenTextDocumentParams
+import org.eclipse.lsp4j.DocumentFormattingParams
+import org.eclipse.lsp4j.DocumentRangeFormattingParams
+import org.eclipse.lsp4j.FormattingOptions
 import org.eclipse.lsp4j.InitializeParams
 import org.eclipse.lsp4j.InitializedParams
 import org.eclipse.lsp4j.services.LanguageClient
@@ -367,11 +371,60 @@ class CppLanguageServer(
   }
 
   override fun formatCode(params: FormatCodeParams?): CodeFormatResult {
-    return CodeFormatResult(false, mutableListOf())
+    val file = params?.file?.toFile() ?: return CodeFormatResult.NONE
+    if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+      log.warn("CppLanguageServer.formatCode called on Main thread — returning no edits to avoid ANR")
+      return CodeFormatResult.NONE
+    }
+    val server = ensureStarted(rootFor(file)) ?: return CodeFormatResult.NONE
+    return try {
+      val uri = file.toURI().toString()
+      syncDocument(file, uri, params.content)
+      val options = FormattingOptions(EditorPreferences.tabSize, EditorPreferences.useSoftTab)
+      val range = params.range
+      val edits = if (isWholeDocument(params.content, range)) {
+        server.textDocumentService.formatting(
+          DocumentFormattingParams(TextDocumentIdentifier(uri), options)
+        ).get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+      } else {
+        server.textDocumentService.rangeFormatting(
+          DocumentRangeFormattingParams(
+            TextDocumentIdentifier(uri),
+            options,
+            org.eclipse.lsp4j.Range(
+              org.eclipse.lsp4j.Position(range.start.line, range.start.column),
+              org.eclipse.lsp4j.Position(range.end.line, range.end.column)
+            )
+          )
+        ).get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+      }
+      CodeFormatResult(
+        false,
+        (edits ?: emptyList()).mapNotNull { mapTextEdit(it) }
+          .sortedByDescending { it.range.start }
+          .toMutableList()
+      )
+    } catch (error: Throwable) {
+      log.error("clangd formatting failed", error)
+      CodeFormatResult.NONE
+    }
   }
 
   override fun handleFailure(failure: LSPFailure?): Boolean {
     return super<ILanguageServer>.handleFailure(failure)
+  }
+
+  private fun isWholeDocument(content: CharSequence, range: Range): Boolean {
+    if (range == Range.NONE || range.start == range.end) {
+      return true
+    }
+    if (range.start.line != 0 || range.start.column != 0) {
+      return false
+    }
+    val lastLine = content.count { it == '\n' }
+    val lastColumn = content.length - (content.lastIndexOf('\n') + 1)
+    return range.end.line > lastLine ||
+      (range.end.line == lastLine && range.end.column >= lastColumn)
   }
 
   private fun rootFor(file: File): File {
