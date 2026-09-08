@@ -18,6 +18,7 @@
 package com.itsaky.androidide.actions.build
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
 import com.itsaky.androidide.actions.ActionData
 import com.itsaky.androidide.actions.EditorActivityAction
@@ -35,9 +36,12 @@ import com.itsaky.androidide.utils.flashSuccess
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
 
-class CmakeBuildAction(context: Context, override val order: Int) : EditorActivityAction() {
+open class CmakeBuildAction(context: Context, override val order: Int) : EditorActivityAction() {
 
   override val id: String = "ide.editor.build.cmake"
+
+  private val buildIcon: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_run)
+  private val cancelIcon: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_close)
 
   companion object {
     private val log = LoggerFactory.getLogger(CmakeBuildAction::class.java)
@@ -49,8 +53,10 @@ class CmakeBuildAction(context: Context, override val order: Int) : EditorActivi
 
   init {
     label = context.getString(R.string.action_build_cmake)
-    icon = ContextCompat.getDrawable(context, R.drawable.ic_run)
+    icon = buildIcon
   }
+
+  protected open fun createRequest(preset: String): BuildRequest = BuildRequest.Build(preset)
 
   override fun prepare(data: ActionData) {
     super.prepare(data)
@@ -64,8 +70,10 @@ class CmakeBuildAction(context: Context, override val order: Int) : EditorActivi
     enabled = ProjectManagerImpl.getInstance().projectInitialized
     if (activity.editorViewModel.isBuildInProgress) {
       label = activity.getString(R.string.action_cancel_build)
+      icon = cancelIcon
     } else {
       label = activity.getString(R.string.action_build_cmake)
+      icon = buildIcon
     }
   }
 
@@ -89,6 +97,7 @@ class CmakeBuildAction(context: Context, override val order: Int) : EditorActivi
     runOnUiThread {
       activity.editorViewModel.isBuildInProgress = true
       activity.invalidateOptionsMenu()
+      activity.clearBuildOutput()
     }
 
     return try {
@@ -113,7 +122,7 @@ class CmakeBuildAction(context: Context, override val order: Int) : EditorActivi
 
       var exitCode = 1
       var failure: String? = null
-      runner.run(projectDir, BuildRequest.Build(preset)) { event ->
+      runner.run(projectDir, createRequest(preset)) { event ->
         when (event) {
           is BuildEvent.Line -> runOnUiThread { activity.appendBuildOutput(event.text) }
           is BuildEvent.Finished -> exitCode = event.exitCode

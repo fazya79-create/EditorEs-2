@@ -30,6 +30,7 @@ import com.itsaky.androidide.actions.editor.SelectAllAction
 import com.itsaky.androidide.actions.etc.FindActionMenu
 import com.itsaky.androidide.actions.etc.ReloadColorSchemesAction
 import com.itsaky.androidide.actions.build.CmakeBuildAction
+import com.itsaky.androidide.actions.build.CmakeCleanBuildAction
 import com.itsaky.androidide.actions.file.CloseAllFilesAction
 import com.itsaky.androidide.actions.file.CloseFileAction
 import com.itsaky.androidide.actions.file.CloseOtherFilesAction
@@ -64,6 +65,7 @@ class EditorActivityActions {
       registry.registerAction(RedoAction(context, order++))
       registry.registerAction(SaveFileAction(context, order++))
       registry.registerAction(CmakeBuildAction(context, order++))
+      registry.registerAction(CmakeCleanBuildAction(context, order++))
       registry.registerAction(FindActionMenu(context, order++))
       registry.registerAction(ReloadColorSchemesAction(context, order++))
 

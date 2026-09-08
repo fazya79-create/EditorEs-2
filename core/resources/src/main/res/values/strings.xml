@@ -277,6 +277,7 @@
   <string name="idepref_backend_current">Current: %1$s</string>
   <string name="action_build_cmake">Build</string>
   <string name="action_cancel_build">Cancel build</string>
+  <string name="action_clean_build_cmake">Clean build</string>
   <string name="msg_build_finished">Build finished with exit code %1$d</string>
   <string name="template_cpp_executable">C++ Executable</string>
   <string name="template_cpp_shared_library">C++ Shared Library</string>

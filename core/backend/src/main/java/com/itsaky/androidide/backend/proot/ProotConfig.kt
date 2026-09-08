@@ -30,6 +30,14 @@ object ProotConfig {
 
     private const val PrimaryStorage = "/storage/emulated/0"
 
+    private const val GuestProjectsFallback = "/projects"
+
+    private val ReservedGuestRoots = setOf(
+        "bin", "boot", "dev", "etc", "home", "lib", "lib32", "lib64", "libx32", "media", "mnt",
+        "opt", "proc", "root", "run", "sbin", "sdcard", "snap", "srv", "storage", "sys", "tmp",
+        "usr", "var"
+    )
+
     private val StorageBinds: List<String>
         get() = buildList {
             val primary = File(PrimaryStorage)
@@ -49,6 +57,24 @@ object ProotConfig {
             File(rootfs, "opt").mkdirs()
         }
     }
+
+    fun guestProjectDir(context: Context, projectDir: File): String {
+        val name = projectDir.name
+            .replace(Regex("[^A-Za-z0-9._-]+"), "_")
+            .trimStart('.')
+            .trim('_')
+            .ifEmpty { "project" }
+        val rootfs = rootfsDir(context)
+        val bare = File(rootfs, name)
+        val shadowsRootfs = name in ReservedGuestRoots ||
+            (bare.exists() && (!bare.isDirectory || bare.list()?.isNotEmpty() == true))
+        val guest = if (shadowsRootfs) "$GuestProjectsFallback/$name" else "/$name"
+        runCatching { File(rootfs, guest.trimStart('/')).mkdirs() }
+        return guest
+    }
+
+    fun projectBind(projectDir: File, guestDir: String): String =
+        "${projectDir.absolutePath}:$guestDir"
 
     private fun toolchainBind(context: Context): String? {
         val host = ToolchainPaths.toolchainRoot(context)
@@ -97,10 +123,11 @@ object ProotConfig {
     fun prootArgs(
         context: Context,
         cwd: String = "/root",
-        bootCommand: String? = null
+        bootCommand: String? = null,
+        binds: List<String> = emptyList()
     ): Array<String> {
         val rootfs = rootfsDir(context).absolutePath
-        val extraBinds = (StorageBinds + listOfNotNull(toolchainBind(context)))
+        val extraBinds = (StorageBinds + listOfNotNull(toolchainBind(context)) + binds)
             .map { "--bind=$it" }
         return arrayOf(
             "proot",

@@ -39,6 +39,11 @@ class BuildOutputFragment : NonEditableEditorFragment() {
     super.onDestroyView()
   }
   
+  override fun clearOutput() {
+    unsavedLines.clear()
+    super.clearOutput()
+  }
+  
   fun appendOutput(output: String?) {
     if (editor == null) {
       unsavedLines.add(output)

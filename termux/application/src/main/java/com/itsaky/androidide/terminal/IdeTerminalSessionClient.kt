@@ -17,10 +17,12 @@
 
 package com.itsaky.androidide.terminal
 
+import android.content.Context
 import com.itsaky.androidide.activities.TerminalActivity
 import com.itsaky.androidide.backend.proot.ProotConfig
 import com.termux.app.terminal.TermuxTerminalSessionActivityClient
 import com.termux.terminal.TerminalSessionClient
+import java.io.File
 
 /**
  * [TerminalSessionClient] delegate for AndroidIDE.
@@ -30,6 +32,8 @@ import com.termux.terminal.TerminalSessionClient
 class IdeTerminalSessionClient(
   activity: TerminalActivity
 ) : TermuxTerminalSessionActivityClient(activity) {
+
+  private val storageRoots = setOf("/storage", "/storage/emulated", "/storage/emulated/0", "/sdcard")
 
   override fun addNewSession(isFailSafe: Boolean, sessionName: String?, workingDirectory: String?) {
     val activity = mActivity
@@ -44,7 +48,7 @@ class IdeTerminalSessionClient(
       // Supplementary GIDs (e.g. external storage) may be granted after the rootfs was installed;
       // register them so Ubuntu's bash.bashrc `groups` call can resolve every group name.
       ProotConfig.registerAndroidIds(activity)
-      val fullArgs = if (cwd != null) ProotConfig.prootArgs(activity, cwd) else ProotConfig.prootArgs(activity)
+      val fullArgs = if (cwd != null) projectSessionArgs(activity, cwd) else ProotConfig.prootArgs(activity)
       val session = service.createTermuxSession(
         ProotConfig.prootBinary(activity),
         fullArgs.drop(1).toTypedArray(),
@@ -58,5 +62,18 @@ class IdeTerminalSessionClient(
       return
     }
     super.addNewSession(isFailSafe, sessionName, workingDirectory)
+  }
+
+  private fun projectSessionArgs(activity: Context, cwd: String): Array<String> {
+    val projectDir = File(cwd)
+    if (!projectDir.isDirectory || cwd.trimEnd('/') in storageRoots) {
+      return ProotConfig.prootArgs(activity, cwd)
+    }
+    val guestCwd = ProotConfig.guestProjectDir(activity, projectDir)
+    return ProotConfig.prootArgs(
+      activity,
+      guestCwd,
+      binds = listOf(ProotConfig.projectBind(projectDir, guestCwd))
+    )
   }
 }

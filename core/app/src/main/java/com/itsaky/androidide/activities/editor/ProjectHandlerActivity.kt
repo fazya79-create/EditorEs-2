@@ -121,6 +121,10 @@ abstract class ProjectHandlerActivity : BaseEditorActivity() {
     content.bottomSheet.appendBuildOut(str)
   }
 
+  fun clearBuildOutput() {
+    content.bottomSheet.clearBuildOutput()
+  }
+
   fun startServices() {
     initLspClient()
     lifecycleScope.launch {
