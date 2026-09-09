@@ -17,8 +17,9 @@ import org.jf.dexlib2.Opcode
 import org.jf.dexlib2.Opcodes
 import org.jf.dexlib2.dexbacked.DexBackedDexFile
 import org.jf.dexlib2.iface.instruction.ReferenceInstruction
+import org.jf.dexlib2.iface.instruction.formats.Instruction12x
+import org.jf.dexlib2.iface.instruction.formats.Instruction21c
 import org.jf.dexlib2.iface.instruction.formats.Instruction35c
-import org.jf.dexlib2.iface.reference.MethodReference
 import org.jf.dexlib2.iface.reference.StringReference
 import org.jf.dexlib2.immutable.ImmutableClassDef
 import org.jf.dexlib2.immutable.ImmutableDexFile
@@ -28,6 +29,7 @@ import org.jf.dexlib2.immutable.ImmutableMethodParameter
 import org.jf.dexlib2.immutable.instruction.ImmutableInstruction10x
 import org.jf.dexlib2.immutable.instruction.ImmutableInstruction35c
 import org.jf.dexlib2.immutable.reference.ImmutableMethodReference
+import org.jf.dexlib2.immutable.reference.ImmutableStringReference
 import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -83,7 +85,7 @@ class ApkPatchEngineTest {
 
     assertThat(result).isEqualTo(ApkPatchEngine.PatchResult(output, launcherActivity))
     verifySignatures(output)
-    assertPatchedDex(output)
+    assertPatchedDex(output, libraryNames = listOf("fixture"))
     assertLibraries(output, listOf(library))
     assertPreservedEntries(input, output)
     assertThat(entries(output).keys).containsNoneOf("META-INF/OLD.SF", "META-INF/OLD.RSA")
@@ -105,7 +107,7 @@ class ApkPatchEngineTest {
 
     assertThat(result.launcherActivity).isEqualTo(launcherActivity)
     verifySignatures(output)
-    assertPatchedDex(output)
+    assertPatchedDex(output, libraryNames = listOf("fixture"))
     assertLibraries(output, listOf(library))
     assertPreservedEntries(input, output)
     assertThat(input.readBytes()).isEqualTo(original)
@@ -121,13 +123,13 @@ class ApkPatchEngineTest {
       "classes2.dex" to dex(launcherType),
     ))
     val original = input.readBytes()
-    val libraries = listOf(library("armeabi-v7a"), library("arm64-v8a"))
+    val libraries = listOf(library("armeabi-v7a"), library("arm64-v8a", "libfixture64.so"))
     val output = temporaryFolder.root.resolve("output/multidex.apk")
 
     ApkPatchEngine(context).patch(input, output, libraries)
 
     verifySignatures(output)
-    assertPatchedDex(output, "classes2.dex")
+    assertPatchedDex(output, "classes2.dex", listOf("fixture", "fixture64"))
     assertThat(entries(output)["classes.dex"]).isEqualTo(primaryDex)
     assertLibraries(output, libraries)
     assertPreservedEntries(input, output)
@@ -141,7 +143,7 @@ class ApkPatchEngineTest {
     val input = apk()
     val original = input.readBytes()
     val arm = library("armeabi-v7a")
-    val arm64 = library("arm64-v8a")
+    val arm64 = library("arm64-v8a", "libfixture64.so")
     val first = temporaryFolder.root.resolve("output/first.apk")
     ApkPatchEngine(context).patch(input, first, listOf(arm))
     val firstVerification = verifySignatures(first)
@@ -169,7 +171,7 @@ class ApkPatchEngineTest {
     }
     assertThat(secondEntries["META-INF/MANIFEST.MF"])
       .isNotEqualTo(firstEntries["META-INF/MANIFEST.MF"])
-    assertPatchedDex(second)
+    assertPatchedDex(second, libraryNames = listOf("fixture", "fixture64"))
     assertLibraries(second, listOf(arm, arm64))
     assertPreservedEntries(first, second)
     assertThat(first.readBytes()).isEqualTo(firstBytes)
@@ -212,50 +214,52 @@ class ApkPatchEngineTest {
     return result
   }
 
-  private fun assertPatchedDex(apk: File, entry: String = "classes.dex") {
+  private fun assertPatchedDex(apk: File, entry: String = "classes.dex", libraryNames: List<String>) {
     val dex = DexBackedDexFile(Opcodes.forApi(28), checkNotNull(entries(apk)[entry]))
     val launcher = dex.classes.single { it.type == launcherType }
     val onCreate = launcher.virtualMethods.single { it.name == "onCreate" }
     val implementation = checkNotNull(onCreate.implementation)
     val instructions = implementation.instructions.toList()
-    assertThat(implementation.registerCount).isEqualTo(2)
-    assertThat(instructions.map { it.opcode }).containsExactly(
-      Opcode.INVOKE_STATIC, Opcode.INVOKE_SUPER, Opcode.RETURN_VOID
+    assertThat(implementation.registerCount).isEqualTo(3)
+    assertThat(instructions.take(3).map { it.opcode }).containsExactly(
+      Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT, Opcode.CONST_STRING
     ).inOrder()
-    val invocation = instructions[0] as Instruction35c
-    assertThat(invocation.registerCount).isEqualTo(0)
-    assertThat(invocation.reference)
-      .isEqualTo(ImmutableMethodReference(launcherType, helperName, emptyList<String>(), "V"))
-    val superCall = instructions[1] as Instruction35c
+    val receiverMove = instructions[0] as Instruction12x
+    assertThat(receiverMove.registerA).isEqualTo(0)
+    assertThat(receiverMove.registerB).isEqualTo(1)
+    val bundleMove = instructions[1] as Instruction12x
+    assertThat(bundleMove.registerA).isEqualTo(1)
+    assertThat(bundleMove.registerB).isEqualTo(2)
+    val marker = instructions[2] as Instruction21c
+    assertThat(marker.registerA).isEqualTo(2)
+    assertThat(marker.reference).isEqualTo(ImmutableStringReference("androidide:apk-patch:load-native-libraries"))
+    libraryNames.forEachIndexed { index, name ->
+      val string = instructions[3 + index * 2] as Instruction21c
+      assertThat(string.registerA).isEqualTo(2)
+      assertThat((string.reference as StringReference).string).isEqualTo(name)
+      val loadCall = instructions[4 + index * 2] as Instruction35c
+      assertThat(loadCall.registerCount).isEqualTo(1)
+      assertThat(loadCall.registerC).isEqualTo(2)
+      assertThat(loadCall.reference).isEqualTo(ImmutableMethodReference("Ljava/lang/System;", "loadLibrary", listOf("Ljava/lang/String;"), "V"))
+    }
+    val superCall = instructions[3 + libraryNames.size * 2] as Instruction35c
     assertThat(superCall.reference).isEqualTo(superOnCreate)
     assertThat(superCall.registerCount).isEqualTo(2)
     assertThat(superCall.registerC).isEqualTo(0)
     assertThat(superCall.registerD).isEqualTo(1)
 
-    assertThat(launcher.directMethods.map { it.name }).containsExactly("<init>", helperName)
+    assertThat(launcher.directMethods.map { it.name }).containsExactly("<init>")
     val constructor = launcher.directMethods.single { it.name == "<init>" }
     val constructorInstructions = checkNotNull(constructor.implementation).instructions.toList()
     assertThat(constructorInstructions.map { it.opcode })
       .containsExactly(Opcode.INVOKE_DIRECT, Opcode.RETURN_VOID).inOrder()
     assertThat((constructorInstructions[0] as ReferenceInstruction).reference)
       .isEqualTo(superConstructor)
-    val helper = launcher.directMethods.single { it.name == helperName }
-    assertThat(helper.accessFlags).isEqualTo(AccessFlags.PRIVATE.value or AccessFlags.STATIC.value)
-    assertThat(helper.parameterTypes).isEmpty()
-    assertThat(helper.returnType).isEqualTo("V")
-    val helperInstructions = checkNotNull(helper.implementation).instructions.toList()
-    assertThat(helperInstructions.map { it.opcode }).containsExactly(
-      Opcode.CONST_STRING, Opcode.CONST_STRING, Opcode.INVOKE_STATIC, Opcode.RETURN_VOID
-    ).inOrder()
-    val references = helperInstructions.filterIsInstance<ReferenceInstruction>().map { it.reference }
-    assertThat(references.filterIsInstance<StringReference>().map { it.string })
-      .containsExactly("androidide:apk-patch:load-native-libraries", "fixture").inOrder()
-    assertThat(references.filterIsInstance<MethodReference>()).containsExactly(
-      ImmutableMethodReference("Ljava/lang/System;", "loadLibrary", listOf("Ljava/lang/String;"), "V")
-    )
-    val loadCall = helperInstructions[2] as Instruction35c
-    assertThat(loadCall.registerCount).isEqualTo(1)
-    assertThat(loadCall.registerC).isEqualTo(0)
+    val loadedNames = libraryNames.indices.map { index ->
+      (instructions[3 + index * 2] as Instruction21c).reference as StringReference
+    }.map(StringReference::getString)
+    assertThat(loadedNames).containsExactlyElementsIn(libraryNames)
+    assertThat(instructions.last().opcode).isEqualTo(Opcode.RETURN_VOID)
   }
 
   private fun assertLibraries(apk: File, libraries: List<ApkPatchEngine.NativeLibrary>) {
@@ -284,12 +288,12 @@ class ApkPatchEngineTest {
     assertThat(context.cacheDir.resolve("keep.txt").readText()).isEqualTo("unrelated cache entry")
   }
 
-  private fun library(abi: String): ApkPatchEngine.NativeLibrary {
+  private fun library(abi: String, name: String = "libfixture.so"): ApkPatchEngine.NativeLibrary {
     val bytes = fixture("$abi/libfixture.so.bin")
     assertThat(bytes.size).isGreaterThan(64)
     assertThat(bytes.take(4)).containsExactly(0x7f.toByte(), 0x45.toByte(), 0x4c.toByte(), 0x46.toByte()).inOrder()
     assertThat(bytes[4].toInt()).isEqualTo(if (abi == "armeabi-v7a") 1 else 2)
-    val file = temporaryFolder.root.resolve("libraries/$abi/libfixture.so")
+    val file = temporaryFolder.root.resolve("libraries/$abi/$name")
     file.parentFile!!.mkdirs()
     file.writeBytes(bytes)
     return ApkPatchEngine.NativeLibrary(abi, file)
@@ -365,7 +369,6 @@ class ApkPatchEngineTest {
     private const val launcherType = "Lcom/itsaky/androidide/injectionfixture/MainActivity;"
     private const val otherActivityType = "Lcom/itsaky/androidide/injectionfixture/OtherActivity;"
     private const val activityType = "Landroid/app/Activity;"
-    private const val helperName = "androidide\$loadNativeLibraries"
     private val superConstructor = ImmutableMethodReference(activityType, "<init>", emptyList<String>(), "V")
     private val superOnCreate = ImmutableMethodReference(activityType, "onCreate", listOf("Landroid/os/Bundle;"), "V")
   }

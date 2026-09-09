@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Sandbox toolchain for building EditorEs (JDK 17 + Android SDK 34 + NDK 26 for termux/emulator ndkBuild).
+# Sandbox toolchain for building EditorEs (JDK 17 + Android SDK 36 + NDK 26 for termux/emulator ndkBuild).
 # Idempotent: every step is skipped when its artifact already exists.
 set -euo pipefail
 
@@ -25,7 +25,7 @@ fi
 
 yes | "$SDKMANAGER" --licenses >/dev/null 2>&1 || true
 # Versions come from composite-builds/build-logic/common/.../BuildConfig.kt (compileSdk, ndkVersion).
-"$SDKMANAGER" --install "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;26.1.10909125" >/dev/null
+"$SDKMANAGER" --install "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;26.1.10909125" >/dev/null
 
 # AGP's validateSigningDebug fails on this JDK when it has to auto-generate the debug keystore, so pre-create it.
 # AGP resolves the location from Java's user.home, which can differ from $HOME in the sandbox.

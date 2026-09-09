@@ -9,23 +9,19 @@ import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
-import org.jf.dexlib2.AccessFlags
 import org.jf.dexlib2.DexFileFactory
 import org.jf.dexlib2.Opcode
 import org.jf.dexlib2.Opcodes
 import org.jf.dexlib2.builder.MutableMethodImplementation
-import org.jf.dexlib2.builder.instruction.BuilderInstruction10x
+import org.jf.dexlib2.builder.instruction.BuilderInstruction12x
 import org.jf.dexlib2.builder.instruction.BuilderInstruction21c
 import org.jf.dexlib2.builder.instruction.BuilderInstruction35c
-import org.jf.dexlib2.HiddenApiRestriction
-import org.jf.dexlib2.iface.Annotation
 import org.jf.dexlib2.iface.ClassDef
 import org.jf.dexlib2.iface.Method
-import org.jf.dexlib2.iface.MethodParameter
-import org.jf.dexlib2.iface.reference.MethodReference
 import org.jf.dexlib2.immutable.ImmutableClassDef
 import org.jf.dexlib2.immutable.ImmutableDexFile
 import org.jf.dexlib2.immutable.ImmutableMethod
+import org.jf.dexlib2.immutable.ImmutableMethodImplementation
 import org.jf.dexlib2.immutable.reference.ImmutableMethodReference
 import org.jf.dexlib2.immutable.reference.ImmutableStringReference
 import java.io.File
@@ -117,11 +113,9 @@ class ApkPatchEngine(private val context: Context) {
   }
 
   private fun patchedClass(classDef: ClassDef, libraries: List<String>): ImmutableClassDef {
-    val existingHelper = classDef.directMethods.firstOrNull(::isOurHelper)
-    val helper = helperMethod(classDef.type, libraries)
-    val direct = classDef.directMethods.filterNot(::isOurHelper).map(ImmutableMethod::of) + helper
+    val direct = classDef.directMethods.filterNot(::isOurHelper).map(ImmutableMethod::of)
     val virtual = classDef.virtualMethods.map { method ->
-      if (isOnCreate(method)) patchedOnCreate(method, classDef.type, existingHelper != null) else ImmutableMethod.of(method)
+      if (isOnCreate(method)) patchedOnCreate(method, classDef.type, libraries) else ImmutableMethod.of(method)
     }
     return ImmutableClassDef(
       classDef.type,
@@ -137,28 +131,36 @@ class ApkPatchEngine(private val context: Context) {
     )
   }
 
-  private fun patchedOnCreate(method: Method, classType: String, hadHelper: Boolean): ImmutableMethod {
+  private fun patchedOnCreate(method: Method, classType: String, libraries: List<String>): ImmutableMethod {
     val implementation = method.implementation ?: return ImmutableMethod.of(method)
-    val patched = MutableMethodImplementation(implementation)
-    if (hadHelper && patched.instructions.firstOrNull()?.let(::isHelperInvocation) == true) patched.removeInstruction(0)
-    patched.addInstruction(0, BuilderInstruction35c(Opcode.INVOKE_STATIC, 0, 0, 0, 0, 0, 0, helperReference(classType)))
+    val existing = MutableMethodImplementation(implementation)
+    if (existing.instructions.firstOrNull()?.let { isHelperInvocation(it, classType) } == true) {
+      existing.removeInstruction(0)
+    }
+    val inlinePrefix = inlinePrefixSize(existing, method.parameterTypes.size + 1)
+    if (inlinePrefix != null) repeat(inlinePrefix) { existing.removeInstruction(0) }
+    val registerCount = existing.registerCount + if (inlinePrefix == null) 1 else 0
+    val patched = MutableMethodImplementation(ImmutableMethodImplementation(
+      registerCount, existing.instructions, existing.tryBlocks, existing.debugItems,
+    ))
+    val parameterStart = registerCount - method.parameterTypes.size - 2
+    (0..method.parameterTypes.size).forEach { index ->
+      patched.addInstruction(index, BuilderInstruction12x(Opcode.MOVE_OBJECT, parameterStart + index, parameterStart + index + 1))
+    }
+    val scratch = registerCount - 1
+    val injection = buildList {
+      add(BuilderInstruction21c(Opcode.CONST_STRING, scratch, ImmutableStringReference(marker)))
+      libraries.forEach { name ->
+        add(BuilderInstruction21c(Opcode.CONST_STRING, scratch, ImmutableStringReference(name)))
+        add(BuilderInstruction35c(Opcode.INVOKE_STATIC, 1, scratch, 0, 0, 0, 0, systemLoadLibrary))
+      }
+    }
+    injection.forEachIndexed { index, instruction ->
+      patched.addInstruction(method.parameterTypes.size + 1 + index, instruction)
+    }
     return ImmutableMethod(
       method.definingClass, method.name, method.parameters, method.returnType, method.accessFlags,
       method.annotations, method.hiddenApiRestrictions, patched,
-    )
-  }
-
-  private fun helperMethod(classType: String, libraries: List<String>): ImmutableMethod {
-    val implementation = MutableMethodImplementation(1)
-    implementation.addInstruction(BuilderInstruction21c(Opcode.CONST_STRING, 0, ImmutableStringReference(marker)))
-    libraries.forEach { name ->
-      implementation.addInstruction(BuilderInstruction21c(Opcode.CONST_STRING, 0, ImmutableStringReference(name)))
-      implementation.addInstruction(BuilderInstruction35c(Opcode.INVOKE_STATIC, 1, 0, 0, 0, 0, 0, systemLoadLibrary))
-    }
-    implementation.addInstruction(BuilderInstruction10x(Opcode.RETURN_VOID))
-    return ImmutableMethod(
-      classType, helperName, emptyList<MethodParameter>(), "V", AccessFlags.PRIVATE.value or AccessFlags.STATIC.value,
-      emptySet<Annotation>(), emptySet<HiddenApiRestriction>(), implementation,
     )
   }
 
@@ -172,9 +174,41 @@ class ApkPatchEngine(private val context: Context) {
   private fun isOnCreate(method: Method): Boolean =
     method.name == "onCreate" && method.returnType == "V" && method.parameterTypes == listOf("Landroid/os/Bundle;")
 
-  private fun isHelperInvocation(instruction: org.jf.dexlib2.iface.instruction.Instruction): Boolean =
+  private fun isHelperInvocation(instruction: org.jf.dexlib2.iface.instruction.Instruction, classType: String): Boolean =
     instruction.opcode == Opcode.INVOKE_STATIC && instruction is org.jf.dexlib2.iface.instruction.ReferenceInstruction &&
-      (instruction.reference as? MethodReference)?.name == helperName
+      instruction.reference == helperReference(classType)
+
+  private fun inlinePrefixSize(implementation: MutableMethodImplementation, parameterCount: Int): Int? {
+    val instructions = implementation.instructions
+    val parameterStart = implementation.registerCount - parameterCount - 1
+    if (instructions.size < parameterCount + 2) return null
+    if ((0 until parameterCount).any { index ->
+        val instruction = instructions[index]
+        instruction.opcode != Opcode.MOVE_OBJECT || instruction !is org.jf.dexlib2.iface.instruction.formats.Instruction12x ||
+          instruction.registerA != parameterStart + index || instruction.registerB != parameterStart + index + 1
+      }) return null
+    val scratch = implementation.registerCount - 1
+    val markerInstruction = instructions[parameterCount]
+    if (markerInstruction.opcode != Opcode.CONST_STRING || markerInstruction !is org.jf.dexlib2.iface.instruction.formats.Instruction21c ||
+      markerInstruction.registerA != scratch || markerInstruction.reference != ImmutableStringReference(marker)) return null
+    var index = parameterCount + 1
+    var loads = 0
+    while (index + 1 < instructions.size && isInlineLoadPair(instructions[index], instructions[index + 1], scratch)) {
+      loads++
+      index += 2
+    }
+    return if (loads > 0) index else null
+  }
+
+  private fun isInlineLoadPair(
+    string: org.jf.dexlib2.iface.instruction.Instruction,
+    invocation: org.jf.dexlib2.iface.instruction.Instruction,
+    scratch: Int,
+  ): Boolean =
+    string.opcode == Opcode.CONST_STRING && string is org.jf.dexlib2.iface.instruction.formats.Instruction21c &&
+      string.registerA == scratch && invocation.opcode == Opcode.INVOKE_STATIC &&
+      invocation is org.jf.dexlib2.iface.instruction.formats.Instruction35c && invocation.registerCount == 1 &&
+      invocation.registerC == scratch && invocation.reference == systemLoadLibrary
 
   private fun rebuild(source: File, destination: File, dexes: Map<String, File>, libraries: Collection<NativeLibrary>) {
     ZipFile(source).use { input ->

@@ -91,34 +91,43 @@
           android:visibility="gone"
           app:trackCornerRadius="2dp" />
 
-        <androidx.core.widget.NestedScrollView
-          android:id="@+id/log_scroll"
+        <com.google.android.material.card.MaterialCardView
           android:layout_width="match_parent"
           android:layout_height="128dp"
-          android:layout_marginTop="12dp">
+          android:layout_marginTop="12dp"
+          app:cardBackgroundColor="?attr/colorSurface"
+          app:strokeColor="?attr/colorOutline"
+          app:strokeWidth="1dp">
 
-          <FrameLayout
+          <androidx.core.widget.NestedScrollView
+            android:id="@+id/log_scroll"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:padding="12dp">
 
-            <com.google.android.material.textview.MaterialTextView
-              android:id="@+id/log_empty"
+            <FrameLayout
               android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:text="@string/msg_native_injection_output_empty"
-              android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-              android:textColor="?attr/colorOnSurfaceVariant" />
+              android:layout_height="wrap_content">
 
-            <com.google.android.material.textview.MaterialTextView
-              android:id="@+id/log"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:fontFamily="monospace"
-              android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-              android:textColor="?attr/colorOnSurface"
-              android:textIsSelectable="true" />
-          </FrameLayout>
-        </androidx.core.widget.NestedScrollView>
+              <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/log_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/msg_native_injection_output_empty"
+                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+              <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/log"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                android:textColor="?attr/colorOnSurface"
+                android:textIsSelectable="true" />
+            </FrameLayout>
+          </androidx.core.widget.NestedScrollView>
+        </com.google.android.material.card.MaterialCardView>
       </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

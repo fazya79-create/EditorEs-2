@@ -7,6 +7,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,10 +19,12 @@ import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.color.MaterialColors
 import com.itsaky.androidide.apk.ApkPatchEngine
 import com.itsaky.androidide.databinding.LayoutNativeLibraryInjectionBinding
 import com.itsaky.androidide.projects.IProjectManager
 import com.itsaky.androidide.resources.R.string
+import com.itsaky.androidide.resources.R.attr
 import com.itsaky.androidide.utils.DialogUtils
 import java.io.File
 
@@ -192,7 +196,16 @@ class NativeLibraryInjectionDialogFragment : DialogFragment() {
   private fun appendLog(message: String) {
     val current = binding ?: return
     current.logEmpty.isVisible = false
-    current.log.append("$message\n")
+    val color = when {
+      message.startsWith(getString(string.msg_native_injection_complete).substringBefore('%')) ->
+        MaterialColors.getColor(current.log, attr.colorSuccess)
+      message.startsWith(getString(string.msg_native_injection_failed).substringBefore('%')) ->
+        MaterialColors.getColor(current.log, com.google.android.material.R.attr.colorError)
+      else -> MaterialColors.getColor(current.log, com.google.android.material.R.attr.colorOnSurfaceVariant)
+    }
+    current.log.append(SpannableString("$message\n").apply {
+      setSpan(ForegroundColorSpan(color), 0, length, 0)
+    })
     current.logScroll.post {
       if (binding === current) current.logScroll.fullScroll(View.FOCUS_DOWN)
     }
