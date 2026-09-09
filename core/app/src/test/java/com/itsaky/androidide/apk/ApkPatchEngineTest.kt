@@ -7,6 +7,7 @@ import android.content.res.AssetManager
 import com.android.apksig.ApkVerifier
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import java.io.RandomAccessFile
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
@@ -81,10 +82,12 @@ class ApkPatchEngineTest {
     val original = input.readBytes()
     val output = temporaryFolder.root.resolve("output/arm.apk")
 
+    assertThat(ZipFile(input).use { it.getEntry("resources.arsc")!!.method }).isEqualTo(ZipEntry.DEFLATED)
     val result = ApkPatchEngine(context).patch(input, output, listOf(library))
 
     assertThat(result).isEqualTo(ApkPatchEngine.PatchResult(output, launcherActivity))
     verifySignatures(output)
+    assertResourceTable(output)
     assertPatchedDex(output, libraryNames = listOf("fixture"))
     assertLibraries(output, listOf(library))
     assertPreservedEntries(input, output)
@@ -274,6 +277,44 @@ class ApkPatchEngineTest {
       }
     }
   }
+
+  private fun assertResourceTable(apk: File) {
+    val entry = ZipFile(apk).use { checkNotNull(it.getEntry("resources.arsc")) }
+    assertThat(entry.method).isEqualTo(ZipEntry.STORED)
+    RandomAccessFile(apk, "r").use { file ->
+      val offset = file.localHeaderOffset(entry.name)
+      file.seek(offset)
+      val header = ByteArray(30)
+      file.readFully(header)
+      val nameLength = header.unsignedShortAt(26)
+      val extraLength = header.unsignedShortAt(28)
+      assertThat((offset + 30 + nameLength + extraLength) % 4).isEqualTo(0)
+    }
+  }
+
+  private fun RandomAccessFile.localHeaderOffset(name: String): Long {
+    val nameBytes = name.toByteArray(Charsets.UTF_8)
+    var offset = 0L
+    while (offset + 30 <= length()) {
+      seek(offset)
+      if (readInt() == 0x504b0304) {
+        val header = ByteArray(30)
+        seek(offset)
+        readFully(header)
+        val nameLength = header.unsignedShortAt(26)
+        if (nameLength == nameBytes.size) {
+          val candidate = ByteArray(nameLength)
+          readFully(candidate)
+          if (candidate.contentEquals(nameBytes)) return offset
+        }
+      }
+      offset++
+    }
+    error("Missing local header for $name")
+  }
+
+  private fun ByteArray.unsignedShortAt(offset: Int): Int =
+    (this[offset].toInt() and 0xff) or ((this[offset + 1].toInt() and 0xff) shl 8)
 
   private fun assertPreservedEntries(input: File, output: File) {
     val before = entries(input)

@@ -27,6 +27,8 @@ import org.jf.dexlib2.immutable.reference.ImmutableStringReference
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.FilterOutputStream
+import java.io.OutputStream
 import java.math.BigInteger
 import java.nio.file.Files
 import java.security.KeyPairGenerator
@@ -212,17 +214,43 @@ class ApkPatchEngine(private val context: Context) {
 
   private fun rebuild(source: File, destination: File, dexes: Map<String, File>, libraries: Collection<NativeLibrary>) {
     ZipFile(source).use { input ->
-      ZipOutputStream(FileOutputStream(destination)).use { output ->
+      val bytesWritten = CountingOutputStream(FileOutputStream(destination))
+      ZipOutputStream(bytesWritten).use { output ->
         input.entries().asSequence().forEach { entry ->
           if (!entry.name.startsWith("META-INF/") && entry.name !in dexes && entry.name !in libraries.map { "lib/${it.abi}/${it.file.name}" }) {
-            output.putNextEntry(ZipEntry(entry.name))
-            input.getInputStream(entry).use { it.copyTo(output) }
-            output.closeEntry()
+            if (entry.name == "resources.arsc") {
+              writeResourceTable(output, bytesWritten.count, entry, input)
+            } else {
+              output.putNextEntry(ZipEntry(entry.name))
+              input.getInputStream(entry).use { it.copyTo(output) }
+              output.closeEntry()
+            }
           }
         }
         dexes.forEach { (name, file) -> writeFile(output, name, file, false) }
         libraries.forEach { writeFile(output, "lib/${it.abi}/${it.file.name}", it.file, true) }
       }
+    }
+  }
+
+  private fun writeResourceTable(output: ZipOutputStream, offset: Long, source: ZipEntry, input: ZipFile) {
+    val entry = ZipEntry(source.name)
+    entry.method = ZipEntry.STORED
+    entry.size = source.size
+    entry.compressedSize = source.size
+    entry.crc = source.crc
+    entry.extra = alignmentExtra(offset, entry.name)
+    output.putNextEntry(entry)
+    input.getInputStream(source).use { it.copyTo(output) }
+    output.closeEntry()
+  }
+
+  private fun alignmentExtra(offset: Long, name: String): ByteArray {
+    val padding = ((4 - (offset + 30 + name.toByteArray(Charsets.UTF_8).size) % 4) % 4).toInt()
+    return ByteArray(4 + padding).also {
+      it[0] = 0x35
+      it[1] = 0xd9.toByte()
+      it[2] = padding.toByte()
     }
   }
 
@@ -309,6 +337,21 @@ class ApkPatchEngine(private val context: Context) {
   }
 
   private fun libraryName(file: File): String = file.name.removePrefix("lib").removeSuffix(".so")
+
+  private class CountingOutputStream(output: OutputStream) : FilterOutputStream(output) {
+    var count = 0L
+      private set
+
+    override fun write(value: Int) {
+      out.write(value)
+      count++
+    }
+
+    override fun write(buffer: ByteArray, offset: Int, length: Int) {
+      out.write(buffer, offset, length)
+      count += length
+    }
+  }
 
   companion object {
     private const val helperName = "androidide\$loadNativeLibraries"
