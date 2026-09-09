@@ -14,7 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
@@ -37,12 +36,6 @@ class NativeLibraryInjectionDialogFragment : DialogFragment() {
   private var isPatching = false
   private val mainHandler = Handler(Looper.getMainLooper())
 
-  private val apkPicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-    if (!isPatching) {
-      uri?.let { binding?.apkPath?.setText(it.toString()) }
-    }
-  }
-
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     val builder = DialogUtils.newMaterialDialogBuilder(requireContext())
     val viewBinding = LayoutNativeLibraryInjectionBinding.inflate(LayoutInflater.from(builder.context))
@@ -50,9 +43,12 @@ class NativeLibraryInjectionDialogFragment : DialogFragment() {
     binding = viewBinding
     libraries = emptyList()
     selectedLibrary = null
+    parentFragmentManager.setFragmentResultListener(ApkFileBrowserDialogFragment.RESULT_KEY, this) { _, result ->
+      if (!isPatching) binding?.apkPath?.setText(result.getString(ApkFileBrowserDialogFragment.RESULT_PATH))
+    }
     viewBinding.browseApk.setEndIconOnClickListener {
       if (!isPatching) {
-        apkPicker.launch(arrayOf("application/vnd.android.package-archive"))
+        ApkFileBrowserDialogFragment().showNow(parentFragmentManager, "apk-file-browser")
       }
     }
     viewBinding.nativeLibrary.setOnItemClickListener { parent, _, position, _ ->

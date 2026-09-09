@@ -7,6 +7,8 @@ import android.net.Uri
 import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.common.truth.Truth.assertThat
@@ -67,43 +69,35 @@ class NativeLibraryInjectionDialogFragmentTest {
   }
 
   @Test
-  fun `browse icon launches the document picker and handles its result`() {
+  fun `browse icon opens the in-app browser and handles its result`() {
     library("armeabi-v7a/libsample.so")
     showDialog(1)
 
     val icon = browseIcon()
     assertThat(icon.isClickable).isTrue()
     assertThat(icon.performClick()).isTrue()
-    val request = checkNotNull(shadowOf(controller.get()).nextStartedActivityForResult)
-    assertThat(request.intent.action).isEqualTo(Intent.ACTION_OPEN_DOCUMENT)
-    assertThat(request.intent.type).isEqualTo("*/*")
-    assertThat(request.intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES)?.toList())
-      .containsExactly("application/vnd.android.package-archive")
-
-    val uri = Uri.parse("content://com.android.providers.downloads.documents/document/42")
-    assertThat(controller.get().activityResultRegistry.dispatchResult(
-      request.requestCode, Activity.RESULT_OK, Intent().setData(uri)
-    )).isTrue()
+    assertThat(controller.get().supportFragmentManager.findFragmentByTag("apk-file-browser"))
+      .isInstanceOf(ApkFileBrowserDialogFragment::class.java)
+    controller.get().supportFragmentManager.setFragmentResult(
+      ApkFileBrowserDialogFragment.RESULT_KEY,
+      bundleOf(ApkFileBrowserDialogFragment.RESULT_PATH to "/storage/emulated/0/Download/example.apk"),
+    )
     shadowOf(Looper.getMainLooper()).idle()
 
-    assertThat(binding.apkPath.text.toString()).isEqualTo(uri.toString())
+    assertThat(binding.apkPath.text.toString()).isEqualTo("/storage/emulated/0/Download/example.apk")
     assertThat(binding.patch.isEnabled).isTrue()
     assertThat(binding.log.text.toString()).isEmpty()
   }
 
   @Test
-  fun `cancelling the document picker preserves the current APK path`() {
+  fun `dismissing the in-app browser preserves the current APK path`() {
     library("arm64-v8a/libsample.so")
     showDialog(1)
     val originalPath = "/storage/emulated/0/Download/original.apk"
     binding.apkPath.setText(originalPath)
 
     assertThat(browseIcon().performClick()).isTrue()
-    val request = checkNotNull(shadowOf(controller.get()).nextStartedActivityForResult)
-    val ignoredUri = Uri.parse("content://downloads/cancelled.apk")
-    assertThat(controller.get().activityResultRegistry.dispatchResult(
-      request.requestCode, Activity.RESULT_CANCELED, Intent().setData(ignoredUri)
-    )).isTrue()
+    (controller.get().supportFragmentManager.findFragmentByTag("apk-file-browser") as DialogFragment).dismiss()
     shadowOf(Looper.getMainLooper()).idle()
 
     assertThat(binding.apkPath.text.toString()).isEqualTo(originalPath)
@@ -198,10 +192,9 @@ class NativeLibraryInjectionDialogFragmentTest {
     }
 
     try {
-      browseIcon().performClick()
-      val request = checkNotNull(shadowOf(controller.get()).nextStartedActivityForResult)
-      controller.get().activityResultRegistry.dispatchResult(
-        request.requestCode, Activity.RESULT_OK, Intent().setData(uri)
+      controller.get().supportFragmentManager.setFragmentResult(
+        ApkFileBrowserDialogFragment.RESULT_KEY,
+        bundleOf(ApkFileBrowserDialogFragment.RESULT_PATH to uri.toString()),
       )
       binding.patch.performClick()
       await { binding.install.isEnabled }

@@ -235,7 +235,7 @@ class ApkPatchEngineTest {
     assertThat(bundleMove.registerB).isEqualTo(2)
     val marker = instructions[2] as Instruction21c
     assertThat(marker.registerA).isEqualTo(2)
-    assertThat(marker.reference).isEqualTo(ImmutableStringReference("androidide:apk-patch:load-native-libraries"))
+    assertThat((marker.reference as StringReference).string).matches("[0-9a-f]{32}")
     libraryNames.forEachIndexed { index, name ->
       val string = instructions[3 + index * 2] as Instruction21c
       assertThat(string.registerA).isEqualTo(2)

@@ -68,7 +68,7 @@ class ApkPatchEngine(private val context: Context) {
       val launcher = launcherActivity(source)
       val classType = "L${launcher.replace('.', '/')};"
       onProgress("Rewriting launcher dex…")
-      val replacements = patchLauncherDex(source, work, classType, libraries.map { libraryName(it.file) }.distinct())
+      val replacements = patchLauncherDex(source, work, classType, libraries.map { libraryName(it.file) }.distinct(), marker())
       require(replacements.isNotEmpty()) { "Launcher activity $launcher was not found in any dex file" }
       val unsigned = File(work, "unsigned.apk")
       onProgress("Adding native libraries…")
@@ -92,7 +92,13 @@ class ApkPatchEngine(private val context: Context) {
     }
   }
 
-  private fun patchLauncherDex(apk: File, work: File, classType: String, libraries: List<String>): Map<String, File> {
+  private fun patchLauncherDex(
+    apk: File,
+    work: File,
+    classType: String,
+    libraries: List<String>,
+    marker: String,
+  ): Map<String, File> {
     val result = linkedMapOf<String, File>()
     ZipFile(apk).use { zip ->
       zip.entries().asSequence().filter { it.name.matches(Regex("classes(\\d+)?\\.dex")) }.forEach { entry ->
@@ -104,7 +110,7 @@ class ApkPatchEngine(private val context: Context) {
           require(target.virtualMethods.any(::isOnCreate)) { "Launcher activity $classType has no onCreate(Bundle) method" }
           val patched = File.createTempFile("patched-", ".dex", work)
           DexFileFactory.writeDexFile(patched.absolutePath, ImmutableDexFile(dexFile.opcodes, dexFile.classes.map {
-            if (it.type == classType) patchedClass(it, libraries) else ImmutableClassDef.of(it)
+            if (it.type == classType) patchedClass(it, libraries, marker) else ImmutableClassDef.of(it)
           }))
           result[entry.name] = patched
         }
@@ -114,10 +120,10 @@ class ApkPatchEngine(private val context: Context) {
     return result
   }
 
-  private fun patchedClass(classDef: ClassDef, libraries: List<String>): ImmutableClassDef {
+  private fun patchedClass(classDef: ClassDef, libraries: List<String>, marker: String): ImmutableClassDef {
     val direct = classDef.directMethods.filterNot(::isOurHelper).map(ImmutableMethod::of)
     val virtual = classDef.virtualMethods.map { method ->
-      if (isOnCreate(method)) patchedOnCreate(method, classDef.type, libraries) else ImmutableMethod.of(method)
+      if (isOnCreate(method)) patchedOnCreate(method, classDef.type, libraries, marker) else ImmutableMethod.of(method)
     }
     return ImmutableClassDef(
       classDef.type,
@@ -133,7 +139,7 @@ class ApkPatchEngine(private val context: Context) {
     )
   }
 
-  private fun patchedOnCreate(method: Method, classType: String, libraries: List<String>): ImmutableMethod {
+  private fun patchedOnCreate(method: Method, classType: String, libraries: List<String>, marker: String): ImmutableMethod {
     val implementation = method.implementation ?: return ImmutableMethod.of(method)
     val existing = MutableMethodImplementation(implementation)
     if (existing.instructions.firstOrNull()?.let { isHelperInvocation(it, classType) } == true) {
@@ -170,7 +176,7 @@ class ApkPatchEngine(private val context: Context) {
     method.name == helperName && method.parameterTypes.isEmpty() && method.returnType == "V" &&
       method.implementation?.instructions?.firstOrNull()?.let { instruction ->
         instruction.opcode == Opcode.CONST_STRING && instruction is org.jf.dexlib2.iface.instruction.ReferenceInstruction &&
-          instruction.reference == ImmutableStringReference(marker)
+          isPatchMarker(instruction.reference)
       } == true
 
   private fun isOnCreate(method: Method): Boolean =
@@ -192,7 +198,7 @@ class ApkPatchEngine(private val context: Context) {
     val scratch = implementation.registerCount - 1
     val markerInstruction = instructions[parameterCount]
     if (markerInstruction.opcode != Opcode.CONST_STRING || markerInstruction !is org.jf.dexlib2.iface.instruction.formats.Instruction21c ||
-      markerInstruction.registerA != scratch || markerInstruction.reference != ImmutableStringReference(marker)) return null
+      markerInstruction.registerA != scratch || !isPatchMarker(markerInstruction.reference)) return null
     var index = parameterCount + 1
     var loads = 0
     while (index + 1 < instructions.size && isInlineLoadPair(instructions[index], instructions[index + 1], scratch)) {
@@ -355,11 +361,17 @@ class ApkPatchEngine(private val context: Context) {
 
   companion object {
     private const val helperName = "androidide\$loadNativeLibraries"
-    private const val marker = "androidide:apk-patch:load-native-libraries"
+    private const val legacyMarker = "androidide:apk-patch:load-native-libraries"
+    private val markerPattern = Regex("[0-9a-f]{32}")
     private val supportedAbis = setOf("armeabi-v7a", "arm64-v8a")
     private val keyPassword = "androidide-apk-patch".toCharArray()
     private const val keyAlias = "androidide-apk-patch"
     private val systemLoadLibrary = ImmutableMethodReference("Ljava/lang/System;", "loadLibrary", listOf("Ljava/lang/String;"), "V")
     private fun helperReference(classType: String) = ImmutableMethodReference(classType, helperName, emptyList<String>(), "V")
+    private fun marker(): String = ByteArray(16).also(SecureRandom()::nextBytes).joinToString("") { "%02x".format(it) }
+    private fun isPatchMarker(reference: Any?): Boolean =
+      (reference as? org.jf.dexlib2.iface.reference.StringReference)?.string.let {
+        it == legacyMarker || it?.matches(markerPattern) == true
+      }
   }
 }
