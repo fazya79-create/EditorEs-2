@@ -1,90 +1,150 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/native_injection_content"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
-  android:orientation="vertical"
-  android:paddingHorizontal="24dp">
-
-  <com.google.android.material.textfield.TextInputLayout
-    android:id="@+id/browse_apk"
-    style="@style/Widget.Material3.TextInputEditText.OutlinedBox.Dense"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:hint="@string/hint_native_injection_apk"
-    app:endIconDrawable="@drawable/ic_folder"
-    app:endIconMode="custom"
-    app:endIconContentDescription="@string/action_browse_apk">
-
-    <com.google.android.material.textfield.TextInputEditText
-      android:id="@+id/apk_path"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:inputType="textUri" />
-  </com.google.android.material.textfield.TextInputLayout>
-
-  <com.google.android.material.textfield.TextInputLayout
-    style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="12dp"
-    android:hint="@string/hint_native_injection_arm">
-
-    <com.google.android.material.textfield.MaterialAutoCompleteTextView
-      android:id="@+id/arm_libraries"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:inputType="none" />
-  </com.google.android.material.textfield.TextInputLayout>
-
-  <com.google.android.material.textfield.TextInputLayout
-    style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="12dp"
-    android:hint="@string/hint_native_injection_arm64">
-
-    <com.google.android.material.textfield.MaterialAutoCompleteTextView
-      android:id="@+id/arm64_libraries"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:inputType="none" />
-  </com.google.android.material.textfield.TextInputLayout>
-
-  <androidx.core.widget.NestedScrollView
-    android:id="@+id/log_scroll"
-    android:layout_width="match_parent"
-    android:layout_height="120dp"
-    android:layout_marginTop="16dp"
-    android:background="?attr/colorSurfaceContainerHigh">
-    <com.google.android.material.textview.MaterialTextView
-      android:id="@+id/log"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:fontFamily="monospace"
-      android:padding="12dp"
-      android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
-  </androidx.core.widget.NestedScrollView>
+  android:clipToPadding="false"
+  android:fillViewport="true">
 
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="16dp"
-    android:gravity="end"
-    android:orientation="horizontal">
-    <com.google.android.material.button.MaterialButton
-      android:id="@+id/patch"
-      style="@style/Widget.Material3.Button.TextButton"
-      android:layout_width="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="24dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="24dp">
+
+    <com.google.android.material.textview.MaterialTextView
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:enabled="false"
-      android:text="@string/action_native_injection_patch" />
-    <com.google.android.material.button.MaterialButton
-      android:id="@+id/install"
-      style="@style/Widget.Material3.Button.TextButton"
-      android:layout_width="wrap_content"
+      android:text="@string/msg_native_injection_description"
+      android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+      android:textColor="?attr/colorOnSurfaceVariant" />
+
+    <com.google.android.material.textfield.TextInputLayout
+      android:id="@+id/browse_apk"
+      style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:enabled="false"
-      android:text="@string/action_native_injection_install" />
+      android:layout_marginTop="20dp"
+      android:hint="@string/hint_native_injection_apk"
+      app:endIconCheckable="false"
+      app:endIconContentDescription="@string/action_browse_apk"
+      app:endIconDrawable="@drawable/ic_folder"
+      app:endIconMode="custom"
+      app:helperText="@string/msg_native_injection_apk_help">
+
+      <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/apk_path"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textUri"
+        android:singleLine="true" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+      android:id="@+id/native_library_input"
+      style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:hint="@string/hint_native_injection_library">
+
+      <com.google.android.material.textfield.MaterialAutoCompleteTextView
+        android:id="@+id/native_library"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:inputType="none"
+        android:maxLines="2"
+        android:singleLine="false" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.card.MaterialCardView
+      style="@style/Widget.Material3.CardView.Filled"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="20dp"
+      app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+      app:cardCornerRadius="16dp"
+      app:cardElevation="0dp">
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <com.google.android.material.textview.MaterialTextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/title_native_injection_output"
+          android:textAppearance="@style/TextAppearance.Material3.TitleSmall" />
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+          android:id="@+id/progress"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="12dp"
+          android:indeterminate="true"
+          android:visibility="gone"
+          app:trackCornerRadius="2dp" />
+
+        <androidx.core.widget.NestedScrollView
+          android:id="@+id/log_scroll"
+          android:layout_width="match_parent"
+          android:layout_height="128dp"
+          android:layout_marginTop="12dp">
+
+          <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textview.MaterialTextView
+              android:id="@+id/log_empty"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:text="@string/msg_native_injection_output_empty"
+              android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+              android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <com.google.android.material.textview.MaterialTextView
+              android:id="@+id/log"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:fontFamily="monospace"
+              android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+              android:textColor="?attr/colorOnSurface"
+              android:textIsSelectable="true" />
+          </FrameLayout>
+        </androidx.core.widget.NestedScrollView>
+      </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="20dp"
+      android:gravity="end"
+      android:orientation="horizontal">
+
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/install"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:text="@string/action_native_injection_install" />
+
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/patch"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:enabled="false"
+        android:text="@string/action_native_injection_patch" />
+    </LinearLayout>
   </LinearLayout>
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

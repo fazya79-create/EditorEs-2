@@ -80,7 +80,9 @@ class ApkPatchEngine(private val context: Context) {
       sign(unsigned, signed)
       onProgress("Verifying v1, v2, and v3 signatures…")
       val verification = ApkVerifier.Builder(signed).build().verify()
-      check(verification.isVerified && verification.isVerifiedUsingV1Scheme && verification.isVerifiedUsingV2Scheme && verification.isVerifiedUsingV3Scheme) {
+      val v1Verification = ApkVerifier.Builder(signed)
+        .setMinCheckedPlatformVersion(23).setMaxCheckedPlatformVersion(23).build().verify()
+      check(verification.isVerified && v1Verification.isVerified && v1Verification.isVerifiedUsingV1Scheme && verification.isVerifiedUsingV2Scheme && verification.isVerifiedUsingV3Scheme) {
         "APK signature verification failed for one or more signing schemes"
       }
       output.parentFile?.mkdirs()

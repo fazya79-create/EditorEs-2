@@ -180,3 +180,36 @@ dependencies {
 
   testImplementation(projects.testing.unitTest)
 }
+
+val injectionFixtures = layout.buildDirectory.dir("generated/injectionFixtures")
+val generateInjectionFixtures by tasks.registering {
+  inputs.dir("src/test/fixtures/native-injection")
+  outputs.dir(injectionFixtures)
+  doLast {
+    val output = injectionFixtures.get().asFile.resolve("native-injection").apply { mkdirs() }
+    val buildTools = android.sdkDirectory.resolve("build-tools/${android.buildToolsVersion}")
+    listOf(21, 26).forEach { minSdk ->
+      exec {
+        commandLine(buildTools.resolve("aapt2"), "link", "--manifest",
+          file("src/test/fixtures/native-injection/AndroidManifest.xml"),
+          "-I", android.sdkDirectory.resolve("platforms/${android.compileSdkVersion}/android.jar"),
+          "--min-sdk-version", minSdk, "--target-sdk-version", 28,
+          "-o", output.resolve("manifest-$minSdk.apk"))
+      }
+    }
+    val toolchain = android.sdkDirectory.resolve("ndk/${android.ndkVersion}/toolchains/llvm/prebuilt")
+      .listFiles()!!.single { it.isDirectory }.resolve("bin")
+    mapOf("armeabi-v7a" to "armv7a-linux-androideabi21-clang", "arm64-v8a" to "aarch64-linux-android21-clang").forEach { (abi, compiler) ->
+      val library = output.resolve("$abi/libfixture.so.bin").apply { parentFile.mkdirs() }
+      exec {
+        commandLine(toolchain.resolve(compiler), "-shared", "-fPIC",
+          file("src/test/fixtures/native-injection/library.c"), "-o", library)
+      }
+    }
+  }
+}
+
+android.sourceSets.getByName("test").resources.srcDir(injectionFixtures)
+tasks.matching { it.name.startsWith("process") && it.name.endsWith("UnitTestJavaRes") }.configureEach {
+  dependsOn(generateInjectionFixtures)
+}

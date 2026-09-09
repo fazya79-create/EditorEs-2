@@ -1,43 +1,71 @@
 package com.itsaky.androidide.fragments.dialogs
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
+import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.DialogFragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.itsaky.androidide.apk.ApkPatchEngine
 import com.itsaky.androidide.databinding.LayoutNativeLibraryInjectionBinding
 import com.itsaky.androidide.projects.IProjectManager
+import com.itsaky.androidide.resources.R.string
+import com.itsaky.androidide.utils.DialogUtils
 import java.io.File
 
 class NativeLibraryInjectionDialogFragment : DialogFragment() {
 
   private var binding: LayoutNativeLibraryInjectionBinding? = null
-  private var armLibraries: List<File> = emptyList()
-  private var arm64Libraries: List<File> = emptyList()
+  private var libraries: List<ApkPatchEngine.NativeLibrary> = emptyList()
+  private var selectedLibrary: ApkPatchEngine.NativeLibrary? = null
   private var patchedApk: File? = null
+  private var isPatching = false
+  private val mainHandler = Handler(Looper.getMainLooper())
 
   private val apkPicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-    uri?.let { binding?.apkPath?.setText(it.toString()) }
+    if (!isPatching) {
+      uri?.let { binding?.apkPath?.setText(it.toString()) }
+    }
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    val viewBinding = LayoutNativeLibraryInjectionBinding.inflate(LayoutInflater.from(requireContext()))
+    val builder = DialogUtils.newMaterialDialogBuilder(requireContext())
+    val viewBinding = LayoutNativeLibraryInjectionBinding.inflate(LayoutInflater.from(builder.context))
+    viewBinding.logScroll.isNestedScrollingEnabled = false
     binding = viewBinding
-    viewBinding.browseApk.setOnClickListener { apkPicker.launch(arrayOf("application/vnd.android.package-archive")) }
+    libraries = emptyList()
+    selectedLibrary = null
+    viewBinding.browseApk.setEndIconOnClickListener {
+      if (!isPatching) {
+        apkPicker.launch(arrayOf("application/vnd.android.package-archive"))
+      }
+    }
+    viewBinding.nativeLibrary.setOnItemClickListener { parent, _, position, _ ->
+      if (!isPatching) {
+        selectedLibrary = (parent.getItemAtPosition(position) as? LibraryChoice)?.library
+        updateControls()
+      }
+    }
     viewBinding.patch.setOnClickListener { patch() }
     viewBinding.install.setOnClickListener { installPatchedApk() }
     viewBinding.apkPath.doOnTextChanged { _, _, _, _ ->
-      viewBinding.patch.isEnabled = !viewBinding.apkPath.text.isNullOrBlank()
+      updateControls()
     }
+    updateControls()
     loadLibraries()
-    return MaterialAlertDialogBuilder(requireContext())
-      .setTitle(com.itsaky.androidide.resources.R.string.title_native_library_injection)
+    return builder
+      .setTitle(string.title_native_library_injection)
       .setView(viewBinding.root)
       .create()
   }
@@ -48,91 +76,113 @@ class NativeLibraryInjectionDialogFragment : DialogFragment() {
   }
 
   private fun loadLibraries() {
-    appendLog("Scanning native build outputs…")
+    val current = binding ?: return
+    val project = runCatching { IProjectManager.getInstance().projectDir }.getOrNull()
     Thread {
-      val libraries = runCatching { discoverLibraries(IProjectManager.getInstance().projectDir) }
+      val discovered = runCatching { project?.let(::discoverLibraries).orEmpty() }
         .getOrElse { emptyMap() }
-      activity?.runOnUiThread {
-        val viewBinding = binding ?: return@runOnUiThread
-        armLibraries = libraries[Abi.ARM].orEmpty()
-        arm64Libraries = libraries[Abi.ARM64].orEmpty()
-        setLibraries(viewBinding.armLibraries, armLibraries)
-        setLibraries(viewBinding.arm64Libraries, arm64Libraries)
-        appendLog("Found ${libraries[Abi.ARM].orEmpty().size} arm and ${libraries[Abi.ARM64].orEmpty().size} arm64 libraries.")
+      mainHandler.post {
+        if (binding !== current) return@post
+        libraries = Abi.entries.flatMap { abi ->
+          val name = when (abi) {
+            Abi.ARM -> "armeabi-v7a"
+            Abi.ARM64 -> "arm64-v8a"
+          }
+          discovered[abi].orEmpty().map { ApkPatchEngine.NativeLibrary(name, it) }
+        }
+        val buildDir = project?.resolve("build")
+        val choices = libraries.map { library ->
+          val path = buildDir?.let { library.file.relativeToOrSelf(it).path } ?: library.file.path
+          LibraryChoice(library, getString(string.native_injection_library_label, library.file.name, library.abi, path))
+        }
+        current.nativeLibrary.setAdapter(object : ArrayAdapter<LibraryChoice>(
+          current.nativeLibrary.context,
+          com.google.android.material.R.layout.m3_auto_complete_simple_item,
+          choices,
+        ) {
+          override fun getView(position: Int, convertView: View?, parent: ViewGroup): View =
+            (super.getView(position, convertView, parent) as TextView).apply { maxLines = 3 }
+        })
+        selectedLibrary = libraries.singleOrNull()
+        current.nativeLibrary.setText(if (choices.size == 1) choices.single().label else "", false)
+        current.nativeLibraryInput.helperText = getString(
+          if (libraries.isEmpty()) string.msg_native_injection_no_libraries
+          else string.msg_native_injection_library_help
+        )
+        updateControls()
       }
     }.start()
   }
 
-  private fun setLibraries(input: android.widget.AutoCompleteTextView, libraries: List<File>) {
-    val buildDir = runCatching { File(IProjectManager.getInstance().projectDir, "build") }.getOrNull()
-    val labels = libraries.map { file ->
-      buildDir?.let { runCatching { file.relativeTo(it).path }.getOrNull() } ?: file.path
-    }
-    input.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, labels))
+  private fun updateControls() {
+    val current = binding ?: return
+    current.browseApk.isEnabled = !isPatching
+    current.nativeLibraryInput.isEnabled = !isPatching && libraries.isNotEmpty()
+    current.patch.isEnabled = !isPatching && selectedLibrary != null && !current.apkPath.text.isNullOrBlank()
+    current.patch.setText(if (isPatching) string.action_native_injection_patching else string.action_native_injection_patch)
+    current.install.isEnabled = !isPatching && patchedApk != null
+    current.progress.isVisible = isPatching
   }
 
   private fun patch() {
+    if (isPatching) return
     val viewBinding = binding ?: return
-    val selections = listOfNotNull(
-      selectedLibrary(viewBinding.armLibraries, armLibraries, "armeabi-v7a"),
-      selectedLibrary(viewBinding.arm64Libraries, arm64Libraries, "arm64-v8a"),
-    )
-    if (selections.isEmpty()) {
-      appendLog("Select at least one native library.")
+    val selection = selectedLibrary ?: return
+    val inputPath = viewBinding.apkPath.text?.toString().orEmpty().trim()
+    if (inputPath.isBlank()) return
+    val context = requireContext().applicationContext
+    val project = runCatching { IProjectManager.getInstance().projectDir }.getOrElse { error ->
+      appendLog(getString(string.msg_native_injection_failed, error.message ?: error.javaClass.simpleName))
       return
     }
-    viewBinding.patch.isEnabled = false
-    viewBinding.install.isEnabled = false
-    appendLog("Preparing APK patch…")
+    isPatching = true
+    patchedApk = null
+    updateControls()
+    appendLog(getString(string.msg_native_injection_preparing))
     Thread {
       val result = runCatching {
-        val temporaryInput = copyInput(viewBinding.apkPath.text?.toString().orEmpty())
+        val temporaryInput = copyInput(context, inputPath)
         try {
-          val project = IProjectManager.getInstance().projectDir
           val output = File(project, "build/patched-${System.currentTimeMillis()}.apk")
-          ApkPatchEngine(requireContext().applicationContext).patch(temporaryInput, output, selections) { message ->
-            activity?.runOnUiThread { appendLog(message) }
+          ApkPatchEngine(context).patch(temporaryInput, output, listOf(selection)) { message ->
+            mainHandler.post { appendLog(message) }
           }
         } finally {
           temporaryInput.delete()
         }
       }
-      activity?.runOnUiThread {
-        val current = binding ?: return@runOnUiThread
+      mainHandler.post {
+        isPatching = false
         result.onSuccess {
           patchedApk = it.output
-          current.install.isEnabled = true
-          appendLog("Patched ${it.launcherActivity} and wrote ${it.output.path}")
-        }.onFailure { error -> appendLog("Patch failed: ${error.message ?: error.javaClass.simpleName}") }
-        current.patch.isEnabled = true
+          appendLog(context.getString(string.msg_native_injection_complete, it.launcherActivity, it.output.path))
+        }.onFailure { error ->
+          appendLog(context.getString(string.msg_native_injection_failed, error.message ?: error.javaClass.simpleName))
+        }
+        updateControls()
       }
     }.start()
   }
 
-  private fun selectedLibrary(
-    input: android.widget.AutoCompleteTextView,
-    libraries: List<File>,
-    abi: String,
-  ): ApkPatchEngine.NativeLibrary? {
-    val file = libraries.getOrNull(input.listSelection) ?: libraries.firstOrNull {
-      it.name == input.text.toString().substringAfterLast('/')
-    }
-    return file?.let { ApkPatchEngine.NativeLibrary(abi, it) }
-  }
-
-  private fun copyInput(value: String): File {
-    val input = File(requireContext().cacheDir, "input-${System.nanoTime()}.apk")
-    if (value.startsWith("content://")) {
-      requireContext().contentResolver.openInputStream(android.net.Uri.parse(value))!!.use { source ->
-        input.outputStream().use(source::copyTo)
+  private fun copyInput(context: Context, value: String): File {
+    val input = File(context.cacheDir, "input-${System.nanoTime()}.apk")
+    try {
+      if (value.startsWith("content://")) {
+        checkNotNull(context.contentResolver.openInputStream(Uri.parse(value))).use { source ->
+          input.outputStream().use(source::copyTo)
+        }
+      } else {
+        File(value).copyTo(input)
       }
-    } else {
-      File(value).copyTo(input)
+      return input
+    } catch (error: Throwable) {
+      input.delete()
+      throw error
     }
-    return input
   }
 
   private fun installPatchedApk() {
+    if (isPatching) return
     val file = patchedApk ?: return
     val uri = FileProvider.getUriForFile(requireContext(), "${requireContext().packageName}.providers.fileprovider", file)
     startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(uri, "application/vnd.android.package-archive")
@@ -140,8 +190,12 @@ class NativeLibraryInjectionDialogFragment : DialogFragment() {
   }
 
   private fun appendLog(message: String) {
-    binding?.log?.append("$message\n")
-    binding?.logScroll?.post { binding?.logScroll?.fullScroll(android.view.View.FOCUS_DOWN) }
+    val current = binding ?: return
+    current.logEmpty.isVisible = false
+    current.log.append("$message\n")
+    current.logScroll.post {
+      if (binding === current) current.logScroll.fullScroll(View.FOCUS_DOWN)
+    }
   }
 
   private fun discoverLibraries(projectDir: File): Map<Abi, List<File>> {
@@ -179,6 +233,10 @@ class NativeLibraryInjectionDialogFragment : DialogFragment() {
     value.contains("arm64-v8a") -> Abi.ARM64
     value.contains("armeabi-v7a") || value.contains("armeabi") -> Abi.ARM
     else -> null
+  }
+
+  private data class LibraryChoice(val library: ApkPatchEngine.NativeLibrary, val label: String) {
+    override fun toString(): String = label
   }
 
   private enum class Abi {

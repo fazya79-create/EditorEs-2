@@ -4,6 +4,9 @@
 -dontnote **
 -dontobfuscate
 
+-keep @interface com.android.apksig.internal.asn1.** { *; }
+-keep @com.android.apksig.internal.asn1.Asn1Class class * { *; }
+
 # lsp4j models are deserialized with Gson
 -keep class org.eclipse.lsp4j.** { *; }
 
