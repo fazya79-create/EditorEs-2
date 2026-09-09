@@ -272,21 +272,7 @@ class UbuntuInstaller(private val context: Context) {
             """.trimIndent() + "\n"
         )
 
-        File(rootfs, "etc/apt/apt.conf.d").mkdirs()
-        File(rootfs, "etc/apt/apt.conf.d/99ide").writeText(
-            """
-            APT::Sandbox::User "root";
-            Acquire::Retries "3";
-            Acquire::http::Pipeline-Depth "0";
-            Acquire::ForceIPv4 "true";
-            DPkg::Options {"--force-confdef";"--force-confold";};
-            """.trimIndent() + "\n"
-        )
-
-        File(rootfs, "etc/dpkg/dpkg.cfg.d").mkdirs()
-        File(rootfs, "etc/dpkg/dpkg.cfg.d/99ide").writeText(
-            "force-unsafe-io\nno-debsig\n"
-        )
+        ProotConfig.ensureDpkgSpeedup(context)
 
         ProotConfig.writeShellProfile(context)
         ProotConfig.prepareStorageMounts(context)

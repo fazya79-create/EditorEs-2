@@ -294,6 +294,7 @@ object ProotConfig {
     }
 
     fun writeShellProfile(context: Context) {
+        ensureDpkgSpeedup(context)
         val rootfs = rootfsDir(context)
         if (!File(rootfs, "etc").isDirectory) return
         runCatching {
@@ -339,7 +340,31 @@ object ProotConfig {
         }
     }
 
+    fun ensureDpkgSpeedup(context: Context) {
+        val rootfs = rootfsDir(context)
+        if (!File(rootfs, "etc").isDirectory) return
+        runCatching {
+            val dpkgDir = File(rootfs, "etc/dpkg/dpkg.cfg.d")
+            dpkgDir.mkdirs()
+            File(dpkgDir, "force-unsafe-io").writeText("force-unsafe-io\n")
+            File(dpkgDir, "99ide").writeText("force-unsafe-io\nno-debsig\n")
+
+            val aptDir = File(rootfs, "etc/apt/apt.conf.d")
+            aptDir.mkdirs()
+            File(aptDir, "99ide").writeText(
+                """
+                APT::Sandbox::User "root";
+                Acquire::Retries "3";
+                Acquire::http::Pipeline-Depth "0";
+                Acquire::ForceIPv4 "true";
+                DPkg::Options {"--force-confdef";"--force-confold";"--force-unsafe-io";};
+                """.trimIndent() + "\n"
+            )
+        }
+    }
+
     fun registerAndroidIds(context: Context) {
+        ensureDpkgSpeedup(context)
         val rootfs = rootfsDir(context)
         val uid = Process.myUid()
         val userName = "aid_app_$uid"
