@@ -214,7 +214,7 @@ class NativeLibraryInjectionDialogFragment : DialogFragment() {
     val results = mutableMapOf<Abi, LinkedHashSet<File>>()
     val cacheDirectories = buildDir.walkTopDown()
       .filter { it.name == "CMakeCache.txt" && it.isFile }
-      .map { it.parentFile }
+      .mapNotNull { it.parentFile }
       .toList()
     cacheDirectories.forEach { directory ->
       val abi = cacheAbi(directory) ?: abiFromPresetPath(directory, buildDir) ?: return@forEach

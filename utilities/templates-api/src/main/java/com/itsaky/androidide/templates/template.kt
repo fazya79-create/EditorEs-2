@@ -121,8 +121,8 @@ class ProjectTemplateData(name: String, projectDir: File, val version: ProjectVe
  * @property templateName The name of the template.
  * @property thumb The thumbnail for the template.
  */
-open class Template<R : TemplateRecipeResult>(@StringRes open val templateName: Int,
-  @DrawableRes open val thumb: Int, open val widgets: List<Widget<*>>,
+open class Template<R : TemplateRecipeResult>(@field:StringRes open val templateName: Int,
+  @field:DrawableRes open val thumb: Int, open val widgets: List<Widget<*>>,
   open val recipe: TemplateRecipe<R>) {
 
   /**
@@ -186,7 +186,7 @@ open class ProjectTemplate(val moduleTemplates: List<Template<*>>, @StringRes te
  * @property recipe The recipe for building the template.
  */
 abstract class TemplateBuilder<R : TemplateRecipeResult>(
-  @StringRes open var templateName: Int? = null, @DrawableRes open var thumb: Int? = null,
+  @field:StringRes open var templateName: Int? = null, @field:DrawableRes open var thumb: Int? = null,
   open var widgets: List<Widget<*>>? = null, open var recipe: TemplateRecipe<R>? = null) {
 
   /**

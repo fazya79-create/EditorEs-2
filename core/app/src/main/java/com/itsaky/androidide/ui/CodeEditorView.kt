@@ -198,6 +198,7 @@ class CodeEditorView(
    * it means that there was an error saving the file or the content of the file was not modified and
    * hence the save operation was skipped.
    */
+  @OptIn(ExperimentalCoroutinesApi::class)
   suspend fun save(): Boolean {
     val file = this.file ?: return false
 
@@ -274,6 +275,7 @@ class CodeEditorView(
     }
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   private fun readFileAndApplySelection(file: File, selection: Range) {
     codeEditorScope.launch(Dispatchers.Main.immediate) {
       updateReadWriteProgress(0)

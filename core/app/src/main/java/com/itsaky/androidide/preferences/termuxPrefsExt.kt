@@ -40,8 +40,8 @@ private const val KEY_TERMUX_VIEW_PREFERENCES = "${KEY_TERMUX_PREFERENCES}.view"
 private const val KEY_TERMUX_VIEW_MARGIN_ADJUSTMENT_ENABLED_PREFERENCE = "${KEY_TERMUX_VIEW_PREFERENCES}.marginAdjustment"
 
 abstract class TermuxSwitchPreference(
-  @StringRes private val summaryOn: Int,
-  @StringRes private val summaryOff: Int,
+  @field:StringRes private val summaryOn: Int,
+  @field:StringRes private val summaryOff: Int,
   property: KMutableProperty0<Boolean>
 ) : SwitchPreference(property) {
 

@@ -32,8 +32,8 @@ data class MainScreenAction
 @JvmOverloads
 constructor(
   val id: Int,
-  @StringRes val text: Int,
-  @DrawableRes val icon: Int,
+  @field:StringRes val text: Int,
+  @field:DrawableRes val icon: Int,
   var onClick: ((MainScreenAction, View) -> Unit)? = null,
   var onLongClick: ((MainScreenAction, View) -> Boolean)? = null
 ) {

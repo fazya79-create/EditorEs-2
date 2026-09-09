@@ -62,9 +62,10 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.eclipse.lsp4j.DidChangeTextDocumentParams
@@ -108,6 +109,7 @@ class CppLanguageServer(
   private var server: LanguageServer? = null
   private var root: File? = null
   private var warmUpJob: Job? = null
+  private val warmUpScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
   // keyed by normalized file path, not by URI: Java's File.toURI() yields "file:/x" while
   // clangd replies with "file:///x", so raw URI strings never match
@@ -166,6 +168,8 @@ class CppLanguageServer(
 
   override fun shutdown() {
     synchronized(lock) {
+      warmUpJob?.cancel()
+      warmUpJob = null
       runCatching { server?.shutdown()?.get(5, TimeUnit.SECONDS) }
       runCatching { server?.exit() }
       runCatching { process?.destroy() }
@@ -195,7 +199,7 @@ class CppLanguageServer(
         root = dir
         // Warm-up clangd early at project-load time
         if (isBackendReady()) {
-          GlobalScope.launch(Dispatchers.IO) {
+          warmUpScope.launch {
             ensureStarted(dir)
           }
         }
@@ -216,7 +220,7 @@ class CppLanguageServer(
       if (server == null || process?.isAlive != true) {
         // In-flight guard: only launch one warm-up at a time
         if (warmUpJob == null || !warmUpJob!!.isActive) {
-          warmUpJob = GlobalScope.launch(Dispatchers.IO) {
+          warmUpJob = warmUpScope.launch {
             ensureStarted(rootFor(file))
           }
           // Clear the job reference when done (success or failure)

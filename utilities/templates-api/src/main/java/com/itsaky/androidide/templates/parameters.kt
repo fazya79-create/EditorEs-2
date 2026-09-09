@@ -77,8 +77,8 @@ enum class ParameterConstraint {
   EXISTS
 }
 
-abstract class Parameter<T>(@StringRes val name: Int,
-  @StringRes val description: Int?, val default: T,
+abstract class Parameter<T>(@field:StringRes val name: Int,
+  @field:StringRes val description: Int?, val default: T,
   var constraints: List<ParameterConstraint>
 ) {
 

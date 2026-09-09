@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment
 import com.itsaky.androidide.common.R
 import com.itsaky.androidide.tasks.cancelIfActive
 import com.itsaky.androidide.ui.themes.IThemeManager
+import com.itsaky.androidide.utils.EdgeToEdgeUtils
 import com.itsaky.androidide.utils.resolveAttr
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,9 +48,13 @@ abstract class BaseIDEActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     if (enableSystemBarTheming) {
-      window?.apply {
-        navigationBarColor = this@BaseIDEActivity.navigationBarColor
-        statusBarColor = this@BaseIDEActivity.statusBarColor
+      window?.let {
+        EdgeToEdgeUtils.applyEdgeToEdgeManually(
+          it,
+          false,
+          statusBarColor,
+          navigationBarColor
+        )
       }
     }
     IThemeManager.getInstance().applyTheme(this)

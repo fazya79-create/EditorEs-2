@@ -27,9 +27,9 @@ import com.itsaky.androidide.resources.R
  * @author Akash Yadav
  */
 enum class IDETheme(
-  @StyleRes val styleLight: Int,
-  @StyleRes val styleDark: Int,
-  @StringRes val title: Int
+  @field:StyleRes val styleLight: Int,
+  @field:StyleRes val styleDark: Int,
+  @field:StringRes val title: Int
 ) {
 
   /**

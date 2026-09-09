@@ -122,7 +122,7 @@ open class CompletionResult(items: Collection<CompletionItem>) {
 
 open class CompletionItem(
   var ideLabel: String,
-  var detail: String,
+  detail: String,
   insertText: String?,
   insertTextFormat: InsertTextFormat?,
   sortText: String?,

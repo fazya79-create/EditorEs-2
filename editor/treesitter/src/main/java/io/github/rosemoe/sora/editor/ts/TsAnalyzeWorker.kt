@@ -63,6 +63,7 @@ class TsAnalyzeWorker(
   @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
   private val analyzerContext = newSingleThreadContext("TsAnalyzeWorkerContext")
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   private val analyzerScope = CoroutineScope(analyzerContext)
   private val messageChannel = LinkedBlockingQueue<Message<*>>()
   private var analyzerJob: Job? = null
@@ -96,6 +97,7 @@ class TsAnalyzeWorker(
     messageChannel.offer(mod)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   fun stop() {
     log.debug("Stopping TsAnalyzeWorker...")
     isDestroyed = true

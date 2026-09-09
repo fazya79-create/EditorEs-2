@@ -25,10 +25,10 @@ import androidx.annotation.StringRes
 data class OnboardingPermissionItem(
   val permission: String,
 
-  @StringRes
+  @field:StringRes
   val title: Int,
 
-  @StringRes
+  @field:StringRes
   val description: Int,
   var isGranted: Boolean
 )

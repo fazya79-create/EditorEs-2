@@ -46,8 +46,8 @@ abstract class TreeSitterLanguage(
   private val langType: String
 ) : IDELanguage() {
 
-  private lateinit var tsTheme: TsTheme
-  private lateinit var languageSpec: TreeSitterLanguageSpec
+  private val languageSpec = getLanguageSpec(context, langType, lang, newLocalCaptureSpec(langType))
+  private val tsTheme = TsTheme(languageSpec.spec.tsQuery)
   private lateinit var _indentProvider: TreeSitterIndentProvider
   private val analyzer by lazy { TreeSitterAnalyzeManager(languageSpec.spec, tsTheme) }
   private val newlineHandlersLazy by lazy { createNewlineHandlers() }
@@ -71,11 +71,6 @@ abstract class TreeSitterLanguage(
 
     private val log = LoggerFactory.getLogger(TreeSitterLanguage::class.java)
     private const val DEF_IDENT_ADV = 0
-  }
-
-  init {
-    this.languageSpec = getLanguageSpec(context, langType, lang, newLocalCaptureSpec(langType))
-    this.tsTheme = TsTheme(languageSpec.spec.tsQuery)
   }
 
   fun setupWith(scheme: IDEColorScheme?) {
