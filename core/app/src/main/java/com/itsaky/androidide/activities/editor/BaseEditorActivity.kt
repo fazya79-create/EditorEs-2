@@ -64,7 +64,6 @@ import com.itsaky.androidide.fragments.sidebar.FileTreeFragment
 import com.itsaky.androidide.handlers.EditorActivityLifecyclerObserver
 import com.itsaky.androidide.handlers.LspHandler.registerLanguageServers
 import com.itsaky.androidide.interfaces.DiagnosticClickListener
-import com.itsaky.androidide.lookup.Lookup
 import com.itsaky.androidide.lsp.models.DiagnosticItem
 import com.itsaky.androidide.models.DiagnosticGroup
 import com.itsaky.androidide.models.OpenedFile
@@ -188,12 +187,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
     }
   }
 
-  protected open fun postDestroy() {
-    if (isDestroying) {
-      Lookup.getDefault().unregisterAll()
-    }
-  }
-
   override fun bindLayout(): View {
     this._binding = ActivityEditorBinding.inflate(layoutInflater)
     this.diagnosticInfoBinding = this.content.diagnosticInfo
@@ -300,7 +293,6 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
     checkIsDestroying()
     preDestroy()
     super.onDestroy()
-    postDestroy()
   }
 
   override fun onSaveInstanceState(outState: Bundle) {

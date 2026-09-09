@@ -18,7 +18,6 @@
 package com.itsaky.androidide.lsp.api;
 
 import com.itsaky.androidide.lsp.models.CompletionsKt;
-import com.itsaky.androidide.preferences.internal.EditorPreferences;
 
 /**
  * Settings contain preferences for the language server. Clients can use settings to enable/disable
@@ -27,8 +26,6 @@ import com.itsaky.androidide.preferences.internal.EditorPreferences;
  * @author Akash Yadav
  */
 public interface IServerSettings {
-
-  String KEY_COMPLETIONS_MATCH_LOWER = EditorPreferences.COMPLETIONS_MATCH_LOWER;
 
   /**
    * Called by language server to check if the completions are enabled. If not enabled, the server

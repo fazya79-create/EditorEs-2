@@ -23,7 +23,6 @@ import com.itsaky.androidide.lsp.models.CompletionParams
 import com.itsaky.androidide.lsp.models.CompletionResult
 import com.itsaky.androidide.lsp.models.FailureType.COMPLETION
 import com.itsaky.androidide.lsp.models.LSPFailure
-import com.itsaky.androidide.lsp.util.setupLookupForCompletion
 import com.itsaky.androidide.models.Position
 import io.github.rosemoe.sora.lang.completion.CompletionCancelledException
 import io.github.rosemoe.sora.text.CharPosition
@@ -65,7 +64,6 @@ internal class CommonCompletionProvider(
   ): List<CompletionItem> {
     val completionResult =
       try {
-        setupLookupForCompletion(file)
         val prefix = CompletionHelper.computePrefix(content, position, prefixMatcher)
         val params =
           CompletionParams(Position(position.line, position.column, position.index), file,

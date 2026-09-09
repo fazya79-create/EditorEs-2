@@ -21,7 +21,6 @@ import android.content.Context
 import androidx.core.content.ContextCompat
 import com.itsaky.androidide.actions.ActionData
 import com.itsaky.androidide.actions.EditorRelatedAction
-import com.itsaky.androidide.models.SaveResult
 import com.itsaky.androidide.resources.R
 import com.itsaky.androidide.utils.flashError
 import com.itsaky.androidide.utils.flashSuccess
@@ -64,7 +63,8 @@ class SaveFileAction(context: Context, override val order: Int) : EditorRelatedA
     return try {
       // Cannot use context.saveAll() because this.execAction is called on non-UI thread
       // and saveAll call will result in UI actions
-      ResultWrapper(result = context.saveAllResult())
+      context.saveAllResult()
+      ResultWrapper(isSuccessful = true)
     } catch (error: Throwable) {
       log.error("Failed to save file", error)
       ResultWrapper()
@@ -72,7 +72,7 @@ class SaveFileAction(context: Context, override val order: Int) : EditorRelatedA
   }
 
   override fun postExec(data: ActionData, result: Any) {
-    if (result is ResultWrapper && result.result != null) {
+    if (result is ResultWrapper && result.isSuccessful) {
       val context = data.requireActivity()
 
       if (result.isAlreadySaving) {
@@ -80,15 +80,7 @@ class SaveFileAction(context: Context, override val order: Int) : EditorRelatedA
         return
       }
 
-      // show save notification before calling 'notifySyncNeeded' so that the file save notification
-      // does not overlap the sync notification
       context.flashSuccess(R.string.all_saved)
-
-      val saveResult = result.result
-
-      if (saveResult.gradleSaved) {
-        context.editorViewModel.isSyncNeeded = true
-      }
 
       context.invalidateOptionsMenu()
     } else {
@@ -97,5 +89,5 @@ class SaveFileAction(context: Context, override val order: Int) : EditorRelatedA
     }
   }
 
-  inner class ResultWrapper(val isAlreadySaving: Boolean = false, val result: SaveResult? = null)
+  inner class ResultWrapper(val isAlreadySaving: Boolean = false, val isSuccessful: Boolean = false)
 }

@@ -25,7 +25,6 @@ import com.itsaky.androidide.actions.ActionMenu
 import com.itsaky.androidide.actions.ActionsRegistry
 import com.itsaky.androidide.actions.FillMenuParams
 import com.itsaky.androidide.actions.OnActionClickListener
-import com.itsaky.androidide.actions.locations.CodeActionsMenu
 import com.itsaky.androidide.utils.withStopWatch
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -53,10 +52,6 @@ class DefaultActionsRegistry : ActionsRegistry() {
 
   companion object {
     private val log = LoggerFactory.getLogger(DefaultActionsRegistry::class.java)
-  }
-
-  init {
-    registerAction(CodeActionsMenu)
   }
 
   override fun getActions(location: ActionItem.Location): MutableMap<String, ActionItem> {

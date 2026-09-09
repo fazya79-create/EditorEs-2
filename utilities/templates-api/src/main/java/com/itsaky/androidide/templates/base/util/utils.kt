@@ -17,7 +17,6 @@
 
 package com.itsaky.androidide.templates.base.util
 
-import com.itsaky.androidide.templates.BaseTemplateData
 import com.itsaky.androidide.templates.ProjectTemplateData
 import java.io.File
 
@@ -26,10 +25,6 @@ import java.io.File
  */
 internal fun baseAsset(type: String, path: String): String {
   return "templates/base/${type}/${path}"
-}
-
-internal fun BaseTemplateData.optonallyKts(file: String): String {
-  return if (useKts) "${file}.kts" else file
 }
 
 fun ProjectTemplateData.moduleNameToDir(name: String): File {

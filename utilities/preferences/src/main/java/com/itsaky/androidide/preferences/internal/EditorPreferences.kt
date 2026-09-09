@@ -25,8 +25,6 @@ package com.itsaky.androidide.preferences.internal
 @Suppress("MemberVisibilityCanBePrivate")
 object EditorPreferences {
 
-  const val COMPLETIONS_MATCH_LOWER = "idepref_editor_completions_matchLower"
-
   const val FLAG_WS_LEADING = "idepref_editor_wsLeading"
   const val FLAG_WS_TRAILING = "idepref_editor_wsTrailing"
   const val FLAG_WS_INNER = "idepref_editor_wsInner"
@@ -50,12 +48,6 @@ object EditorPreferences {
 
   const val COLOR_SCHEME = "idepref_editor_colorScheme"
   const val DEFAULT_COLOR_SCHEME = "default"
-
-  var completionsMatchLower: Boolean
-    get() = prefManager.getBoolean(COMPLETIONS_MATCH_LOWER, false)
-    set(value) {
-      prefManager.putBoolean(COMPLETIONS_MATCH_LOWER, value)
-    }
 
   var drawLeadingWs: Boolean
     get() = prefManager.getBoolean(FLAG_WS_LEADING, false)

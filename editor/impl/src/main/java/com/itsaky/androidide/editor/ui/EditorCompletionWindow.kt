@@ -17,10 +17,7 @@
 
 package com.itsaky.androidide.editor.ui
 
-import android.content.Intent
-import android.net.Uri
 import android.widget.ListView
-import com.itsaky.androidide.lsp.util.DocumentationReferenceProvider
 import com.itsaky.androidide.progress.ProgressManager
 import com.itsaky.androidide.utils.KeyboardUtils
 import io.github.rosemoe.sora.lang.completion.CompletionItem
@@ -60,20 +57,6 @@ class EditorCompletionWindow(val editor: IDEEditor) : EditorAutoCompletion(edito
     (layout.completionList as? ListView)?.let {
       listView = it
       it.adapter = this.adapter
-      it.setOnItemLongClickListener { _, view, position, _ ->
-        val data =
-          (items[position] as? com.itsaky.androidide.lsp.models.CompletionItem)?.data
-            ?: return@setOnItemLongClickListener false
-        val url =
-          DocumentationReferenceProvider.getUrl(data) ?: return@setOnItemLongClickListener false
-        Intent().apply {
-          action = Intent.ACTION_VIEW
-          setData(Uri.parse(url))
-          addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-          view.context.startActivity(this)
-        }
-        true
-      }
     }
   }
 

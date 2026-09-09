@@ -123,7 +123,6 @@ object ProotConfig {
     fun prootArgs(
         context: Context,
         cwd: String = "/root",
-        bootCommand: String? = null,
         binds: List<String> = emptyList()
     ): Array<String> {
         val rootfs = rootfsDir(context).absolutePath
@@ -165,16 +164,10 @@ object ProotConfig {
             "ANDROID_NDK_HOME=$GuestNdkRoot",
             "TERM=xterm-256color",
             "TMPDIR=/tmp",
-            *bootShell(bootCommand)
+            "/usr/bin/bash",
+            "-l"
         )
     }
-
-    private fun bootShell(bootCommand: String?): Array<String> =
-        if (bootCommand == null) {
-            arrayOf("/usr/bin/bash", "-l")
-        } else {
-            arrayOf("/usr/bin/bash", "-lc", "$bootCommand; exec /usr/bin/bash -l")
-        }
 
     fun prootEnv(context: Context): Array<String> = arrayOf(
         "TERM=xterm-256color",

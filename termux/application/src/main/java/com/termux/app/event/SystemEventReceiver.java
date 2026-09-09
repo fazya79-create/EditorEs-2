@@ -11,7 +11,6 @@ import com.termux.shared.data.IntentUtils;
 import com.termux.shared.logger.Logger;
 import com.termux.shared.termux.TermuxUtils;
 import com.termux.shared.termux.file.TermuxFileUtils;
-import com.termux.shared.termux.shell.TermuxShellManager;
 import com.termux.shared.termux.shell.command.environment.TermuxShellEnvironment;
 
 public class SystemEventReceiver extends BroadcastReceiver {
@@ -36,9 +35,6 @@ public class SystemEventReceiver extends BroadcastReceiver {
     if (action == null) return;
 
     switch (action) {
-      case Intent.ACTION_BOOT_COMPLETED:
-        onActionBootCompleted(context, intent);
-        break;
       case Intent.ACTION_PACKAGE_ADDED:
       case Intent.ACTION_PACKAGE_REMOVED:
       case Intent.ACTION_PACKAGE_REPLACED:
@@ -47,10 +43,6 @@ public class SystemEventReceiver extends BroadcastReceiver {
       default:
         Logger.logError(LOG_TAG, "Invalid action \"" + action + "\" passed to " + LOG_TAG);
     }
-  }
-
-  public synchronized void onActionBootCompleted(@NonNull Context context, @NonNull Intent intent) {
-    TermuxShellManager.onActionBootCompleted(context, intent);
   }
 
   public synchronized void onActionPackageUpdated(@NonNull Context context, @NonNull Intent intent) {

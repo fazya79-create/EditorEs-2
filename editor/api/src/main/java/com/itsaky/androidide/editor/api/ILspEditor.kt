@@ -20,7 +20,6 @@ package com.itsaky.androidide.editor.api
 import com.itsaky.androidide.lsp.api.ILanguageClient
 import com.itsaky.androidide.lsp.api.ILanguageServer
 import com.itsaky.androidide.lsp.models.Command
-import com.itsaky.androidide.lsp.models.SignatureHelp
 
 /**
  * LSP functions for the editor.
@@ -51,19 +50,6 @@ interface ILspEditor {
   fun executeCommand(command: Command?)
 
   /**
-   * If any language server is set, requests signature help at the cursor's position. On a valid
-   * response, shows the signature help in a popup window.
-   */
-  fun signatureHelp()
-
-  /**
-   * Shows the given signature help in the editor.
-   *
-   * @param help The signature help data to show.
-   */
-  fun showSignatureHelp(help: SignatureHelp?)
-
-  /**
    * If any language server is set, asks the language server to find the definition of token at the
    * cursor position.
    *
@@ -79,12 +65,6 @@ interface ILspEditor {
    * If the server returns a valid response, that response is forwarded to the [ ].
    */
   fun findReferences()
-
-  /**
-   * Requests the language server to provided a semantically larger selection than the current
-   * selection. If a valid response is received, that range will be selected.
-   */
-  fun expandSelection()
 
   /** Ensures that all the windows are dismissed. */
   fun ensureWindowsDismissed()

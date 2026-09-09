@@ -23,7 +23,6 @@ import com.itsaky.androidide.actions.ActionItem.Location.EDITOR_TOOLBAR
 import com.itsaky.androidide.actions.ActionsRegistry
 import com.itsaky.androidide.actions.editor.CopyAction
 import com.itsaky.androidide.actions.editor.CutAction
-import com.itsaky.androidide.actions.editor.ExpandSelectionAction
 import com.itsaky.androidide.actions.editor.LongSelectAction
 import com.itsaky.androidide.actions.editor.PasteAction
 import com.itsaky.androidide.actions.editor.SelectAllAction
@@ -70,7 +69,6 @@ class EditorActivityActions {
       registry.registerAction(ReloadColorSchemesAction(context, order++))
 
       // editor text actions
-      registry.registerAction(ExpandSelectionAction(context, order++))
       registry.registerAction(SelectAllAction(context, order++))
       registry.registerAction(LongSelectAction(context, order++))
       registry.registerAction(CutAction(context, order++))

@@ -83,37 +83,13 @@ typealias TemplateRecipeFinalizer = RecipeExecutor.() -> Unit
  *
  * @property name The name of the module.
  * @property projectDir The directory for the module.
- * @property language The source language for the module.
- * @property useKts Whether to use Kotlin DSL for Gradle build scripts.
  */
-abstract class BaseTemplateData(val name: String, val projectDir: File, val language: Language,
-  val useKts: Boolean) : TemplateData()
-
-/**
- * Language for source files.
- */
-enum class Language(val lang: String, val ext: String) {
-
-  Java("Java", "java"), Kotlin("Kotlin", "kt");
-}
-
-/**
- * Version information for the project.
- *
- * @property gradlePlugin The Android Gradle Plugin version.
- * @property gradle The Gradle version.
- * @property kotlin The Kotlin Plugin version.
- */
-data class ProjectVersionData(val gradlePlugin: String = ANDROID_GRADLE_PLUGIN_VERSION,
-  val gradle: String = GRADLE_DISTRIBUTION_VERSION, val kotlin: String = KOTLIN_VERSION)
+abstract class BaseTemplateData(val name: String, val projectDir: File) : TemplateData()
 
 /**
  * Data for creating root projects.
- *
- * @property version The version information for this project.
  */
-class ProjectTemplateData(name: String, projectDir: File, val version: ProjectVersionData,
-  language: Language, useKts: Boolean) : BaseTemplateData(name, projectDir, language, useKts)
+class ProjectTemplateData(name: String, projectDir: File) : BaseTemplateData(name, projectDir)
 
 /**
  * Model for a template.

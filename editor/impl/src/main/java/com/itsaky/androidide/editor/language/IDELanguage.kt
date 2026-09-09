@@ -19,10 +19,8 @@ package com.itsaky.androidide.editor.language
 import android.os.Bundle
 import com.itsaky.androidide.editor.api.IEditor
 import com.itsaky.androidide.editor.ui.IDECompletionPublisher
-import com.itsaky.androidide.lookup.Lookup
 import com.itsaky.androidide.lsp.api.ILanguageServer
 import com.itsaky.androidide.preferences.internal.EditorPreferences
-import com.itsaky.androidide.progress.ICancelChecker
 import io.github.rosemoe.sora.lang.Language
 import io.github.rosemoe.sora.lang.completion.CompletionCancelledException
 import io.github.rosemoe.sora.lang.completion.CompletionPublisher
@@ -59,14 +57,8 @@ abstract class IDELanguage : Language {
     publisher: CompletionPublisher,
     extraArguments: Bundle
   ) {
-    try {
-      val cancelChecker = CompletionCancelChecker(publisher)
-      Lookup.getDefault().register(ICancelChecker::class.java, cancelChecker)
-      doComplete(content, position, publisher, cancelChecker, extraArguments)
-    } finally {
-      Lookup.getDefault().unregister(
-        ICancelChecker::class.java)
-    }
+    val cancelChecker = CompletionCancelChecker(publisher)
+    doComplete(content, position, publisher, cancelChecker, extraArguments)
   }
 
   private fun doComplete(

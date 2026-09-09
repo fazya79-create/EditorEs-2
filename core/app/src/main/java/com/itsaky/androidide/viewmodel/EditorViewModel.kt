@@ -45,7 +45,6 @@ class EditorViewModel : ViewModel() {
   internal val _statusText = MutableLiveData<Pair<CharSequence, Int>>("" to CENTER)
   internal val _displayedFile = MutableLiveData(-1)
   internal val _startDrawerOpened = MutableLiveData(false)
-  internal val _isSyncNeeded = MutableLiveData(false)
 
   internal val _filesModified = MutableLiveData(false)
   internal val _filesSaving = MutableLiveData(false)
@@ -111,12 +110,6 @@ class EditorViewModel : ViewModel() {
     get() = _startDrawerOpened.value ?: false
     set(value) {
       _startDrawerOpened.value = value
-    }
-
-  var isSyncNeeded: Boolean
-    get() = _isSyncNeeded.value ?: false
-    set(value) {
-      _isSyncNeeded.value = value
     }
 
   internal var files: MutableList<File>

@@ -23,8 +23,6 @@ object BackendPreferences {
   const val BUILD_ABI = "ide.backend.buildAbi"
   const val BUILD_API_LEVEL = "ide.backend.buildApiLevel"
   const val BUILD_TYPE = "ide.backend.buildType"
-  const val NDK_VERSION = "ide.backend.ndkVersion"
-  const val CMAKE_VERSION = "ide.backend.cmakeVersion"
 
   const val ABI_ARM64 = 0
   const val ABI_ARM32 = 1
@@ -51,18 +49,6 @@ object BackendPreferences {
     get() = prefManager.getInt(BUILD_TYPE, BUILD_TYPE_RELEASE)
     set(value) {
       prefManager.putInt(BUILD_TYPE, value)
-    }
-
-  var ndkVersion: String
-    get() = prefManager.getString(NDK_VERSION, "")
-    set(value) {
-      prefManager.putString(NDK_VERSION, value)
-    }
-
-  var cmakeVersion: String
-    get() = prefManager.getString(CMAKE_VERSION, "")
-    set(value) {
-      prefManager.putString(CMAKE_VERSION, value)
     }
 
   fun abis(): List<String> = when (buildAbi) {

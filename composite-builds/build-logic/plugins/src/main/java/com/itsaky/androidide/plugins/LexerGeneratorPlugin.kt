@@ -76,8 +76,6 @@ class LexerGeneratorPlugin : Plugin<Project> {
         outDir.absolutePath,
         "-package",
         pck,
-        "-listener",
-        "-visitor",
         "-Xexact-output-dir"
       )
     options.addAll(files)

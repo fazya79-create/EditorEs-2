@@ -18,7 +18,6 @@
 package com.itsaky.androidide.templates.impl
 
 import com.itsaky.androidide.templates.ProjectTemplate
-import com.itsaky.androidide.templates.ProjectVersionData
 import com.itsaky.androidide.templates.StringParameter
 import com.itsaky.androidide.templates.base.ProjectTemplateBuilder
 import com.itsaky.androidide.templates.base.baseProject
@@ -27,10 +26,9 @@ import com.itsaky.androidide.templates.projectNameParameter
 
 internal inline fun baseProjectImpl(
   projectName: StringParameter = projectNameParameter(),
-  projectVersionData: ProjectVersionData = ProjectVersionData(),
   crossinline block: ProjectTemplateBuilder.() -> Unit
 ): ProjectTemplate =
-  baseProject(projectName = projectName, projectVersionData = projectVersionData) {
+  baseProject(projectName = projectName) {
     block()
 
     if (!isRecipeSet) {

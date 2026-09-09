@@ -48,7 +48,6 @@ import com.itsaky.androidide.models.FileExtension
 import com.itsaky.androidide.models.OpenedFile
 import com.itsaky.androidide.models.OpenedFilesCache
 import com.itsaky.androidide.models.Range
-import com.itsaky.androidide.models.SaveResult
 import com.itsaky.androidide.projects.ClangFormat
 import com.itsaky.androidide.projects.IProjectManager
 import com.itsaky.androidide.tasks.executeAsync
@@ -363,87 +362,56 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
 
   override fun saveAllAsync(
     notify: Boolean,
-    requestSync: Boolean,
-    processResources: Boolean,
     progressConsumer: ((Int, Int) -> Unit)?,
     runAfter: (() -> Unit)?
   ) {
     editorActivityScope.launch {
-      saveAll(notify, requestSync, processResources, progressConsumer)
+      saveAll(notify, progressConsumer)
       runAfter?.invoke()
     }
   }
 
   override suspend fun saveAll(
     notify: Boolean,
-    requestSync: Boolean,
-    processResources: Boolean,
     progressConsumer: ((Int, Int) -> Unit)?
-  ): Boolean {
-    val result = saveAllResult(progressConsumer)
+  ) {
+    saveAllResult(progressConsumer)
 
     // don't bother to switch the context if we don't need to
-    if (notify || (result.gradleSaved && requestSync)) {
+    if (notify) {
       withContext(Dispatchers.Main) {
-        if (notify) {
-          flashSuccess(string.all_saved)
-        }
-
-        if (result.gradleSaved && requestSync) {
-          editorViewModel.isSyncNeeded = true
-        }
+        flashSuccess(string.all_saved)
       }
     }
-
-    return result.gradleSaved
   }
 
-  override suspend fun saveAllResult(progressConsumer: ((Int, Int) -> Unit)?): SaveResult {
-    return performFileSave {
-      val result = SaveResult()
+  override suspend fun saveAllResult(progressConsumer: ((Int, Int) -> Unit)?) {
+    performFileSave {
       for (i in 0 until editorViewModel.getOpenedFileCount()) {
-        saveResultInternal(i, result)
+        saveResultInternal(i)
         progressConsumer?.invoke(i + 1, editorViewModel.getOpenedFileCount())
       }
-
-      return@performFileSave result
     }
   }
 
-  override suspend fun saveResult(index: Int, result: SaveResult) {
+  override suspend fun saveResult(index: Int) {
     performFileSave {
-      saveResultInternal(index, result)
+      saveResultInternal(index)
     }
   }
 
-  private suspend fun saveResultInternal(
-    index: Int,
-    result: SaveResult
-  ) : Boolean {
+  private suspend fun saveResultInternal(index: Int) : Boolean {
     if (index < 0 || index >= editorViewModel.getOpenedFileCount()) {
       return false
     }
 
     val frag = getEditorAtIndex(index) ?: return false
-    val fileName = frag.file?.name ?: return false
+    if (frag.file == null) {
+      return false
+    }
 
-    run {
-      // Must be called before frag.save()
-      // Otherwise, it'll always return false
-      val modified = frag.isModified
-      if (!frag.save()) {
-        return false
-      }
-
-      val isGradle = fileName.endsWith(".gradle") || fileName.endsWith(".gradle.kts")
-      val isXml: Boolean = fileName.endsWith(".xml")
-      if (!result.gradleSaved) {
-        result.gradleSaved = modified && isGradle
-      }
-
-      if (!result.xmlSaved) {
-        result.xmlSaved = modified && isXml
-      }
+    if (!frag.save()) {
+      return false
     }
 
     val hasUnsaved = hasUnsavedFiles()

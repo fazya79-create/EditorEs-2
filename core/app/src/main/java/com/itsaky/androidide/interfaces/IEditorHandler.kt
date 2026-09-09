@@ -18,7 +18,6 @@
 package com.itsaky.androidide.interfaces
 
 import com.itsaky.androidide.models.Range
-import com.itsaky.androidide.models.SaveResult
 import com.itsaky.androidide.ui.CodeEditorView
 import java.io.File
 
@@ -45,16 +44,13 @@ interface IEditorHandler {
    * Save all files.
    *
    * @param notify Whether to notify the user about the save event.
-   * @param processResources Whether the resources must be generated after the save operation.
    * @param progressConsumer A function which consumes the progress of the save operation.
    * See [saveAllResult] for more details.
    */
   suspend fun saveAll(
     notify: Boolean = true,
-    requestSync: Boolean = true,
-    processResources: Boolean = false,
     progressConsumer: ((progress: Int, total: Int) -> Unit)? = null
-  ) : Boolean
+  )
 
   /**
    * Save all files asynchronously.
@@ -64,21 +60,17 @@ interface IEditorHandler {
    */
   fun saveAllAsync(
     notify: Boolean = true,
-    requestSync: Boolean = true,
-    processResources: Boolean = false,
     progressConsumer: ((progress: Int, total: Int) -> Unit)? = null,
     runAfter: (() -> Unit)? = null
   )
 
   /**
-   * Save all files and get the [SaveResult].
-   *
    * @param progressConsumer A function which consumes the progress of the save operation. The first
    * parameter of the function is the current save progress (saved file count) and the second parameter
    * is the total file count.
    */
-  suspend fun saveAllResult(progressConsumer: ((progress: Int, total: Int) -> Unit)? = null) : SaveResult
-  suspend fun saveResult(index: Int, result: SaveResult)
+  suspend fun saveAllResult(progressConsumer: ((progress: Int, total: Int) -> Unit)? = null)
+  suspend fun saveResult(index: Int)
   
   fun closeFile(index: Int) = closeFile(index) {}
   fun closeFile(index: Int, runAfter: () -> Unit)

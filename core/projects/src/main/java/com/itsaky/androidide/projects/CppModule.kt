@@ -17,7 +17,6 @@
 
 package com.itsaky.androidide.projects
 
-import com.itsaky.androidide.lookup.Lookup
 import java.io.File
 import java.nio.file.Files
 import kotlin.io.path.extension
@@ -26,8 +25,6 @@ import kotlin.io.path.isRegularFile
 class CppModule(val dir: File, val name: String = dir.name) {
 
   companion object {
-    val COMPLETION_MODULE_KEY = Lookup.Key<CppModule>()
-
     private val SOURCE_EXTENSIONS =
       setOf("c", "cc", "cpp", "cxx", "cu", "h", "hh", "hpp", "hxx")
 

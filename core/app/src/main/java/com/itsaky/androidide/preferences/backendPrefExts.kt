@@ -31,8 +31,6 @@ import com.itsaky.androidide.preferences.internal.BackendPreferences
 import com.itsaky.androidide.preferences.internal.BackendPreferences.buildAbi
 import com.itsaky.androidide.preferences.internal.BackendPreferences.buildApiLevel
 import com.itsaky.androidide.preferences.internal.BackendPreferences.buildTypeIndex
-import com.itsaky.androidide.preferences.internal.BackendPreferences.cmakeVersion
-import com.itsaky.androidide.preferences.internal.BackendPreferences.ndkVersion
 import com.itsaky.androidide.resources.R.string
 import com.itsaky.androidide.tasks.executeAsync
 import com.itsaky.androidide.tasks.executeAsyncProvideError
@@ -234,10 +232,6 @@ private fun installToolchain(preference: Preference, kind: ToolchainKind, releas
       ToolchainInstaller(context.applicationContext, kind).install(release) { phase ->
         progress?.update(phase)
         done = phase is com.itsaky.androidide.backend.build.ToolchainPhase.Done
-      }
-      if (done) {
-        val tag = ToolchainPaths.installedVersion(context.applicationContext, kind) ?: release.tag
-        if (kind == ToolchainKind.Ndk) ndkVersion = tag else cmakeVersion = tag
       }
       done
     }

@@ -53,19 +53,15 @@ import com.itsaky.androidide.lsp.api.ILanguageServer
 import com.itsaky.androidide.lsp.models.Command
 import com.itsaky.androidide.lsp.models.DefinitionParams
 import com.itsaky.androidide.lsp.models.DefinitionResult
-import com.itsaky.androidide.lsp.models.ExpandSelectionParams
 import com.itsaky.androidide.lsp.models.ReferenceParams
 import com.itsaky.androidide.lsp.models.ReferenceResult
 import com.itsaky.androidide.lsp.models.ShowDocumentParams
-import com.itsaky.androidide.lsp.models.SignatureHelp
-import com.itsaky.androidide.lsp.models.SignatureHelpParams
 import com.itsaky.androidide.models.Position
 import com.itsaky.androidide.models.Range
 import com.itsaky.androidide.preferences.internal.EditorPreferences
 import com.itsaky.androidide.progress.ICancelChecker
 import com.itsaky.androidide.syntax.colorschemes.DynamicColorScheme
 import com.itsaky.androidide.syntax.colorschemes.SchemeAndroidIDE
-import com.itsaky.androidide.tasks.JobCancelChecker
 import com.itsaky.androidide.tasks.cancelIfActive
 import com.itsaky.androidide.tasks.launchAsyncWithProgress
 import com.itsaky.androidide.utils.DocumentUtils
@@ -111,7 +107,6 @@ open class IDEEditor @JvmOverloads constructor(
   internal var _file: File? = null
 
   private var _actionsMenu: EditorActionsMenu? = null
-  private var _signatureHelpWindow: SignatureHelpWindow? = null
   private var _diagnosticWindow: DiagnosticWindow? = null
   private var fileVersion = 0
   internal var isModified = false
@@ -121,7 +116,7 @@ open class IDEEditor @JvmOverloads constructor(
     val languageClient = languageClient ?: return@Runnable
     val cursor = this.cursor ?: return@Runnable
 
-    if (cursor.isSelected || _signatureHelpWindow?.isShowing == true) {
+    if (cursor.isSelected) {
       return@Runnable
     }
 
@@ -139,7 +134,6 @@ open class IDEEditor @JvmOverloads constructor(
   protected val eventDispatcher = EditorEventDispatcher()
 
   private var setupTsLanguageJob: Job? = null
-  private var sigHelpCancelChecker: ICancelChecker? = null
 
   var languageServer: ILanguageServer? = null
     private set
@@ -156,14 +150,6 @@ open class IDEEditor @JvmOverloads constructor(
    * The text searcher for the editor.
    */
   lateinit var searcher: IDEEditorSearcher
-
-  /**
-   * The signature help window for the editor.
-   */
-  val signatureHelpWindow: SignatureHelpWindow
-    get() {
-      return _signatureHelpWindow ?: SignatureHelpWindow(this).also { _signatureHelpWindow = it }
-    }
 
   /**
    * The diagnostic window for the editor.
@@ -251,45 +237,8 @@ open class IDEEditor @JvmOverloads constructor(
         completion.requireCompletion()
       }
 
-      Command.TRIGGER_PARAMETER_HINTS -> signatureHelp()
       Command.FORMAT_CODE -> formatCodeAsync()
     }
-  }
-
-  override fun signatureHelp() {
-    if (isReleased) {
-      return
-    }
-    val languageServer = this.languageServer ?: return
-    val file = this.file ?: return
-
-    this.languageClient ?: return
-
-    sigHelpCancelChecker?.also { it.cancel() }
-
-    val cancelChecker = JobCancelChecker().also {
-      this.sigHelpCancelChecker = it
-    }
-
-    editorScope.launch(Dispatchers.Default) {
-      cancelChecker.job = coroutineContext[Job]
-
-      val help = safeGet("signature help request") {
-        val params = SignatureHelpParams(file.toPath(), cursorLSPPosition, cancelChecker)
-        languageServer.signatureHelp(params)
-      }
-
-      withContext(Dispatchers.Main) {
-        showSignatureHelp(help)
-      }
-    }.logError("signature help request")
-  }
-
-  override fun showSignatureHelp(help: SignatureHelp?) {
-    if (isReleased) {
-      return
-    }
-    signatureHelpWindow.setupAndDisplay(help)
   }
 
   override fun findDefinition() {
@@ -326,33 +275,9 @@ open class IDEEditor @JvmOverloads constructor(
     }?.logError("references request")
   }
 
-  override fun expandSelection() {
-    if (isReleased) {
-      return
-    }
-    val languageServer = this.languageServer ?: return
-    val file = file ?: return
-
-    launchCancellableAsyncWithProgress(string.please_wait) { _, _ ->
-      val initialRange = cursorLSPRange
-      val result = safeGet("expand selection request") {
-        val params = ExpandSelectionParams(file.toPath(), initialRange)
-        languageServer.expandSelection(params)
-      } ?: initialRange
-
-      withContext(Dispatchers.Main) {
-        setSelection(result)
-      }
-    }?.logError("expand selection request")
-  }
-
   override fun ensureWindowsDismissed() {
     if (_diagnosticWindow?.isShowing == true) {
       _diagnosticWindow?.dismiss()
-    }
-
-    if (_signatureHelpWindow?.isShowing == true) {
-      _signatureHelpWindow?.dismiss()
     }
 
     if (_actionsMenu?.isShowing == true) {
@@ -391,7 +316,6 @@ open class IDEEditor @JvmOverloads constructor(
     _actionsMenu?.destroy()
 
     _actionsMenu = null
-    _signatureHelpWindow = null
     _diagnosticWindow = null
 
     languageServer = null
@@ -679,7 +603,6 @@ open class IDEEditor @JvmOverloads constructor(
 
       editorScope.launch {
         dispatchDocumentChangeEvent(event)
-        checkForSignatureHelp(event)
       }
     }
 
@@ -845,37 +768,6 @@ open class IDEEditor @JvmOverloads constructor(
     val file = file ?: return
 
     eventDispatcher.dispatch(DocumentCloseEvent(file.toPath(), cursorLSPRange))
-  }
-
-  /**
-   * Checks if the content change event should trigger signature help. Signature help trigger
-   * characters are :
-   *
-   *
-   *  * `'('` (parentheses)
-   *  * `','` (comma)
-   *
-   *
-   * @param event The content change event.
-   */
-  private fun checkForSignatureHelp(event: ContentChangeEvent) {
-    if (isReleased) {
-      return
-    }
-    if (languageServer == null) {
-      return
-    }
-    val changeLength = event.changedText.length
-    if (event.action != ContentChangeEvent.ACTION_INSERT || changeLength < 1 || changeLength > 2) {
-      // change length will be 1 if ',' is inserted
-      // changeLength will be 2 as '(' and ')' are inserted at the same time
-      return
-    }
-
-    val ch = event.changedText[0]
-    if (ch == '(' || ch == ',') {
-      signatureHelp()
-    }
   }
 
   private fun configureFlashbar(builder: Flashbar.Builder, @StringRes message: Int,

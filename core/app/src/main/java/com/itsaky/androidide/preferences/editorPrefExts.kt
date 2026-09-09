@@ -27,7 +27,6 @@ import com.itsaky.androidide.editor.schemes.IDEColorSchemeProvider
 import com.itsaky.androidide.preferences.internal.EditorPreferences
 import com.itsaky.androidide.preferences.internal.EditorPreferences.AUTO_SAVE
 import com.itsaky.androidide.preferences.internal.EditorPreferences.COLOR_SCHEME
-import com.itsaky.androidide.preferences.internal.EditorPreferences.COMPLETIONS_MATCH_LOWER
 import com.itsaky.androidide.preferences.internal.EditorPreferences.DEFAULT_COLOR_SCHEME
 import com.itsaky.androidide.preferences.internal.EditorPreferences.DELETE_EMPTY_LINES
 import com.itsaky.androidide.preferences.internal.EditorPreferences.DELETE_TABS_ON_BACKSPACE
@@ -86,7 +85,6 @@ private class CommonConfigurations(
     addPreference(DeleteTabs())
     addPreference(StickyScrollEnabled())
     addPreference(PinLineNumbersEnabled())
-    addPreference(CompletionsMatchLower())
   }
 }
 
@@ -258,17 +256,6 @@ private class AutoSave(
   override val icon: Int? = drawable.ic_save,
 ) : SwitchPreference(setValue = EditorPreferences::autoSave::set,
   getValue = EditorPreferences::autoSave::get)
-
-@Parcelize
-private class CompletionsMatchLower(
-  override val key: String = COMPLETIONS_MATCH_LOWER,
-  override val title: Int = string.idepref_java_matchLower_title,
-  override val summary: Int? = string.idepref_java_matchLower_summary,
-  override val icon: Int? = drawable.ic_text_lower,
-) : SwitchPreference(
-  setValue = EditorPreferences::completionsMatchLower::set,
-  getValue = EditorPreferences::completionsMatchLower::get
-)
 
 @Parcelize
 private class VisibiblePasswordFlag(
