@@ -1,28 +1,70 @@
 package com.itsaky.androidide.backend
 
 import android.app.Activity
+import android.app.Application
+import android.content.Context
+import android.os.Bundle
+import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.ThreadUtils
 import com.itsaky.androidide.backend.build.ToolchainPhase
 import com.itsaky.androidide.backend.proot.InstallPhase
 import com.itsaky.androidide.flashbar.Flashbar
 import com.itsaky.androidide.flashbar.Flashbar.Gravity.TOP
 import com.itsaky.androidide.flashbar.Flashbar.ProgressPosition.LEFT
+import com.itsaky.androidide.flashbar.FlashbarView
 import com.itsaky.androidide.utils.DURATION_INDEFINITE
 import com.itsaky.androidide.utils.flashError
 import com.itsaky.androidide.utils.flashSuccess
 import com.itsaky.androidide.utils.flashbarBuilder
 import com.itsaky.androidide.utils.showOnUiThread
 
-class InstallFlashbar(activity: Activity, title: String) {
+class InstallFlashbar(context: Context, private val title: String) {
 
-  private val host: Activity = activity
-  private val flashbar: Flashbar = activity
-    .flashbarBuilder(gravity = TOP, duration = DURATION_INDEFINITE)
-    .title(title)
-    .message("Starting…")
-    .showProgress(LEFT)
-    .build()
-    .also { it.showOnUiThread() }
+  private val app: Application = (context.applicationContext as? Application)
+    ?: (ActivityUtils.getTopActivity()?.applicationContext as? Application)
+    ?: throw IllegalStateException("Application context unavailable")
+
+  private var currentActivity: Activity? = null
+  private var currentFlashbar: Flashbar? = null
+  private var isFinished: Boolean = false
+  private var lastStateAction: ((FlashbarView) -> Unit)? = null
+
+  private val lifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+    override fun onActivityStarted(activity: Activity) {}
+    override fun onActivityResumed(activity: Activity) {
+      attachTo(activity)
+    }
+    override fun onActivityPaused(activity: Activity) {
+      if (currentActivity == activity) {
+        detach()
+      }
+    }
+    override fun onActivityStopped(activity: Activity) {}
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+    override fun onActivityDestroyed(activity: Activity) {
+      if (currentActivity == activity) {
+        detach()
+      }
+    }
+  }
+
+  init {
+    val setup = Runnable {
+      app.registerActivityLifecycleCallbacks(lifecycleCallbacks)
+      val initial = (context as? Activity) ?: ActivityUtils.getTopActivity()
+      initial?.let {
+        if (!it.isFinishing && !it.isDestroyed) {
+          attachTo(it)
+        }
+      }
+    }
+    if (ThreadUtils.isMainThread()) {
+      setup.run()
+    } else {
+      ThreadUtils.runOnUiThread(setup)
+    }
+  }
 
   fun update(phase: InstallPhase) {
     ThreadUtils.runOnUiThread {
@@ -52,43 +94,94 @@ class InstallFlashbar(activity: Activity, title: String) {
   }
 
   fun downloading(percent: Int, receivedMb: Double, totalMb: Double) {
-    val view = flashbar.flashbarView
-    view.setDeterminateProgress(percent)
-    view.setMessage(
-      "Downloading $percent% (${"%.1f".format(receivedMb)}/${"%.1f".format(totalMb)} MB)")
+    val action: (FlashbarView) -> Unit = { view ->
+      view.setDeterminateProgress(percent)
+      view.setMessage(
+        "Downloading $percent% (${"%.1f".format(receivedMb)}/${"%.1f".format(totalMb)} MB)")
+    }
+    lastStateAction = action
+    currentFlashbar?.flashbarView?.let(action)
   }
 
   fun extracting(count: Int) {
-    val view = flashbar.flashbarView
-    view.setIndeterminateProgress()
-    view.setMessage("Extracting $count files…")
+    val action: (FlashbarView) -> Unit = { view ->
+      view.setIndeterminateProgress()
+      view.setMessage("Extracting $count files…")
+    }
+    lastStateAction = action
+    currentFlashbar?.flashbarView?.let(action)
   }
 
   fun finalizing() {
-    val view = flashbar.flashbarView
-    view.setIndeterminateProgress()
-    view.setMessage("Finalizing…")
+    val action: (FlashbarView) -> Unit = { view ->
+      view.setIndeterminateProgress()
+      view.setMessage("Finalizing…")
+    }
+    lastStateAction = action
+    currentFlashbar?.flashbarView?.let(action)
   }
 
   fun retrying(attempt: Int, reason: String, receivedMb: Double) {
-    val view = flashbar.flashbarView
-    view.setIndeterminateProgress()
-    view.setMessage("Retry #$attempt (${"%.1f".format(receivedMb)} MB): $reason")
+    val action: (FlashbarView) -> Unit = { view ->
+      view.setIndeterminateProgress()
+      view.setMessage("Retry #$attempt (${"%.1f".format(receivedMb)} MB): $reason")
+    }
+    lastStateAction = action
+    currentFlashbar?.flashbarView?.let(action)
   }
 
   fun done() {
-    dismiss()
-    host.flashSuccess("Installation finished")
+    ThreadUtils.runOnUiThread {
+      if (isFinished) return@runOnUiThread
+      isFinished = true
+      runCatching { app.unregisterActivityLifecycleCallbacks(lifecycleCallbacks) }
+      detach()
+      val top = ActivityUtils.getTopActivity() ?: currentActivity
+      top?.flashSuccess("Installation finished")
+    }
   }
 
   fun failed(message: String) {
-    dismiss()
-    host.flashError(message)
+    ThreadUtils.runOnUiThread {
+      if (isFinished) return@runOnUiThread
+      isFinished = true
+      runCatching { app.unregisterActivityLifecycleCallbacks(lifecycleCallbacks) }
+      detach()
+      val top = ActivityUtils.getTopActivity() ?: currentActivity
+      top?.flashError(message)
+    }
   }
 
   fun dismiss() {
     ThreadUtils.runOnUiThread {
-      flashbar.dismiss()
+      if (isFinished) return@runOnUiThread
+      isFinished = true
+      runCatching { app.unregisterActivityLifecycleCallbacks(lifecycleCallbacks) }
+      detach()
     }
+  }
+
+  private fun attachTo(activity: Activity) {
+    if (isFinished || activity.isFinishing || activity.isDestroyed) return
+    if (activity::class.java.simpleName == "CrashHandlerActivity") return
+    if (currentActivity == activity && currentFlashbar != null) return
+    detach()
+    currentActivity = activity
+    val bar = activity.flashbarBuilder(gravity = TOP, duration = DURATION_INDEFINITE)
+      .title(title)
+      .message("Starting…")
+      .showProgress(LEFT)
+      .build()
+    currentFlashbar = bar
+    bar.showOnUiThread()
+    lastStateAction?.let { action ->
+      bar.flashbarView.let(action)
+    }
+  }
+
+  private fun detach() {
+    runCatching { currentFlashbar?.dismiss() }
+    currentFlashbar = null
+    currentActivity = null
   }
 }

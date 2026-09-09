@@ -96,28 +96,16 @@ private class InstallUbuntuPreference(
 
   override fun onPreferenceClick(preference: Preference): Boolean {
     val context = preference.context
-    val activity = context as? android.app.Activity
-    val progress = activity?.let {
-      InstallFlashbar(it, context.getString(string.idepref_backend_install_ubuntu))
-    } ?: run {
-      flashInfo(string.idepref_backend_install_started)
-      null
-    }
+    val progress = InstallFlashbar(context, context.getString(string.idepref_backend_install_ubuntu))
     executeAsync(callable = {
       runBlocking {
         UbuntuInstaller(context.applicationContext).install { phase ->
-          progress?.update(phase)
+          progress.update(phase)
         }
       }
       ProotConfig.isInstalled(context.applicationContext)
     }) { installed ->
-      if (progress == null) {
-        if (installed == true) {
-          flashSuccess(string.idepref_backend_install_done)
-        } else {
-          flashError(string.idepref_backend_install_failed_simple)
-        }
-      } else if (installed != true) {
+      if (installed != true) {
         progress.failed(context.getString(string.idepref_backend_install_failed_simple))
       }
       updateSummary(context, preference)
@@ -216,33 +204,23 @@ private fun installToolchain(preference: Preference, kind: ToolchainKind) {
 
 private fun installToolchain(preference: Preference, kind: ToolchainKind, release: ToolchainRelease) {
   val context = preference.context
-  val activity = context as? android.app.Activity
   val label = if (kind == ToolchainKind.Ndk) {
     context.getString(string.idepref_backend_install_ndk)
   } else {
     context.getString(string.idepref_backend_install_cmake)
   }
-  val progress = activity?.let { InstallFlashbar(it, label) } ?: run {
-    flashInfo(string.idepref_backend_install_started)
-    null
-  }
+  val progress = InstallFlashbar(context, label)
   executeAsync(callable = {
     runBlocking {
       var done = false
       ToolchainInstaller(context.applicationContext, kind).install(release) { phase ->
-        progress?.update(phase)
+        progress.update(phase)
         done = phase is com.itsaky.androidide.backend.build.ToolchainPhase.Done
       }
       done
     }
   }) { done ->
-    if (progress == null) {
-      if (done == true) {
-        flashSuccess(string.idepref_backend_install_done)
-      } else {
-        flashError(string.idepref_backend_install_failed_simple)
-      }
-    } else if (done != true) {
+    if (done != true) {
       progress.failed(context.getString(string.idepref_backend_install_failed_simple))
     }
     val installed = ToolchainPaths.installedVersion(context.applicationContext, kind)
