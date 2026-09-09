@@ -221,6 +221,43 @@ class NativeLibraryInjectionDialogFragmentTest {
   }
 
   @Test
+  fun `repeated patches reuse one output file and remove earlier patched APKs`() {
+    library("arm64-v8a/libsample.so")
+    val build = project.resolve("build")
+    val stale = build.resolve("patched-1700000000000.apk").apply { writeText("stale") }
+    val unrelated = build.resolve("app-debug.apk").apply { writeText("unrelated") }
+    showDialog(1)
+    var run = 0
+    mockkConstructor(ApkPatchEngine::class)
+    every { anyConstructed<ApkPatchEngine>().patch(any(), any(), any(), any()) } answers {
+      val output = secondArg<File>()
+      output.parentFile!!.mkdirs()
+      output.writeText("patched ${++run}")
+      ApkPatchEngine.PatchResult(output, "fixture.MainActivity")
+    }
+
+    try {
+      binding.apkPath.setText(temporaryFolder.newFile("source.apk").apply { writeText("original") }.path)
+      repeat(3) { iteration ->
+        binding.patch.performClick()
+        await { binding.progress.visibility == View.GONE && binding.install.isEnabled }
+        val apks = build.listFiles { file -> file.extension == "apk" }!!.map { it.name }
+        assertThat(apks).containsExactly("patched.apk", "app-debug.apk")
+        assertThat(build.resolve("patched.apk").readText()).isEqualTo("patched ${iteration + 1}")
+      }
+      assertThat(stale.exists()).isFalse()
+      assertThat(unrelated.readText()).isEqualTo("unrelated")
+
+      binding.install.performClick()
+      val intent = shadowOf(controller.get()).nextStartedActivity
+      assertThat(intent.action).isEqualTo(Intent.ACTION_VIEW)
+      assertThat(intent.data?.lastPathSegment).isEqualTo("patched.apk")
+    } finally {
+      unmockkConstructor(ApkPatchEngine::class)
+    }
+  }
+
+  @Test
   fun `patching locks inputs captures the selection and cleans up after failure`() {
     val library = library("arm64-v8a/libsample.so")
     val input = temporaryFolder.newFile("source.apk").apply { writeText("original APK") }

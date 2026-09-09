@@ -147,7 +147,8 @@ class NativeLibraryInjectionDialogFragment : DialogFragment() {
       val result = runCatching {
         val temporaryInput = copyInput(context, inputPath)
         try {
-          val output = File(project, "build/patched-${System.currentTimeMillis()}.apk")
+          val output = File(project, "build/patched.apk")
+          output.parentFile?.listFiles { file -> file.name.matches(stalePatchedApk) }?.forEach { it.delete() }
           ApkPatchEngine(context).patch(temporaryInput, output, listOf(selection)) { message ->
             mainHandler.post { appendLog(message) }
           }
@@ -255,5 +256,9 @@ class NativeLibraryInjectionDialogFragment : DialogFragment() {
   private enum class Abi {
     ARM,
     ARM64,
+  }
+
+  companion object {
+    private val stalePatchedApk = Regex("patched-\\d+\\.apk")
   }
 }
