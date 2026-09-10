@@ -286,6 +286,14 @@
   <string name="idepref_codestyle_no_project">Open a C/C++ project to edit its code style</string>
   <string name="idepref_codestyle_invalid_number">Enter a whole number between %1$d and %2$d</string>
   <string name="idepref_backend_env">Environment</string>
+  <string name="idepref_termux_privileged_group">Privileged terminal</string>
+  <string name="idepref_termux_shizuku_title">Shizuku access</string>
+  <string name="idepref_termux_shizuku_not_installed">Shizuku not installed. Tap to download.</string>
+  <string name="idepref_termux_shizuku_not_running">Shizuku is installed but not running. Tap to open Shizuku.</string>
+  <string name="idepref_termux_shizuku_unsupported">Installed Shizuku version is not supported (v11+ required).</string>
+  <string name="idepref_termux_shizuku_permission_required">Tap to request Shizuku permission.</string>
+  <string name="idepref_termux_shizuku_permission_denied">Permission denied. Allow AndroidIDE in the Shizuku app.</string>
+  <string name="idepref_termux_shizuku_ready">Granted. Privileged sessions run as %1$s.</string>
   <string name="idepref_backend_install_ubuntu">Install Ubuntu (required)</string>
   <string name="idepref_backend_install_ndk">Install NDK (optional)</string>
   <string name="idepref_backend_install_cmake">Install CMake (optional)</string>

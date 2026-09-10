@@ -20,10 +20,14 @@ package com.itsaky.androidide.activities
 import android.content.ComponentName
 import android.os.Bundle
 import android.os.IBinder
+import android.view.ContextMenu
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import com.itsaky.androidide.terminal.IdeTerminalSessionClient
+import com.itsaky.androidide.terminal.shizuku.PrivilegedSessionOpener
 import com.itsaky.androidide.utils.Environment
 import com.itsaky.androidide.utils.flashError
 import com.termux.R
@@ -49,6 +53,7 @@ class TerminalActivity : TermuxActivity() {
   companion object {
 
     private const val KEY_TERMINAL_CAN_ADD_SESSIONS = "ide.terminal.sessions.canAddSessions"
+    private const val CONTEXT_MENU_NEW_PRIVILEGED_SESSION_ID = 100
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,5 +91,28 @@ class TerminalActivity : TermuxActivity() {
     } else {
       flashError(R.string.msg_terminal_new_sessions_disabled)
     }
+  }
+
+  override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
+    super.onCreateContextMenu(menu, v, menuInfo)
+    if (currentSession == null) return
+    menu.add(Menu.NONE, CONTEXT_MENU_NEW_PRIVILEGED_SESSION_ID, Menu.NONE, R.string.action_new_privileged_session)
+      .isEnabled = canAddNewSessions
+  }
+
+  override fun onContextItemSelected(item: MenuItem): Boolean {
+    if (item.itemId == CONTEXT_MENU_NEW_PRIVILEGED_SESSION_ID) {
+      onCreateNewPrivilegedSession(null, null)
+      return true
+    }
+    return super.onContextItemSelected(item)
+  }
+
+  fun onCreateNewPrivilegedSession(sessionName: String?, workingDirectory: String?) {
+    if (!canAddNewSessions) {
+      flashError(R.string.msg_terminal_new_sessions_disabled)
+      return
+    }
+    PrivilegedSessionOpener(this).open(sessionName, workingDirectory)
   }
 }

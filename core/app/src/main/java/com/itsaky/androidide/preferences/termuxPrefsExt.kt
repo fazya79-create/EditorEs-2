@@ -23,6 +23,8 @@ import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import com.itsaky.androidide.R
 import com.itsaky.androidide.app.IDEApplication
+import com.itsaky.androidide.terminal.shizuku.ShizukuTerminal
+import com.itsaky.androidide.utils.flashError
 import com.termux.shared.logger.Logger
 import com.termux.shared.termux.settings.preferences.TermuxAppSharedPreferences
 import kotlinx.parcelize.Parcelize
@@ -38,6 +40,8 @@ private const val KEY_TERMUX_KBD_SOFT_KDB_ENABLED_PREFERENCE = "${KEY_TERMUX_KBD
 private const val KEY_TERMUX_KBD_SOFT_KDB_ONLY_IF_NO_HARD_KBD_PREFERENCE = "${KEY_TERMUX_KBD_PREFERENCES}.softKbdOnlyIfNoHardKbd"
 private const val KEY_TERMUX_VIEW_PREFERENCES = "${KEY_TERMUX_PREFERENCES}.view"
 private const val KEY_TERMUX_VIEW_MARGIN_ADJUSTMENT_ENABLED_PREFERENCE = "${KEY_TERMUX_VIEW_PREFERENCES}.marginAdjustment"
+private const val KEY_TERMUX_PRIVILEGED_PREFERENCES = "${KEY_TERMUX_PREFERENCES}.privileged"
+private const val KEY_TERMUX_PRIVILEGED_SHIZUKU_PREFERENCE = "${KEY_TERMUX_PRIVILEGED_PREFERENCES}.shizuku"
 
 abstract class TermuxSwitchPreference(
   @field:StringRes private val summaryOn: Int,
@@ -80,6 +84,70 @@ class TermuxPreferences(
     addPreference(TermuxDebuggingPreferences())
     addPreference(TermuxKeyboardPreferences())
     addPreference(TermuxViewPreferences())
+    addPreference(TermuxPrivilegedPreferences())
+  }
+}
+
+@Parcelize
+class TermuxPrivilegedPreferences(
+  override val key: String = KEY_TERMUX_PRIVILEGED_PREFERENCES,
+  override val title: Int = R.string.idepref_termux_privileged_group,
+  override val children: List<IPreference> = mutableListOf()
+) : IPreferenceGroup() {
+
+  init {
+    addPreference(TermuxShizukuAccessPreference())
+  }
+}
+
+@Parcelize
+class TermuxShizukuAccessPreference(
+  override val key: String = KEY_TERMUX_PRIVILEGED_SHIZUKU_PREFERENCE,
+  override val title: Int = R.string.idepref_termux_shizuku_title,
+  override val icon: Int? = R.drawable.ic_terminal
+) : SimplePreference() {
+
+  override fun onCreatePreference(context: Context): Preference {
+    return super.onCreatePreference(context).also { updateSummary(it) }
+  }
+
+  override fun onPreferenceClick(preference: Preference): Boolean {
+    val context = preference.context
+    when (ShizukuTerminal.status(context)) {
+      ShizukuTerminal.Status.NOT_INSTALLED -> ShizukuTerminal.openDownloadPage(context)
+      ShizukuTerminal.Status.NOT_RUNNING,
+      ShizukuTerminal.Status.PERMISSION_DENIED,
+      ShizukuTerminal.Status.READY -> ShizukuTerminal.openManager(context)
+      ShizukuTerminal.Status.UNSUPPORTED_VERSION -> flashError(R.string.msg_shizuku_unsupported)
+      ShizukuTerminal.Status.PERMISSION_REQUIRED -> ShizukuTerminal.requestPermission { granted ->
+        if (!granted) {
+          flashError(R.string.msg_shizuku_permission_not_granted)
+        }
+        updateSummary(preference)
+      }
+    }
+    updateSummary(preference)
+    return true
+  }
+
+  private fun updateSummary(preference: Preference) {
+    val context = preference.context
+    preference.summary = when (ShizukuTerminal.status(context)) {
+      ShizukuTerminal.Status.NOT_INSTALLED -> context.getString(R.string.idepref_termux_shizuku_not_installed)
+      ShizukuTerminal.Status.NOT_RUNNING -> context.getString(R.string.idepref_termux_shizuku_not_running)
+      ShizukuTerminal.Status.UNSUPPORTED_VERSION -> context.getString(R.string.idepref_termux_shizuku_unsupported)
+      ShizukuTerminal.Status.PERMISSION_REQUIRED -> context.getString(R.string.idepref_termux_shizuku_permission_required)
+      ShizukuTerminal.Status.PERMISSION_DENIED -> context.getString(R.string.idepref_termux_shizuku_permission_denied)
+      ShizukuTerminal.Status.READY -> {
+        val uid = ShizukuTerminal.privilegeUid()
+        val identity = if (uid == ShizukuTerminal.UID_ROOT) {
+          context.getString(R.string.privileged_session_name_root)
+        } else {
+          context.getString(R.string.privileged_session_name_shell)
+        }
+        context.getString(R.string.idepref_termux_shizuku_ready, identity)
+      }
+    }
   }
 }
 

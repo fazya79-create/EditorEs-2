@@ -75,17 +75,24 @@ public final class TerminalSession extends TerminalOutput {
     private final String[] mArgs;
     private final String[] mEnv;
     private final Integer mTranscriptRows;
+    private final TerminalProcess.Launcher mProcessLauncher;
+    private TerminalProcess mProcess;
 
 
     private static final String LOG_TAG = "TerminalSession";
 
     public TerminalSession(String shellPath, String cwd, String[] args, String[] env, Integer transcriptRows, TerminalSessionClient client) {
+        this(shellPath, cwd, args, env, transcriptRows, client, null);
+    }
+
+    public TerminalSession(String shellPath, String cwd, String[] args, String[] env, Integer transcriptRows, TerminalSessionClient client, TerminalProcess.Launcher processLauncher) {
         this.mShellPath = shellPath;
         this.mCwd = cwd;
         this.mArgs = args;
         this.mEnv = env;
         this.mTranscriptRows = transcriptRows;
         this.mClient = client;
+        this.mProcessLauncher = processLauncher;
     }
 
     /**
@@ -123,9 +130,15 @@ public final class TerminalSession extends TerminalOutput {
     public void initializeEmulator(int columns, int rows) {
         mEmulator = new TerminalEmulator(this, columns, rows, mTranscriptRows, mClient);
 
-        int[] processId = new int[1];
-        mTerminalFileDescriptor = JNI.createSubprocess(mShellPath, mCwd, mArgs, mEnv, processId, rows, columns);
-        mShellPid = processId[0];
+        if (mProcessLauncher != null) {
+            mProcess = mProcessLauncher.launch(mShellPath, mCwd, mArgs, mEnv, rows, columns);
+            mTerminalFileDescriptor = mProcess.getFileDescriptor();
+            mShellPid = mProcess.getPid();
+        } else {
+            int[] processId = new int[1];
+            mTerminalFileDescriptor = JNI.createSubprocess(mShellPath, mCwd, mArgs, mEnv, processId, rows, columns);
+            mShellPid = processId[0];
+        }
         mClient.setTerminalShellPid(this, mShellPid);
 
         final FileDescriptor terminalFileDescriptorWrapped = wrapFileDescriptor(mTerminalFileDescriptor, mClient);
@@ -167,7 +180,7 @@ public final class TerminalSession extends TerminalOutput {
         new Thread("TermSessionWaiter[pid=" + mShellPid + "]") {
             @Override
             public void run() {
-                int processExitCode = JNI.waitFor(mShellPid);
+                int processExitCode = mProcess != null ? mProcess.waitFor() : JNI.waitFor(mShellPid);
                 mMainThreadHandler.sendMessage(mMainThreadHandler.obtainMessage(MSG_PROCESS_EXITED, processExitCode));
             }
         }.start();
@@ -235,6 +248,10 @@ public final class TerminalSession extends TerminalOutput {
     /** Finish this terminal session by sending SIGKILL to the shell. */
     public void finishIfRunning() {
         if (isRunning()) {
+            if (mProcess != null) {
+                mProcess.kill();
+                return;
+            }
             try {
                 Os.kill(mShellPid, OsConstants.SIGKILL);
             } catch (ErrnoException e) {
@@ -253,7 +270,11 @@ public final class TerminalSession extends TerminalOutput {
         // Stop the reader and writer threads, and close the I/O streams
         mTerminalToProcessIOQueue.close();
         mProcessToTerminalIOQueue.close();
-        JNI.close(mTerminalFileDescriptor);
+        if (mProcess != null) {
+            mProcess.close();
+        } else {
+            JNI.close(mTerminalFileDescriptor);
+        }
     }
 
     @Override
@@ -298,6 +319,14 @@ public final class TerminalSession extends TerminalOutput {
     public String getCwd() {
         if (mShellPid < 1) {
             return null;
+        }
+        if (mProcess != null) {
+            try {
+                return mProcess.getCwd();
+            } catch (IOException | SecurityException e) {
+                Logger.logStackTraceWithMessage(mClient, LOG_TAG, "Error getting current directory", e);
+                return null;
+            }
         }
         try {
             final String cwdSymlink = String.format("/proc/%s/cwd/", mShellPid);

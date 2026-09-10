@@ -33,6 +33,21 @@
   <string name="title_create_named_session">New named session</string>
   <string name="action_create_named_session_confirm">Create</string>
 
+  <string name="action_new_privileged_session">New privileged session (Shizuku)</string>
+  <string name="title_privileged_session">Privileged session</string>
+  <string name="msg_shizuku_not_installed">Shizuku is not installed. Install Shizuku (or Sui) to open a privileged terminal.</string>
+  <string name="msg_shizuku_not_running">Shizuku is not running. Start it from the Shizuku app (wireless debugging or root) and try again.</string>
+  <string name="msg_shizuku_unsupported">The installed Shizuku version is too old. Update Shizuku to v11 or newer.</string>
+  <string name="msg_shizuku_permission_denied">Shizuku access was denied. Allow AndroidIDE in the Shizuku app under \"Authorized applications\".</string>
+  <string name="msg_shizuku_permission_not_granted">Shizuku permission was not granted.</string>
+  <string name="msg_shizuku_service_failed">Could not start the privileged terminal service: %1$s</string>
+  <string name="msg_shizuku_pty_failed">Could not create the privileged terminal: %1$s</string>
+  <string name="action_shizuku_download">Download</string>
+  <string name="action_shizuku_open">Open Shizuku</string>
+  <string name="action_shizuku_grant">Grant</string>
+  <string name="privileged_session_name_shell">adb shell</string>
+  <string name="privileged_session_name_root">root</string>
+
   <string name="action_toggle_soft_keyboard">Keyboard</string>
 
   <string name="msg_enabling_terminal_toolbar">Enabling Terminal Toolbar</string>

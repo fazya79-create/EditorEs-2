@@ -31,6 +31,7 @@ import com.termux.shared.shell.ShellUtils;
 import com.termux.shared.shell.command.ExecutionCommand;
 import com.termux.shared.shell.command.ExecutionCommand.Runner;
 import com.termux.shared.shell.command.ExecutionCommand.ShellCreateMode;
+import com.termux.shared.shell.command.environment.IShellEnvironment;
 import com.termux.shared.shell.command.runner.app.AppShell;
 import com.termux.shared.termux.TermuxConstants;
 import com.termux.shared.termux.TermuxConstants.TERMUX_APP.TERMUX_ACTIVITY;
@@ -44,8 +45,10 @@ import com.termux.shared.termux.shell.command.environment.TermuxShellEnvironment
 import com.termux.shared.termux.shell.command.runner.terminal.TermuxSession;
 import com.termux.shared.termux.terminal.TermuxTerminalSessionClientBase;
 import com.termux.terminal.TerminalEmulator;
+import com.termux.terminal.TerminalProcess;
 import com.termux.terminal.TerminalSession;
 import com.itsaky.androidide.backend.proot.ProotConfig;
+import com.itsaky.androidide.terminal.shizuku.ShizukuTerminal;
 import com.termux.terminal.TerminalSessionClient;
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -185,6 +188,8 @@ public final class TermuxService extends Service implements AppShell.AppShellCli
             killAllTermuxExecutionCommands();
 
         TermuxShellManager.onAppExit(this);
+
+        ShizukuTerminal.INSTANCE.shutdown(this);
 
         SystemEventReceiver.unregisterPackageUpdateEvents(this);
 
@@ -586,6 +591,12 @@ public final class TermuxService extends Service implements AppShell.AppShellCli
     /** Create a {@link TermuxSession}. */
     @Nullable
     public synchronized TermuxSession createTermuxSession(ExecutionCommand executionCommand) {
+        return createTermuxSession(executionCommand, new TermuxShellEnvironment(), null);
+    }
+
+    @Nullable
+    public synchronized TermuxSession createTermuxSession(ExecutionCommand executionCommand,
+        @NonNull IShellEnvironment shellEnvironment, @Nullable TerminalProcess.Launcher processLauncher) {
         if (executionCommand == null) return null;
 
         Logger.logDebug(LOG_TAG, "Creating \"" + executionCommand.getCommandIdAndLabelLogString() + "\" TermuxSession");
@@ -609,7 +620,7 @@ public final class TermuxService extends Service implements AppShell.AppShellCli
             additionalEnvironment = new HashMap<>(ProotConfig.INSTANCE.prootEnvMap(this));
         }
         TermuxSession newTermuxSession = TermuxSession.execute(this, executionCommand, getTermuxTerminalSessionClient(),
-            this, new TermuxShellEnvironment(), additionalEnvironment, executionCommand.isPluginExecutionCommand);
+            this, shellEnvironment, additionalEnvironment, executionCommand.isPluginExecutionCommand, processLauncher);
         if (newTermuxSession == null) {
             Logger.logError(LOG_TAG, "Failed to execute new TermuxSession command for:\n" + executionCommand.getCommandIdAndLabelLogString());
             // If the execution command was started for a plugin, then process the error

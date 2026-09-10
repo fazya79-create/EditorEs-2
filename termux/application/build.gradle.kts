@@ -40,6 +40,8 @@ android {
     }
 
     packaging.jniLibs.useLegacyPackaging = true
+
+    buildFeatures.aidl = true
 }
 
 dependencies {
@@ -52,6 +54,8 @@ dependencies {
     implementation(libs.google.guava)
     implementation(libs.common.markwon.core)
     implementation(libs.common.markwon.extStrikethrough)
+    implementation(libs.common.shizuku.api)
+    implementation(libs.common.shizuku.provider)
 
     implementation(projects.core.backend)
     implementation(projects.core.common)

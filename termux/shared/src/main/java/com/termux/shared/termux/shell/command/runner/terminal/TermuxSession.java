@@ -16,6 +16,7 @@ import com.termux.shared.errors.Errno;
 import com.termux.shared.logger.Logger;
 import com.termux.shared.shell.command.environment.IShellEnvironment;
 import com.termux.shared.shell.ShellUtils;
+import com.termux.terminal.TerminalProcess;
 import com.termux.terminal.TerminalSession;
 import com.termux.terminal.TerminalSessionClient;
 
@@ -79,6 +80,16 @@ public class TermuxSession {
                                         @NonNull final IShellEnvironment shellEnvironmentClient,
                                         @Nullable HashMap<String, String> additionalEnvironment,
                                         final boolean setStdoutOnExit) {
+        return execute(currentPackageContext, executionCommand, terminalSessionClient, termuxSessionClient,
+            shellEnvironmentClient, additionalEnvironment, setStdoutOnExit, null);
+    }
+
+    public static TermuxSession execute(@NonNull final Context currentPackageContext, @NonNull ExecutionCommand executionCommand,
+                                        @NonNull final TerminalSessionClient terminalSessionClient, final TermuxSessionClient termuxSessionClient,
+                                        @NonNull final IShellEnvironment shellEnvironmentClient,
+                                        @Nullable HashMap<String, String> additionalEnvironment,
+                                        final boolean setStdoutOnExit,
+                                        @Nullable final TerminalProcess.Launcher processLauncher) {
         if (executionCommand.executable != null && executionCommand.executable.isEmpty())
             executionCommand.executable = null;
         if (executionCommand.workingDirectory == null || executionCommand.workingDirectory.isEmpty())
@@ -155,7 +166,7 @@ public class TermuxSession {
         Logger.logDebug(LOG_TAG, "Running \"" + executionCommand.getCommandIdAndLabelLogString() + "\" TermuxSession");
         TerminalSession terminalSession = new TerminalSession(executionCommand.executable,
             executionCommand.workingDirectory, executionCommand.arguments, environmentArray,
-            executionCommand.terminalTranscriptRows, terminalSessionClient);
+            executionCommand.terminalTranscriptRows, terminalSessionClient, processLauncher);
 
         if (executionCommand.shellName != null) {
             terminalSession.mSessionName = executionCommand.shellName;
