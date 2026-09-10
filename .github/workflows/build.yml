@@ -8,7 +8,12 @@ on:
   pull_request:
     paths-ignore:
       - '**.md'
-  workflow_dispatch: { }
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: false
+        default: 'debug'
 
 env:
   BUILD_JAVA_VERSION: '17'
@@ -19,7 +24,7 @@ jobs:
     strategy:
       matrix:
         # pull requests cannot read the signing secrets, so they build an unsigned debug APK
-        build_type: ${{ fromJSON(github.event_name == 'pull_request' && '["debug"]' || '["release"]') }}
+        build_type: ${{ fromJSON((github.event_name == 'pull_request' || inputs.build_type == 'debug' || github.repository != 'fazya79-create/EditorEs-2') && '["debug"]' || '["release"]') }}
     name: Build APK
     runs-on: ubuntu-latest
     steps:

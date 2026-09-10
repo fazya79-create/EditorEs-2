@@ -192,6 +192,8 @@ public class ExecutionCommand {
     /** The shell name of commands. */
     public String shellName;
 
+    public TerminalSession.PtyProcessHandler ptyProcessHandler;
+
     /** The {@link ShellCreateMode} of commands. */
     public String shellCreateMode;
 

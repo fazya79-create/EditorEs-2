@@ -20,6 +20,10 @@ package com.itsaky.androidide.terminal
 import android.content.Context
 import com.itsaky.androidide.activities.TerminalActivity
 import com.itsaky.androidide.backend.proot.ProotConfig
+import com.itsaky.androidide.terminal.shizuku.ShizukuManager
+import com.itsaky.androidide.terminal.shizuku.ShizukuPtyProcessHandler
+import com.itsaky.androidide.utils.flashError
+import com.itsaky.androidide.utils.flashInfo
 import com.termux.app.terminal.TermuxTerminalSessionActivityClient
 import com.termux.terminal.TerminalSessionClient
 import java.io.File
@@ -75,5 +79,53 @@ class IdeTerminalSessionClient(
       guestCwd,
       binds = listOf(ProotConfig.projectBind(projectDir, guestCwd))
     )
+  }
+
+  fun addNewPrivilegedSession(sessionName: String? = null, workingDirectory: String? = null) {
+    val activity = mActivity ?: return
+    val service = activity.termuxService ?: return
+
+    if (!ShizukuManager.isShizukuRunning()) {
+      activity.flashError(com.termux.R.string.shizuku_not_running)
+      return
+    }
+
+    if (!ShizukuManager.isPermissionGranted()) {
+      ShizukuManager.requestPermission { granted ->
+        if (granted) {
+          addNewPrivilegedSession(sessionName, workingDirectory)
+        } else {
+          activity.flashError(com.termux.R.string.shizuku_permission_denied)
+        }
+      }
+      return
+    }
+
+    activity.flashInfo(com.termux.R.string.shizuku_service_connecting)
+    ShizukuManager.getService(activity) { terminalService, error ->
+      if (terminalService == null || error != null) {
+        activity.flashError(com.termux.R.string.shizuku_service_failed)
+        return@getService
+      }
+
+      val cwd = workingDirectory ?: "/data/local/tmp"
+      val ptyHandler = ShizukuPtyProcessHandler(terminalService)
+      val name = sessionName ?: activity.getString(com.termux.R.string.title_privileged_session)
+      val session = service.createTermuxSession(
+        "/system/bin/sh",
+        arrayOf("-i"),
+        null,
+        cwd,
+        false,
+        name,
+        ptyHandler
+      )
+      if (session != null) {
+        setCurrentSession(session.terminalSession)
+        activity.drawer.closeDrawers()
+      } else {
+        activity.flashError(com.termux.R.string.shizuku_service_failed)
+      }
+    }
   }
 }

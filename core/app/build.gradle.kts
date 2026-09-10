@@ -114,6 +114,8 @@ dependencies {
   implementation(libs.common.utilcode)
   implementation(libs.common.kotlin.coroutines.android)
   implementation(libs.common.hiddenApiBypass)
+  implementation(libs.shizuku.api)
+  implementation(libs.shizuku.provider)
 
   implementation(libs.google.auto.service.annotations)
   implementation(libs.google.gson)

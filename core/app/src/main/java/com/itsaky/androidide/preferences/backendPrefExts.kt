@@ -67,6 +67,7 @@ private class EnvironmentGroup(
     addPreference(InstallUbuntuPreference())
     addPreference(InstallNdkPreference())
     addPreference(InstallCmakePreference())
+    addPreference(ShizukuPreference())
   }
 }
 

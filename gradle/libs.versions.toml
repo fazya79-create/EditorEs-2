@@ -10,6 +10,7 @@ antlr4 = "4.13.1"
 markwon = "4.6.2"
 maven-publish-plugin = "0.29.0"
 logback = "1.5.3"
+shizuku = "13.1.5"
 
 [libraries]
 
@@ -39,6 +40,8 @@ common-jsonrpc = { module = "org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc", versi
 common-markwon-core = { module = "io.noties.markwon:core", version.ref = "markwon" }
 common-markwon-extStrikethrough = { module = "io.noties.markwon:ext-strikethrough", version.ref = "markwon" }
 common-hiddenApiBypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version = "4.3" }
+shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
+shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizuku" }
 
 # AndroidX
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.7.1" }

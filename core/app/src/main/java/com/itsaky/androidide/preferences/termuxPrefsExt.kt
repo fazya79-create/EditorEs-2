@@ -77,6 +77,7 @@ class TermuxPreferences(
 ) : IPreferenceScreen() {
 
   init {
+    addPreference(ShizukuPreference(key = "idepref_terminal_shizuku"))
     addPreference(TermuxDebuggingPreferences())
     addPreference(TermuxKeyboardPreferences())
     addPreference(TermuxViewPreferences())

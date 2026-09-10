@@ -40,6 +40,10 @@ android {
     }
 
     packaging.jniLibs.useLegacyPackaging = true
+
+    buildFeatures {
+        aidl = true
+    }
 }
 
 dependencies {
@@ -52,10 +56,12 @@ dependencies {
     implementation(libs.google.guava)
     implementation(libs.common.markwon.core)
     implementation(libs.common.markwon.extStrikethrough)
+    implementation(libs.shizuku.api)
 
     implementation(projects.core.backend)
     implementation(projects.core.common)
     implementation(projects.core.resources)
+    implementation(projects.termux.emulator)
     implementation(projects.termux.view)
     implementation(projects.termux.shared)
     implementation(projects.utilities.preferences)

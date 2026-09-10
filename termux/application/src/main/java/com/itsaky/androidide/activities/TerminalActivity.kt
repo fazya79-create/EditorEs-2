@@ -30,6 +30,8 @@ import com.termux.R
 import com.termux.app.TermuxActivity
 import com.termux.app.terminal.TermuxTerminalSessionActivityClient
 
+import com.termux.shared.termux.interact.TextInputDialogUtils
+
 /**
  * @author Akash Yadav
  */
@@ -44,6 +46,7 @@ class TerminalActivity : TermuxActivity() {
     set(value) {
       field = value
       findViewById<View>(R.id.new_session_button)?.isEnabled = value
+      findViewById<View>(R.id.new_privileged_session_button)?.isEnabled = value
     }
 
   companion object {
@@ -60,6 +63,37 @@ class TerminalActivity : TermuxActivity() {
 
     canAddNewSessions = savedInstanceState?.getBoolean(
       KEY_TERMINAL_CAN_ADD_SESSIONS, true) ?: true
+    setNewPrivilegedSessionButtonView()
+  }
+
+  private fun setNewPrivilegedSessionButtonView() {
+    val button = findViewById<View>(R.id.new_privileged_session_button) ?: return
+    button.setOnClickListener {
+      onCreateNewPrivilegedSession(null, null)
+    }
+    button.setOnLongClickListener {
+      TextInputDialogUtils.textInput(
+        this,
+        R.string.title_create_named_session,
+        null,
+        R.string.action_create_named_session_confirm,
+        { text -> onCreateNewPrivilegedSession(text, null) },
+        -1,
+        null,
+        -1,
+        null,
+        null
+      )
+      true
+    }
+  }
+
+  private fun onCreateNewPrivilegedSession(sessionName: String?, workingDirectory: String?) {
+    if (canAddNewSessions) {
+      (termuxTerminalSessionClient as? IdeTerminalSessionClient)?.addNewPrivilegedSession(sessionName, workingDirectory)
+    } else {
+      flashError(R.string.msg_terminal_new_sessions_disabled)
+    }
   }
 
   override fun onCreateTerminalSessionClient(): TermuxTerminalSessionActivityClient {

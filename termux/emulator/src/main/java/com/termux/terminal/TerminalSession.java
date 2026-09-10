@@ -75,17 +75,30 @@ public final class TerminalSession extends TerminalOutput {
     private final String[] mArgs;
     private final String[] mEnv;
     private final Integer mTranscriptRows;
+    private final PtyProcessHandler mPtyProcessHandler;
 
+    public interface PtyProcessHandler {
+        int createSubprocess(String cmd, String cwd, String[] args, String[] env, int[] processId, int rows, int columns) throws Exception;
+        void setPtyWindowSize(int fd, int rows, int columns);
+        int waitFor(int processId);
+        void finishIfRunning(int processId);
+        void close(int fd);
+    }
 
     private static final String LOG_TAG = "TerminalSession";
 
     public TerminalSession(String shellPath, String cwd, String[] args, String[] env, Integer transcriptRows, TerminalSessionClient client) {
+        this(shellPath, cwd, args, env, transcriptRows, client, null);
+    }
+
+    public TerminalSession(String shellPath, String cwd, String[] args, String[] env, Integer transcriptRows, TerminalSessionClient client, PtyProcessHandler ptyProcessHandler) {
         this.mShellPath = shellPath;
         this.mCwd = cwd;
         this.mArgs = args;
         this.mEnv = env;
         this.mTranscriptRows = transcriptRows;
         this.mClient = client;
+        this.mPtyProcessHandler = ptyProcessHandler;
     }
 
     /**
@@ -104,7 +117,11 @@ public final class TerminalSession extends TerminalOutput {
         if (mEmulator == null) {
             initializeEmulator(columns, rows);
         } else {
-            JNI.setPtyWindowSize(mTerminalFileDescriptor, rows, columns);
+            if (mPtyProcessHandler != null) {
+                mPtyProcessHandler.setPtyWindowSize(mTerminalFileDescriptor, rows, columns);
+            } else {
+                JNI.setPtyWindowSize(mTerminalFileDescriptor, rows, columns);
+            }
             mEmulator.resize(columns, rows);
         }
     }
@@ -124,7 +141,14 @@ public final class TerminalSession extends TerminalOutput {
         mEmulator = new TerminalEmulator(this, columns, rows, mTranscriptRows, mClient);
 
         int[] processId = new int[1];
-        mTerminalFileDescriptor = JNI.createSubprocess(mShellPath, mCwd, mArgs, mEnv, processId, rows, columns);
+        try {
+            mTerminalFileDescriptor = mPtyProcessHandler != null
+                ? mPtyProcessHandler.createSubprocess(mShellPath, mCwd, mArgs, mEnv, processId, rows, columns)
+                : JNI.createSubprocess(mShellPath, mCwd, mArgs, mEnv, processId, rows, columns);
+        } catch (Exception e) {
+            mMainThreadHandler.sendMessage(mMainThreadHandler.obtainMessage(MSG_PROCESS_EXITED, -1));
+            return;
+        }
         mShellPid = processId[0];
         mClient.setTerminalShellPid(this, mShellPid);
 
@@ -159,7 +183,6 @@ public final class TerminalSession extends TerminalOutput {
                         termOut.write(buffer, 0, bytesToWrite);
                     }
                 } catch (IOException e) {
-                    // Ignore.
                 }
             }
         }.start();
@@ -167,7 +190,14 @@ public final class TerminalSession extends TerminalOutput {
         new Thread("TermSessionWaiter[pid=" + mShellPid + "]") {
             @Override
             public void run() {
-                int processExitCode = JNI.waitFor(mShellPid);
+                int processExitCode;
+                try {
+                    processExitCode = mPtyProcessHandler != null
+                        ? mPtyProcessHandler.waitFor(mShellPid)
+                        : JNI.waitFor(mShellPid);
+                } catch (Throwable t) {
+                    processExitCode = -1;
+                }
                 mMainThreadHandler.sendMessage(mMainThreadHandler.obtainMessage(MSG_PROCESS_EXITED, processExitCode));
             }
         }.start();
@@ -235,10 +265,14 @@ public final class TerminalSession extends TerminalOutput {
     /** Finish this terminal session by sending SIGKILL to the shell. */
     public void finishIfRunning() {
         if (isRunning()) {
-            try {
-                Os.kill(mShellPid, OsConstants.SIGKILL);
-            } catch (ErrnoException e) {
-                Logger.logWarn(mClient, LOG_TAG, "Failed sending SIGKILL: " + e.getMessage());
+            if (mPtyProcessHandler != null) {
+                mPtyProcessHandler.finishIfRunning(mShellPid);
+            } else {
+                try {
+                    Os.kill(mShellPid, OsConstants.SIGKILL);
+                } catch (ErrnoException e) {
+                    Logger.logWarn(mClient, LOG_TAG, "Failed sending SIGKILL: " + e.getMessage());
+                }
             }
         }
     }
@@ -253,7 +287,11 @@ public final class TerminalSession extends TerminalOutput {
         // Stop the reader and writer threads, and close the I/O streams
         mTerminalToProcessIOQueue.close();
         mProcessToTerminalIOQueue.close();
-        JNI.close(mTerminalFileDescriptor);
+        if (mPtyProcessHandler != null) {
+            mPtyProcessHandler.close(mTerminalFileDescriptor);
+        } else {
+            JNI.close(mTerminalFileDescriptor);
+        }
     }
 
     @Override
