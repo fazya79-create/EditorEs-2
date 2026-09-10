@@ -289,6 +289,11 @@
   <string name="idepref_backend_install_ubuntu">Install Ubuntu (required)</string>
   <string name="idepref_backend_install_ndk">Install NDK (optional)</string>
   <string name="idepref_backend_install_cmake">Install CMake (optional)</string>
+  <string name="idepref_shizuku_title">Privileged Terminal (Shizuku)</string>
+  <string name="idepref_shizuku_summary_authorized">Authorized (Privilege: %1$s)</string>
+  <string name="idepref_shizuku_summary_permission_required">Permission required. Tap to authorize.</string>
+  <string name="idepref_shizuku_summary_not_running">Shizuku is not running. Start Shizuku to enable.</string>
+  <string name="idepref_shizuku_summary_not_installed">Shizuku is not installed.</string>
   <string name="idepref_backend_installed">Installed (%1$s)</string>
   <string name="idepref_backend_missing">Not installed</string>
   <string name="idepref_backend_install_started">Installation started in background</string>

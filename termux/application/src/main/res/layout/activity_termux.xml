@@ -64,7 +64,7 @@
             android:id="@+id/toggle_keyboard_button"
             style="@style/Widget.Material3.Button.TextButton"
             android:textAllCaps="true"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/action_toggle_soft_keyboard" />
@@ -73,11 +73,19 @@
             android:id="@+id/new_session_button"
             style="@style/Widget.Material3.Button.TextButton"
             android:textAllCaps="true"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/action_new_session" />
         </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+          android:id="@+id/new_privileged_session_button"
+          style="@style/Widget.Material3.Button.TextButton"
+          android:textAllCaps="true"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/action_new_privileged_session" />
       </LinearLayout>
 
     </androidx.drawerlayout.widget.DrawerLayout>

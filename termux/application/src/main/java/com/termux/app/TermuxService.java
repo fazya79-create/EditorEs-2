@@ -577,9 +577,17 @@ public final class TermuxService extends Service implements AppShell.AppShellCli
     @Nullable
     public TermuxSession createTermuxSession(String executablePath, String[] arguments, String stdin,
         String workingDirectory, boolean isFailSafe, String sessionName) {
+        return createTermuxSession(executablePath, arguments, stdin, workingDirectory, isFailSafe, sessionName, null);
+    }
+
+    @Nullable
+    public TermuxSession createTermuxSession(String executablePath, String[] arguments, String stdin,
+        String workingDirectory, boolean isFailSafe, String sessionName,
+        TerminalSession.PtyProcessHandler ptyProcessHandler) {
         ExecutionCommand executionCommand = new ExecutionCommand(TermuxShellManager.getNextShellId(),
             executablePath, arguments, stdin, workingDirectory, Runner.TERMINAL_SESSION.getRunnerName(), isFailSafe);
         executionCommand.shellName = sessionName;
+        executionCommand.ptyProcessHandler = ptyProcessHandler;
         return createTermuxSession(executionCommand);
     }
 
