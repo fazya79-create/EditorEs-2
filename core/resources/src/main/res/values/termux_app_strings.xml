@@ -47,6 +47,12 @@
   <string name="action_shizuku_grant">Grant</string>
   <string name="privileged_session_name_shell">adb shell</string>
   <string name="privileged_session_name_root">root</string>
+  <string name="title_privileged_session_mode">Privileged shell type</string>
+  <string name="privileged_session_mode_android">Privileged Shell (Android)</string>
+  <string name="privileged_session_mode_ubuntu">Privileged Shell (Ubuntu)</string>
+  <string name="privileged_session_name_android">%1$s (Android)</string>
+  <string name="privileged_session_name_ubuntu">%1$s (Ubuntu)</string>
+  <string name="msg_privileged_ubuntu_not_installed">Ubuntu is not installed. Install it from Settings › Native backend to open a privileged Ubuntu shell.</string>
 
   <string name="action_toggle_soft_keyboard">Keyboard</string>
 

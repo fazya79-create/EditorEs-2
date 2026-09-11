@@ -17,6 +17,7 @@
 
 package com.itsaky.androidide.terminal.shizuku
 
+import com.itsaky.androidide.backend.proot.ProotConfig
 import com.itsaky.androidide.utils.DialogUtils
 import com.itsaky.androidide.utils.flashError
 import com.termux.R
@@ -32,6 +33,20 @@ class PrivilegedSessionOpener(private val activity: TermuxActivity) {
   }
 
   fun open(sessionName: String?, workingDirectory: String?) {
+    val modes = PrivilegedSessionMode.entries
+    val choices = modes.map { activity.getString(it.labelRes) }.toTypedArray<CharSequence>()
+    DialogUtils.newSingleChoiceDialog(
+      activity,
+      activity.getString(R.string.title_privileged_session_mode),
+      choices,
+      0,
+      true
+    ) { which ->
+      modes.getOrNull(which)?.let { open(it, sessionName, workingDirectory) }
+    }.show()
+  }
+
+  fun open(mode: PrivilegedSessionMode, sessionName: String?, workingDirectory: String?) {
     val termuxService = activity.termuxService ?: return
     if (termuxService.termuxSessionsSize >= MAX_SESSIONS) {
       DialogUtils.newMaterialDialogBuilder(activity)
@@ -39,6 +54,12 @@ class PrivilegedSessionOpener(private val activity: TermuxActivity) {
         .setMessage(R.string.msg_max_terminals_reached)
         .setPositiveButton(android.R.string.ok, null)
         .show()
+      return
+    }
+    if (mode == PrivilegedSessionMode.UBUNTU &&
+      !(ProotConfig.isInstalled(activity) && ProotConfig.isAvailable(activity))
+    ) {
+      flashError(R.string.msg_privileged_ubuntu_not_installed)
       return
     }
     when (ShizukuTerminal.status(activity)) {
@@ -58,46 +79,73 @@ class PrivilegedSessionOpener(private val activity: TermuxActivity) {
 
       ShizukuTerminal.Status.PERMISSION_REQUIRED -> ShizukuTerminal.requestPermission { granted ->
         if (granted) {
-          connectAndOpen(sessionName, workingDirectory)
+          connectAndOpen(mode, sessionName, workingDirectory)
         } else {
           flashError(R.string.msg_shizuku_permission_not_granted)
         }
       }
 
-      ShizukuTerminal.Status.READY -> connectAndOpen(sessionName, workingDirectory)
+      ShizukuTerminal.Status.READY -> connectAndOpen(mode, sessionName, workingDirectory)
     }
   }
 
-  private fun connectAndOpen(sessionName: String?, workingDirectory: String?) {
+  private fun connectAndOpen(mode: PrivilegedSessionMode, sessionName: String?, workingDirectory: String?) {
     ShizukuTerminal.connectService(activity) { service, error ->
       if (service == null) {
         flashError(activity.getString(R.string.msg_shizuku_service_failed, error ?: ""))
         return@connectService
       }
       if (activity.isFinishing || activity.isDestroyed) return@connectService
-      createSession(service, sessionName, workingDirectory)
+      createSession(service, mode, sessionName, workingDirectory)
     }
   }
 
-  private fun createSession(service: IPrivilegedPtyService, sessionName: String?, workingDirectory: String?) {
+  private fun createSession(
+    service: IPrivilegedPtyService,
+    mode: PrivilegedSessionMode,
+    sessionName: String?,
+    workingDirectory: String?
+  ) {
     val termuxService = activity.termuxService ?: return
     val uid = runCatching { service.uid }.getOrElse { ShizukuTerminal.privilegeUid() ?: ShizukuTerminal.UID_SHELL }
-    val cwd = PrivilegedShellEnvironment.sanitizeWorkingDirectory(
-      uid, workingDirectory ?: activity.currentSession?.cwd
-    )
-    val name = sessionName ?: activity.getString(
+    val identity = activity.getString(
       if (uid == ShizukuTerminal.UID_ROOT) R.string.privileged_session_name_root
       else R.string.privileged_session_name_shell
     )
-    val command = ExecutionCommand(
-      TermuxShellManager.getNextShellId(),
-      PrivilegedShellEnvironment.SYSTEM_SHELL,
-      null,
-      null,
-      cwd,
-      Runner.TERMINAL_SESSION.runnerName,
-      true
+    val name = sessionName ?: activity.getString(
+      when (mode) {
+        PrivilegedSessionMode.ANDROID -> R.string.privileged_session_name_android
+        PrivilegedSessionMode.UBUNTU -> R.string.privileged_session_name_ubuntu
+      },
+      identity
     )
+    val command = when (mode) {
+      PrivilegedSessionMode.ANDROID -> ExecutionCommand(
+        TermuxShellManager.getNextShellId(),
+        PrivilegedShellEnvironment.SYSTEM_SHELL,
+        null,
+        null,
+        PrivilegedShellEnvironment.sanitizeWorkingDirectory(
+          uid, workingDirectory ?: activity.currentSession?.cwd
+        ),
+        Runner.TERMINAL_SESSION.runnerName,
+        true
+      )
+
+      PrivilegedSessionMode.UBUNTU -> {
+        ProotConfig.registerAndroidIds(activity)
+        ProotConfig.writeShellProfile(activity)
+        ExecutionCommand(
+          TermuxShellManager.getNextShellId(),
+          ProotConfig.prootBinary(activity),
+          ProotConfig.prootArgs(activity).drop(1).toTypedArray(),
+          null,
+          PrivilegedShellEnvironment.home(uid),
+          Runner.TERMINAL_SESSION.runnerName,
+          true
+        )
+      }
+    }
     command.shellName = name
     val session = termuxService.createTermuxSession(
       command,

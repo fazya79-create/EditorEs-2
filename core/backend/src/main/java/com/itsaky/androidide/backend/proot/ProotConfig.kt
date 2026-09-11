@@ -306,7 +306,7 @@ object ProotConfig {
                 export LANG=C.UTF-8
                 export TMPDIR=/tmp
                 export DEBIAN_FRONTEND=noninteractive
-                export PS1='\[\033[01;32m\]\u@ubuntu\[\033[00m\]:\[\033[01;36m\]\w\[\033[00m\]\$ '
+                PS1='\[\033[01;32m\]\u@ubuntu\[\033[00m\]:\[\033[01;36m\]\w\[\033[00m\]\$ '
                 alias ll='ls -alF'
             """.trimIndent() + "\n"
 
@@ -326,6 +326,9 @@ object ProotConfig {
                 bashrc.writeText(profileScript)
             } else {
                 val content = bashrc.readText()
+                if (content.contains("export PS1=")) {
+                    bashrc.writeText(content.replace("export PS1=", "PS1="))
+                }
                 if (!content.contains("00-ide.sh") && !content.contains("u@ubuntu")) {
                     bashrc.appendText("\n[ -f /etc/profile.d/00-ide.sh ] && . /etc/profile.d/00-ide.sh\n")
                 }

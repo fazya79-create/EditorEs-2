@@ -48,6 +48,7 @@ class IdeTerminalSessionClient(
       // Supplementary GIDs (e.g. external storage) may be granted after the rootfs was installed;
       // register them so Ubuntu's bash.bashrc `groups` call can resolve every group name.
       ProotConfig.registerAndroidIds(activity)
+      ProotConfig.writeShellProfile(activity)
       val fullArgs = if (cwd != null) projectSessionArgs(activity, cwd) else ProotConfig.prootArgs(activity)
       val session = service.createTermuxSession(
         ProotConfig.prootBinary(activity),
