@@ -34,7 +34,9 @@
   <string name="action_create_named_session_confirm">Create</string>
 
   <string name="action_new_privileged_session">New privileged session (Shizuku)</string>
-  <string name="action_new_privileged_session_short">Privileged</string>
+  <string name="action_new_privileged_session_short">Privileged session</string>
+  <string name="title_sessions_drawer">Sessions</string>
+  <string name="action_open_sessions_drawer">Open sessions</string>
   <string name="title_privileged_session">Privileged session</string>
   <string name="msg_shizuku_not_installed">Shizuku is not installed. Install Shizuku (or Sui) to open a privileged terminal.</string>
   <string name="msg_shizuku_not_running">Shizuku is not running. Start it from the Shizuku app (wireless debugging or root) and try again.</string>

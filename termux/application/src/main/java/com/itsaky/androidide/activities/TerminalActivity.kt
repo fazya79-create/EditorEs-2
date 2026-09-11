@@ -25,6 +25,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
 import androidx.core.view.WindowCompat
 import com.itsaky.androidide.terminal.IdeTerminalSessionClient
 import com.itsaky.androidide.terminal.shizuku.PrivilegedSessionOpener
@@ -68,6 +69,9 @@ class TerminalActivity : TermuxActivity() {
       KEY_TERMINAL_CAN_ADD_SESSIONS, true) ?: true
     findViewById<View>(R.id.new_privileged_session_button)?.setOnClickListener {
       onCreateNewPrivilegedSession(null, null)
+    }
+    findViewById<View>(R.id.open_drawer_button)?.setOnClickListener {
+      drawer.openDrawer(GravityCompat.START)
     }
   }
 
