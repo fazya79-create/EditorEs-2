@@ -48,6 +48,7 @@ class TerminalActivity : TermuxActivity() {
     set(value) {
       field = value
       findViewById<View>(R.id.new_session_button)?.isEnabled = value
+      findViewById<View>(R.id.new_privileged_session_button)?.isEnabled = value
     }
 
   companion object {
@@ -65,6 +66,9 @@ class TerminalActivity : TermuxActivity() {
 
     canAddNewSessions = savedInstanceState?.getBoolean(
       KEY_TERMINAL_CAN_ADD_SESSIONS, true) ?: true
+    findViewById<View>(R.id.new_privileged_session_button)?.setOnClickListener {
+      onCreateNewPrivilegedSession(null, null)
+    }
   }
 
   override fun onCreateTerminalSessionClient(): TermuxTerminalSessionActivityClient {

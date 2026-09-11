@@ -56,11 +56,16 @@ class PrivilegedSessionOpener(private val activity: TermuxActivity) {
         .show()
       return
     }
-    if (mode == PrivilegedSessionMode.UBUNTU &&
-      !(ProotConfig.isInstalled(activity) && ProotConfig.isAvailable(activity))
-    ) {
-      flashError(R.string.msg_privileged_ubuntu_not_installed)
-      return
+    if (mode == PrivilegedSessionMode.UBUNTU) {
+      if (!(ProotConfig.isInstalled(activity) && ProotConfig.isAvailable(activity))) {
+        flashError(R.string.msg_privileged_ubuntu_not_installed)
+        return
+      }
+      val uid = ShizukuTerminal.privilegeUid()
+      if (uid != null && uid != ShizukuTerminal.UID_ROOT) {
+        flashError(R.string.msg_privileged_ubuntu_requires_root)
+        return
+      }
     }
     when (ShizukuTerminal.status(activity)) {
       ShizukuTerminal.Status.NOT_INSTALLED -> showBlocker(
