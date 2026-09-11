@@ -47,20 +47,24 @@ public class TermuxSessionsListViewController extends ArrayAdapter<TermuxSession
         }
 
         TextView sessionTitleView = sessionRowView.findViewById(R.id.session_title);
+        View closeView = sessionRowView.findViewById(R.id.session_close);
 
         TerminalSession sessionAtRow = getItem(position).getTerminalSession();
         if (sessionAtRow == null) {
             sessionTitleView.setText("null session");
+            closeView.setOnClickListener(null);
             return sessionRowView;
         }
 
         boolean shouldEnableDarkTheme = ThemeUtils.shouldEnableDarkTheme(mActivity, NightMode.getAppNightMode().getName());
 
         if (shouldEnableDarkTheme) {
-            sessionTitleView.setBackground(
+            sessionRowView.setBackground(
                 ContextCompat.getDrawable(mActivity, R.drawable.session_background_black_selected)
             );
         }
+
+        closeView.setOnClickListener(v -> mActivity.closeSession(sessionAtRow));
 
         String name = sessionAtRow.mSessionName;
         String sessionTitle = sessionAtRow.getTitle();

@@ -1,14 +1,34 @@
-<com.google.android.material.textview.MaterialTextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/session_title"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/session_row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="48dp"
     android:background="@drawable/session_background_selected"
-    android:ellipsize="end"
-    android:maxLines="2"
-    android:gravity="start|center_vertical"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
     android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
-    android:textSize="14sp" />
+    android:paddingEnd="4dp">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/session_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:textSize="14sp" />
+
+    <ImageButton
+        android:id="@+id/session_close"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/action_close_session"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_close"
+        app:tint="?attr/termuxActivityDrawerImageTint" />
+</LinearLayout>

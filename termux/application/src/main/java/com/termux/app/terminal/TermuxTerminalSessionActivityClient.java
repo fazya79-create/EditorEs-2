@@ -139,6 +139,11 @@ public class TermuxTerminalSessionActivityClient extends TermuxTerminalSessionCl
             return;
         }
 
+        if (mActivity.consumePendingClose(finishedSession)) {
+            removeFinishedSession(finishedSession);
+            return;
+        }
+
         int index = service.getIndexOfSession(finishedSession);
 
         // For plugin commands that expect the result back, we should immediately close the session

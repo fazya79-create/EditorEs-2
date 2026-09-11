@@ -93,59 +93,73 @@
         <com.google.android.material.divider.MaterialDivider
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:layout_marginStart="12dp"
-          android:layout_marginEnd="12dp"
-          android:layout_marginTop="8dp"
-          android:layout_marginBottom="8dp" />
+          android:layout_marginTop="8dp" />
 
-        <com.google.android.material.button.MaterialButton
-          android:id="@+id/new_session_button"
-          style="@style/Widget.Material3.Button.TextButton.Icon"
+        <LinearLayout
           android:layout_width="match_parent"
-          android:layout_height="48dp"
-          android:layout_marginStart="12dp"
-          android:layout_marginEnd="12dp"
-          android:gravity="start|center_vertical"
-          android:text="@string/action_new_session"
-          android:textAllCaps="false"
-          android:textColor="?attr/termuxActivityDrawerImageTint"
-          app:icon="@drawable/ic_add"
-          app:iconGravity="start"
-          app:iconPadding="16dp"
-          app:iconTint="?attr/termuxActivityDrawerImageTint" />
+          android:layout_height="wrap_content"
+          android:orientation="horizontal">
 
-        <com.google.android.material.button.MaterialButton
-          android:id="@+id/new_privileged_session_button"
-          style="@style/Widget.Material3.Button.TextButton.Icon"
-          android:layout_width="match_parent"
-          android:layout_height="48dp"
-          android:layout_marginStart="12dp"
-          android:layout_marginEnd="12dp"
-          android:gravity="start|center_vertical"
-          android:text="@string/action_new_privileged_session_short"
-          android:textAllCaps="false"
-          android:textColor="?attr/termuxActivityDrawerImageTint"
-          app:icon="@drawable/ic_shield"
-          app:iconGravity="start"
-          app:iconPadding="16dp"
-          app:iconTint="?attr/termuxActivityDrawerImageTint" />
+          <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <com.google.android.material.button.MaterialButton
-          android:id="@+id/toggle_keyboard_button"
-          style="@style/Widget.Material3.Button.TextButton.Icon"
-          android:layout_width="match_parent"
-          android:layout_height="48dp"
-          android:layout_marginStart="12dp"
-          android:layout_marginEnd="12dp"
-          android:layout_marginBottom="12dp"
-          android:gravity="start|center_vertical"
-          android:text="@string/action_toggle_soft_keyboard"
-          android:textAllCaps="false"
-          android:textColor="?attr/termuxActivityDrawerImageTint"
-          app:icon="@drawable/ic_keyboard"
-          app:iconGravity="start"
-          app:iconPadding="16dp"
-          app:iconTint="?attr/termuxActivityDrawerImageTint" />
+            <com.google.android.material.button.MaterialButton
+              android:id="@+id/new_session_button"
+              style="@style/TermuxActivity.Drawer.TabButton"
+              android:text="@string/action_new_session" />
+
+            <View
+              android:layout_width="match_parent"
+              android:layout_height="2dp"
+              android:layout_marginStart="12dp"
+              android:layout_marginEnd="12dp"
+              android:layout_marginBottom="8dp"
+              android:background="?attr/termuxActivityDrawerImageTint" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <com.google.android.material.button.MaterialButton
+              android:id="@+id/new_privileged_session_button"
+              style="@style/TermuxActivity.Drawer.TabButton"
+              android:text="@string/action_new_privileged_session_short" />
+
+            <View
+              android:layout_width="match_parent"
+              android:layout_height="2dp"
+              android:layout_marginStart="12dp"
+              android:layout_marginEnd="12dp"
+              android:layout_marginBottom="8dp"
+              android:background="?attr/termuxActivityDrawerImageTint" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <com.google.android.material.button.MaterialButton
+              android:id="@+id/toggle_keyboard_button"
+              style="@style/TermuxActivity.Drawer.TabButton"
+              android:text="@string/action_toggle_soft_keyboard" />
+
+            <View
+              android:layout_width="match_parent"
+              android:layout_height="2dp"
+              android:layout_marginStart="12dp"
+              android:layout_marginEnd="12dp"
+              android:layout_marginBottom="8dp"
+              android:background="?attr/termuxActivityDrawerImageTint" />
+          </LinearLayout>
+        </LinearLayout>
       </LinearLayout>
 
     </androidx.drawerlayout.widget.DrawerLayout>

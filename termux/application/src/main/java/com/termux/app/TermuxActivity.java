@@ -54,7 +54,9 @@ import com.termux.terminal.TerminalSession;
 import com.termux.terminal.TerminalSessionClient;
 import com.termux.view.TerminalView;
 import com.termux.view.TerminalViewClient;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.Optional;
 
 /**
@@ -172,6 +174,8 @@ public class TermuxActivity extends BaseIDEActivity implements ServiceConnection
 
     protected static final String ARG_TERMINAL_TOOLBAR_TEXT_INPUT = "terminal_toolbar_text_input";
     protected static final String ARG_ACTIVITY_RECREATED = "activity_recreated";
+
+    private final Set<TerminalSession> mSessionsPendingClose = new HashSet<>();
 
     protected static final String LOG_TAG = "TermuxActivity";
 
@@ -746,6 +750,28 @@ public class TermuxActivity extends BaseIDEActivity implements ServiceConnection
         });
         b.setNegativeButton(android.R.string.no, null);
         b.show();
+    }
+
+    public void closeSession(TerminalSession session) {
+        if (session == null) return;
+        if (!session.isRunning()) {
+            mTermuxTerminalSessionActivityClient.removeFinishedSession(session);
+            return;
+        }
+        final AlertDialog.Builder b = new AlertDialog.Builder(this);
+        b.setIcon(android.R.drawable.ic_dialog_alert);
+        b.setMessage(R.string.title_confirm_kill_process);
+        b.setPositiveButton(android.R.string.yes, (dialog, id) -> {
+            dialog.dismiss();
+            mSessionsPendingClose.add(session);
+            session.finishIfRunning();
+        });
+        b.setNegativeButton(android.R.string.no, null);
+        b.show();
+    }
+
+    public boolean consumePendingClose(TerminalSession session) {
+        return mSessionsPendingClose.remove(session);
     }
 
     private void onResetTerminalSession(TerminalSession session) {
