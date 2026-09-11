@@ -155,6 +155,7 @@ dependencies {
 
   // Local projects here
   implementation(projects.core.actions)
+  implementation(projects.core.ai)
   implementation(projects.core.backend)
   implementation(projects.core.common)
   implementation(projects.core.lspApi)

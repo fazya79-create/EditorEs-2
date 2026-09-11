@@ -315,4 +315,42 @@
   <string name="msg_build_finished">Build finished with exit code %1$d</string>
   <string name="template_cpp_executable">C++ Executable</string>
   <string name="template_cpp_shared_library">C++ Shared Library</string>
+
+  <string name="title_ai_assistant">Assistant</string>
+  <string name="title_ai_you">You</string>
+  <string name="title_ai_error">Error</string>
+  <string name="msg_ai_tool_running">Running\u2026</string>
+  <string name="hint_ai_message">Ask about this project\u2026</string>
+  <string name="action_ai_send">Send</string>
+  <string name="action_ai_stop">Stop</string>
+  <string name="action_ai_clear">Clear conversation</string>
+  <string name="action_ai_accept">Accept</string>
+  <string name="action_ai_reject">Reject</string>
+  <string name="msg_ai_empty">Ask the assistant to explain, find or change code in the project. It can read and write files and run shell commands, and will ask before making changes.</string>
+  <string name="msg_ai_missing_api_key">No API key is configured. Add one in Preferences &gt; AI assistant.</string>
+  <string name="msg_ai_yolo_banner">YOLO mode is on: tool calls run without asking</string>
+  <string name="msg_ai_awaiting_approval">Waiting for your approval</string>
+  <string name="msg_ai_tool_rejected">Rejected</string>
+  <string name="title_ai_approval">Allow this action?</string>
+
+  <string name="idepref_ai_title">AI assistant</string>
+  <string name="idepref_ai_summary">Provider, API keys and tool safety</string>
+  <string name="idepref_ai_provider_group">Provider</string>
+  <string name="idepref_ai_provider">Active provider</string>
+  <string name="idepref_ai_provider_openai">OpenAI compatible</string>
+  <string name="idepref_ai_provider_anthropic">Anthropic compatible</string>
+  <string name="idepref_ai_openai_key">OpenAI API key</string>
+  <string name="idepref_ai_openai_base_url">OpenAI base URL</string>
+  <string name="idepref_ai_openai_model">OpenAI model</string>
+  <string name="idepref_ai_anthropic_key">Anthropic API key</string>
+  <string name="idepref_ai_anthropic_base_url">Anthropic base URL</string>
+  <string name="idepref_ai_anthropic_model">Anthropic model</string>
+  <string name="idepref_ai_key_set">A key is stored on this device</string>
+  <string name="idepref_ai_key_missing">No key stored</string>
+  <string name="idepref_ai_safety_group">Tool safety</string>
+  <string name="idepref_ai_yolo">YOLO mode</string>
+  <string name="idepref_ai_yolo_on">On: file writes and shell commands run without asking</string>
+  <string name="idepref_ai_yolo_off">Off: every file write and shell command needs your approval</string>
+  <string name="idepref_ai_shell_timeout">Shell command timeout</string>
+  <string name="idepref_ai_shell_timeout_current">%1$d seconds</string>
 </resources>

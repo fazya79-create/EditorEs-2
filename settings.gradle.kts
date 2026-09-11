@@ -113,6 +113,7 @@ rootProject.name = "AndroidIDE"
 include(
   ":annotation:processors",
   ":core:actions",
+  ":core:ai",
   ":core:app",
   ":core:backend",
   ":core:common",

@@ -15,28 +15,27 @@
  *   along with AndroidIDE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.itsaky.androidide.preferences
+package com.itsaky.androidide.actions.sidebar
 
-import com.itsaky.androidide.resources.R.string
-import kotlinx.parcelize.Parcelize
+import android.content.Context
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import com.itsaky.androidide.ai.ui.AiChatFragment
+import com.itsaky.androidide.resources.R
+import kotlin.reflect.KClass
 
-internal fun IDEPreferences.addRootPreferences() {
-  addPreference(ConfigurationPreferences())
-}
+class AiAssistantSidebarAction(context: Context, override val order: Int) :
+  AbstractSidebarAction() {
 
-@Parcelize
-class ConfigurationPreferences(
-  override val key: String = "idepref_configure",
-  override val title: Int = string.configure,
-  override val children: List<IPreference> = mutableListOf()
-) : IPreferenceGroup() {
+  companion object {
+    const val ID = "ide.editor.sidebar.aiAssistant"
+  }
+
+  override val id: String = ID
+  override val fragmentClass: KClass<out Fragment> = AiChatFragment::class
 
   init {
-    addPreference(GeneralPreferencesScreen())
-    addPreference(EditorPreferencesScreen())
-    addPreference(BackendPreferencesScreen())
-    addPreference(AiPreferencesScreen())
-    addPreference(CodeStylePreferencesScreen())
-    addPreference(TermuxPreferences())
+    label = context.getString(R.string.title_ai_assistant)
+    icon = ContextCompat.getDrawable(context, R.drawable.ic_ai_assistant)
   }
 }
