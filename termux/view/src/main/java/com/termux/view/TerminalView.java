@@ -58,6 +58,9 @@ public final class TerminalView extends View {
 
     private TextSelectionCursorController mTextSelectionCursorController;
 
+    private static final long RESIZE_DEBOUNCE_MS = 120;
+    private final Runnable mUpdateSizeRunnable = this::updateSize;
+
     private Handler mTerminalCursorBlinkerHandler;
     private TerminalCursorBlinkerRunnable mTerminalCursorBlinkerRunnable;
     private int mTerminalCursorBlinkerRate;
@@ -937,7 +940,12 @@ public final class TerminalView extends View {
      */
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        updateSize();
+        if (mEmulator == null) {
+            updateSize();
+            return;
+        }
+        removeCallbacks(mUpdateSizeRunnable);
+        postDelayed(mUpdateSizeRunnable, RESIZE_DEBOUNCE_MS);
     }
 
     /** Check if the terminal size in rows and columns should be updated. */
@@ -1305,6 +1313,7 @@ public final class TerminalView extends View {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        removeCallbacks(mUpdateSizeRunnable);
 
         if (mTextSelectionCursorController != null) {
             // Might solve the following exception
