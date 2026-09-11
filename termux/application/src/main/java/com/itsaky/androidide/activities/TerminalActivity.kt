@@ -27,6 +27,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.WindowCompat
+import com.google.android.material.appbar.MaterialToolbar
 import com.itsaky.androidide.terminal.IdeTerminalSessionClient
 import com.itsaky.androidide.terminal.shizuku.PrivilegedSessionOpener
 import com.itsaky.androidide.utils.Environment
@@ -70,9 +71,31 @@ class TerminalActivity : TermuxActivity() {
     findViewById<View>(R.id.new_privileged_session_button)?.setOnClickListener {
       onCreateNewPrivilegedSession(null, null)
     }
-    findViewById<View>(R.id.open_drawer_button)?.setOnClickListener {
-      drawer.openDrawer(GravityCompat.START)
+    findViewById<MaterialToolbar>(R.id.terminal_toolbar)?.apply {
+      setNavigationOnClickListener { drawer.openDrawer(GravityCompat.START) }
+      setOnClickListener { terminalView.showContextMenu() }
     }
+    updateToolbarTitle()
+  }
+
+  fun updateToolbarTitle() {
+    val toolbar = findViewById<MaterialToolbar>(R.id.terminal_toolbar) ?: return
+    val session = currentSession
+    val service = termuxService
+    if (session == null || service == null) {
+      toolbar.title = getString(R.string.title_sessions_drawer)
+      toolbar.subtitle = null
+      return
+    }
+    val index = service.getIndexOfSession(session)
+    val name = session.mSessionName?.takeIf { it.isNotBlank() }
+    toolbar.title = if (name != null) "[${index + 1}] $name" else "[${index + 1}]"
+    toolbar.subtitle = session.title?.takeIf { it.isNotBlank() }
+  }
+
+  override fun termuxSessionListNotifyUpdated() {
+    super.termuxSessionListNotifyUpdated()
+    updateToolbarTitle()
   }
 
   override fun onCreateTerminalSessionClient(): TermuxTerminalSessionActivityClient {

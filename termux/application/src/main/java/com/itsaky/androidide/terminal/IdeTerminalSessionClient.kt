@@ -21,6 +21,7 @@ import android.content.Context
 import com.itsaky.androidide.activities.TerminalActivity
 import com.itsaky.androidide.backend.proot.ProotConfig
 import com.termux.app.terminal.TermuxTerminalSessionActivityClient
+import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
 import java.io.File
 
@@ -34,6 +35,16 @@ class IdeTerminalSessionClient(
 ) : TermuxTerminalSessionActivityClient(activity) {
 
   private val storageRoots = setOf("/storage", "/storage/emulated", "/storage/emulated/0", "/sdcard")
+
+  override fun setCurrentSession(session: TerminalSession?) {
+    super.setCurrentSession(session)
+    (mActivity as? TerminalActivity)?.updateToolbarTitle()
+  }
+
+  override fun onTitleChanged(updatedSession: TerminalSession) {
+    super.onTitleChanged(updatedSession)
+    (mActivity as? TerminalActivity)?.updateToolbarTitle()
+  }
 
   override fun addNewSession(isFailSafe: Boolean, sessionName: String?, workingDirectory: String?) {
     val activity = mActivity
