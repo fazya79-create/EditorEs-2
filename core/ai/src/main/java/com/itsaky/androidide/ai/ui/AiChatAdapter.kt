@@ -129,6 +129,9 @@ class AiChatAdapter(
           binding.message.text = when (entry.kind) {
             NoticeKind.COMPACTED ->
               context.getString(R.string.msg_ai_context_compacted, entry.count)
+
+            NoticeKind.COMPACTION_FAILED ->
+              context.getString(R.string.msg_ai_context_compaction_failed)
           }
           binding.root.setCardBackgroundColor(
             context.resolveAttr(com.google.android.material.R.attr.colorSurfaceContainerLow)

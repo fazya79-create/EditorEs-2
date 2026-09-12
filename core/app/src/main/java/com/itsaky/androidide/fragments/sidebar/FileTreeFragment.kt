@@ -31,6 +31,7 @@ import com.blankj.utilcode.util.SizeUtils
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.itsaky.androidide.adapters.viewholders.FileTreeViewHolder
 import com.itsaky.androidide.databinding.LayoutEditorFileTreeBinding
+import com.itsaky.androidide.eventbus.events.file.ProjectFilesChangedEvent
 import com.itsaky.androidide.eventbus.events.filetree.FileClickEvent
 import com.itsaky.androidide.eventbus.events.filetree.FileLongClickEvent
 import com.itsaky.androidide.events.ExpandTreeNodeRequestEvent
@@ -195,6 +196,15 @@ class FileTreeFragment : BottomSheetDialogFragment(), TreeNodeClickListener,
     listProjectFiles()
   }
 
+  @Suppress("unused", "UNUSED_PARAMETER")
+  @Subscribe(threadMode = MAIN)
+  fun onProjectFilesChanged(event: ProjectFilesChangedEvent) {
+    if (!isVisible || context == null) {
+      return
+    }
+    listProjectFiles(fileTreeView?.saveState)
+  }
+
   @Suppress("unused")
   @Subscribe(threadMode = MAIN)
   fun onGetExpandTreeNodeRequest(event: ExpandTreeNodeRequestEvent) {
@@ -206,7 +216,7 @@ class FileTreeFragment : BottomSheetDialogFragment(), TreeNodeClickListener,
     expandNode(event.node)
   }
 
-  fun listProjectFiles() {
+  fun listProjectFiles(state: String? = viewModel.savedState) {
     if (binding == null) {
       // Fragment has been destroyed
       return
@@ -237,7 +247,7 @@ class FileTreeFragment : BottomSheetDialogFragment(), TreeNodeClickListener,
         binding!!.horizontalCroll.removeAllViews()
         val view = tree.view
         binding!!.horizontalCroll.addView(view)
-        view.post { tryRestoreState(rootNode) }
+        view.post { tryRestoreState(rootNode, state) }
       }
     }
   }
@@ -248,7 +258,7 @@ class FileTreeFragment : BottomSheetDialogFragment(), TreeNodeClickListener,
     } else AndroidTreeView(context, node, drawable.bg_ripple).also { fileTreeView = it }
   }
 
-  private fun tryRestoreState(rootNode: TreeNode, state: String? = viewModel.savedState) {
+  private fun tryRestoreState(rootNode: TreeNode, state: String?) {
     if (!TextUtils.isEmpty(state) && fileTreeView != null) {
       fileTreeView!!.collapseAll()
       val openNodes =

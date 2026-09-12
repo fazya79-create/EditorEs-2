@@ -140,7 +140,7 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
         viewModel.resume(info.id)
         dialog.dismiss()
       },
-      onDelete = { info -> viewModel.deleteSession(info.id) }
+      onDelete = { info -> confirmDeleteSession(info) }
     )
 
     historyBinding.sessions.layoutManager = LinearLayoutManager(requireContext())
@@ -152,6 +152,21 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
 
     dialog.setOnDismissListener { viewModel.sessions.removeObservers(viewLifecycleOwner) }
     dialog.show()
+  }
+
+  private fun confirmDeleteSession(info: ChatSessionInfo) {
+    val title = info.title.ifBlank {
+      getString(com.itsaky.androidide.resources.R.string.msg_ai_history_untitled)
+    }
+    DialogUtils.newYesNoDialog(
+      context = requireContext(),
+      title = getString(com.itsaky.androidide.resources.R.string.title_confirm_delete),
+      message = getString(com.itsaky.androidide.resources.R.string.msg_confirm_delete, title),
+      positiveClickListener = { dialog, _ ->
+        dialog.dismiss()
+        viewModel.deleteSession(info.id)
+      }
+    ) { dialog, _ -> dialog.dismiss() }.show()
   }
 
   private fun submitSessions(

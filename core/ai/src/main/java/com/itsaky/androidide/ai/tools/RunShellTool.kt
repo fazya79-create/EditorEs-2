@@ -22,9 +22,11 @@ import com.google.gson.JsonObject
 import com.itsaky.androidide.ai.model.ToolSpec
 import com.itsaky.androidide.ai.prefs.AiPreferences
 import com.itsaky.androidide.backend.proot.ProotConfig
+import com.itsaky.androidide.eventbus.events.file.ProjectFilesChangedEvent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.greenrobot.eventbus.EventBus
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -93,6 +95,7 @@ class RunShellTool : AiTool {
           throw ToolException("The command timed out after $timeout seconds.")
         }
 
+        EventBus.getDefault().post(ProjectFilesChangedEvent())
         format(process.exitValue(), output)
       } catch (err: CancellationException) {
         process?.destroy()

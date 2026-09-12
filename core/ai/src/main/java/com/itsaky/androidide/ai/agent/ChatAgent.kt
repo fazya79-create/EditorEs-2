@@ -52,6 +52,8 @@ sealed interface AgentEvent {
     val replaced: Int
   ) : AgentEvent
 
+  data object CompactionFailed : AgentEvent
+
   data class UsageUpdated(val usage: TokenUsage, val contextWindow: Int) : AgentEvent
 
   data object TurnCompleted : AgentEvent
@@ -140,7 +142,7 @@ class ChatAgent(
       }
 
       if (stopReason != StopReason.TOOL_USE || assistant.toolCalls.isEmpty()) {
-        compactIfNeeded(usage, messages)?.let { emit(it) }
+        compactIfNeeded(usage, messages).forEach { emit(it) }
         emit(AgentEvent.TurnCompleted)
         return@flow
       }
@@ -162,34 +164,39 @@ class ChatAgent(
       messages += ChatMessage.toolResults(results)
       round++
 
-      compactIfNeeded(usage, messages)?.let { emit(it) }
+      compactIfNeeded(usage, messages).forEach { emit(it) }
     }
   }
 
   private suspend fun compactIfNeeded(
     usage: TokenUsage,
     messages: MutableList<ChatMessage>
-  ): AgentEvent? {
+  ): List<AgentEvent> {
     if (!ContextCompactor.shouldCompact(usage.total, contextWindow, compactThresholdPercent)) {
-      return null
+      return emptyList()
     }
     return compact(messages)
   }
 
-  private suspend fun compact(messages: MutableList<ChatMessage>): AgentEvent? {
+  private suspend fun compact(messages: MutableList<ChatMessage>): List<AgentEvent> {
     val (older, recent) = ContextCompactor.split(messages)
     if (older.isEmpty()) {
-      return null
+      return emptyList()
     }
 
-    val summary = summarise(older) ?: return null
+    val summary = summarise(older) ?: return listOf(AgentEvent.CompactionFailed)
     val replaced = older.size
 
     messages.clear()
     messages += ContextCompactor.asSummaryMessage(summary)
     messages += recent
 
-    return AgentEvent.ContextCompacted(messages.toList(), replaced)
+    // The token count that triggered compaction describes the history that was just discarded.
+    // Reporting an empty reading retires it until the next response measures the new history.
+    return listOf(
+      AgentEvent.ContextCompacted(messages.toList(), replaced),
+      AgentEvent.UsageUpdated(TokenUsage(), contextWindow)
+    )
   }
 
   private suspend fun summarise(older: List<ChatMessage>): String? {

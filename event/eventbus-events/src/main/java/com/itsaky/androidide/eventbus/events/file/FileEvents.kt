@@ -25,6 +25,9 @@ abstract class FileEvent : Event() {
   abstract val file: File
 }
 
+/** Event dispatched when a command may have changed files in the current project. */
+class ProjectFilesChangedEvent : Event()
+
 /**
  * Event dispatched when a new file is created in the file tree.
  *

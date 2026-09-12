@@ -321,6 +321,7 @@
   <string name="title_ai_error">Error</string>
   <string name="title_ai_notice">Context</string>
   <string name="msg_ai_context_compacted">Older messages were summarised to free up context (%1$d messages replaced).</string>
+  <string name="msg_ai_context_compaction_failed">Older messages could not be summarised, so the conversation still fills the context window. Start a new chat if the model starts rejecting messages.</string>
   <string name="msg_ai_context_usage">Context %1$d%%</string>
   <string name="msg_ai_context_usage_cached">Context %1$d%% (%2$d%% cached)</string>
   <string name="msg_ai_tool_running">Running\u2026</string>

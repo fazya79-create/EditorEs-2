@@ -20,9 +20,10 @@ package com.itsaky.androidide.ai.tools
 import android.content.Context
 import com.google.gson.JsonObject
 import com.itsaky.androidide.ai.model.ToolSpec
-import com.itsaky.androidide.projects.IProjectManager
+import com.itsaky.androidide.eventbus.events.file.ProjectFilesChangedEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.greenrobot.eventbus.EventBus
 
 class WriteFileTool : AiTool {
 
@@ -71,9 +72,7 @@ class WriteFileTool : AiTool {
       file.parentFile?.mkdirs()
       file.writeText(content)
 
-      if (!existed) {
-        IProjectManager.getInstance().notifyFileCreated(file)
-      }
+      EventBus.getDefault().post(ProjectFilesChangedEvent())
 
       val verb = if (existed) "Updated" else "Created"
       "$verb ${WorkspacePaths.relativize(file)} (${content.length} characters)."

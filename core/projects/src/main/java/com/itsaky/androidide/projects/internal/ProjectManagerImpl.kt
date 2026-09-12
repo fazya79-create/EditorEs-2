@@ -23,6 +23,7 @@ import com.itsaky.androidide.eventbus.events.EventReceiver
 import com.itsaky.androidide.eventbus.events.file.FileCreationEvent
 import com.itsaky.androidide.eventbus.events.file.FileDeletionEvent
 import com.itsaky.androidide.eventbus.events.file.FileRenameEvent
+import com.itsaky.androidide.eventbus.events.file.ProjectFilesChangedEvent
 import com.itsaky.androidide.eventbus.events.project.ProjectInitializedEvent
 import com.itsaky.androidide.projects.CppModule
 import com.itsaky.androidide.projects.IProjectManager
@@ -108,6 +109,12 @@ class ProjectManagerImpl : IProjectManager, EventReceiver {
   @Suppress("unused", "UNUSED_PARAMETER")
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   fun onFileRenamed(event: FileRenameEvent) {
+    rescanWorkspace()
+  }
+
+  @Suppress("unused", "UNUSED_PARAMETER")
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  fun onProjectFilesChanged(event: ProjectFilesChangedEvent) {
     rescanWorkspace()
   }
 

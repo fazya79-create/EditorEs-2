@@ -67,6 +67,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   private var sessionCreatedAt = System.currentTimeMillis()
   private var sessionTitle = ""
   private var titleGenerated = false
+  private var deletedSessionId: String? = null
   private var lastPrompt: String? = null
 
   val entries = MutableLiveData<List<ChatEntry>>(emptyList())
@@ -96,15 +97,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     if (pending != null) {
       viewModelScope.launch { withContext(Dispatchers.IO) { store.save(pending) } }
     }
-    history.clear()
-    items.clear()
-    lastPrompt = null
-    sessionId = store.newSessionId()
-    sessionCreatedAt = System.currentTimeMillis()
-    sessionTitle = ""
-    titleGenerated = false
-    contextUsage.value = null
-    publish()
+    startNewSession()
   }
 
   fun refreshSessions() {
@@ -141,8 +134,28 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   fun deleteSession(id: String) {
     viewModelScope.launch {
       withContext(Dispatchers.IO) { store.delete(id) }
+      if (id == sessionId) {
+        if (isBusy) {
+          deletedSessionId = id
+        } else {
+          startNewSession()
+        }
+      }
       refreshSessions()
     }
+  }
+
+  private fun startNewSession() {
+    history.clear()
+    items.clear()
+    lastPrompt = null
+    sessionId = store.newSessionId()
+    sessionCreatedAt = System.currentTimeMillis()
+    sessionTitle = ""
+    titleGenerated = false
+    contextUsage.value = null
+    deletedSessionId = null
+    publish()
   }
 
   fun retry() {
@@ -347,7 +360,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
 
         is AgentEvent.UsageUpdated -> {
           contextUsage.postValue(
-            if (event.contextWindow > 0) {
+            if (event.contextWindow > 0 && !event.usage.isEmpty) {
               ContextUsage(event.usage.total, event.contextWindow, event.usage.cachedInputTokens)
             } else {
               null
@@ -360,6 +373,9 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
           history += event.history
           append(ChatEntry.Notice(nextId(), NoticeKind.COMPACTED, event.replaced))
         }
+
+        AgentEvent.CompactionFailed ->
+          append(ChatEntry.Notice(nextId(), NoticeKind.COMPACTION_FAILED, 0))
 
         AgentEvent.TurnCompleted -> finishStreaming()
       }
@@ -397,6 +413,9 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
 
   private suspend fun persist() {
     val session = snapshot() ?: return
+    if (session.info.id == deletedSessionId) {
+      return
+    }
     withContext(NonCancellable + Dispatchers.IO) { store.save(session) }
   }
 

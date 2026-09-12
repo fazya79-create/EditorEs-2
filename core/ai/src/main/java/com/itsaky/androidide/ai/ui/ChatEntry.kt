@@ -66,7 +66,8 @@ sealed interface ChatEntry {
 }
 
 enum class NoticeKind {
-  COMPACTED
+  COMPACTED,
+  COMPACTION_FAILED
 }
 
 data class ContextUsage(val used: Int, val window: Int, val cached: Int = 0) {
