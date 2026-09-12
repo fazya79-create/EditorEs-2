@@ -88,6 +88,35 @@ class ModelCatalogTest {
   }
 
   @Test
+  fun `server specific context fields and nested containers are detected`() {
+    val body = """
+      {
+        "data": [
+          {"id": "vllm/model", "max_model_len": 32768},
+          {"id": "litellm/model", "max_input_tokens": 200000},
+          {"id": "router/model", "capabilities": {"contextWindow": 200000}},
+          {"id": "ollama/model", "context_length": 262144},
+          {"id": "camel/model", "contextLength": 8192},
+          {"id": "tgwui/model", "truncation_length": 4096},
+          {"id": "proxy/model", "model_info": {"max_input_tokens": 128000}},
+          {"id": "unknown/model", "object": "model"}
+        ]
+      }
+    """.trimIndent()
+
+    val windows = ModelCatalog.parse(ProviderKind.OPENAI, body).associate { it.id to it.contextWindow }
+
+    assertThat(windows["vllm/model"]).isEqualTo(32_768)
+    assertThat(windows["litellm/model"]).isEqualTo(200_000)
+    assertThat(windows["router/model"]).isEqualTo(200_000)
+    assertThat(windows["ollama/model"]).isEqualTo(262_144)
+    assertThat(windows["camel/model"]).isEqualTo(8_192)
+    assertThat(windows["tgwui/model"]).isEqualTo(4_096)
+    assertThat(windows["proxy/model"]).isEqualTo(128_000)
+    assertThat(windows["unknown/model"]).isEqualTo(0)
+  }
+
+  @Test
   fun `a malformed body yields no models instead of failing`() {
     assertThat(ModelCatalog.parse(ProviderKind.OPENAI, "not json")).isEmpty()
     assertThat(ModelCatalog.parse(ProviderKind.GOOGLE, "{}")).isEmpty()

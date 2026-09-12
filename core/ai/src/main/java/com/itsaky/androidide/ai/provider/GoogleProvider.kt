@@ -25,6 +25,7 @@ import com.itsaky.androidide.ai.model.ChatMessage
 import com.itsaky.androidide.ai.model.ChatRequest
 import com.itsaky.androidide.ai.model.ChatRole
 import com.itsaky.androidide.ai.model.ChatStreamEvent
+import com.itsaky.androidide.ai.model.GroundingSource
 import com.itsaky.androidide.ai.model.StopReason
 import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.model.TokenUsage
@@ -43,10 +44,14 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
 
   override val kind: ProviderKind = ProviderKind.GOOGLE
 
+  override fun supportsBuiltInSearchWith(model: String, hasFunctionTools: Boolean): Boolean =
+    !hasFunctionTools || supportsToolCombination(model)
+
   override fun stream(request: ChatRequest): Flow<ChatStreamEvent> = callbackFlow {
     val text = StringBuilder()
     val reasoning = StringBuilder()
     val calls = mutableListOf<ToolCall>()
+    val grounding = GroundingCollector()
     var stopReason = StopReason.END_TURN
     var usage = TokenUsage()
 
@@ -62,7 +67,7 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
             break
           }
           readUsage(event)?.let { usage = it }
-          val reason = handleEvent(event, text, reasoning, calls)
+          val reason = handleEvent(event, text, reasoning, calls, grounding)
           if (reason != null) {
             stopReason = reason
           }
@@ -89,6 +94,10 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
 
     if (calls.isNotEmpty() && stopReason == StopReason.END_TURN) {
       stopReason = StopReason.TOOL_USE
+    }
+
+    if (grounding.isNotEmpty) {
+      send(ChatStreamEvent.Grounded(grounding.queries(), grounding.sources()))
     }
 
     send(
@@ -126,7 +135,8 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
     event: SseEvent,
     text: StringBuilder,
     reasoning: StringBuilder,
-    calls: MutableList<ToolCall>
+    calls: MutableList<ToolCall>,
+    grounding: GroundingCollector
   ): StopReason? {
     val chunk = runCatching { JsonParser.parseString(event.data).asJsonObject }.getOrNull()
       ?: return null
@@ -151,6 +161,10 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
       ?.takeIf { it.isJsonObject }
       ?.asJsonObject
       ?: return null
+
+    candidate.getAsJsonObject("groundingMetadata")?.let { metadata ->
+      grounding.merge(metadata)
+    }
 
     val stopReason = candidate.get("finishReason")
       ?.takeIf { it.isJsonPrimitive }
@@ -207,8 +221,9 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
         reasoning.append(content)
         send(ChatStreamEvent.ReasoningDelta(content))
       } else {
-        text.append(content)
-        send(ChatStreamEvent.TextDelta(content))
+        val delta = newText(text, content) ?: return@forEach
+        text.append(delta)
+        send(ChatStreamEvent.TextDelta(delta))
       }
     }
 
@@ -236,6 +251,15 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
     thinkingConfig(request)?.let { generationConfig.add("thinkingConfig", it) }
     body.add("generationConfig", generationConfig)
 
+    val tools = JsonArray()
+    val builtInSearch = request.builtInSearch &&
+        (request.tools.isEmpty() || supportsToolCombination(request.model))
+    if (builtInSearch) {
+      val search = JsonObject()
+      search.add(GOOGLE_SEARCH, JsonObject())
+      tools.add(search)
+    }
+
     if (request.tools.isNotEmpty()) {
       val declarations = JsonArray()
       request.tools.forEach { spec ->
@@ -249,13 +273,42 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
 
       val tool = JsonObject()
       tool.add("functionDeclarations", declarations)
-
-      val tools = JsonArray()
       tools.add(tool)
+    }
+
+    if (tools.size() > 0) {
       body.add("tools", tools)
     }
 
+    if (builtInSearch && request.tools.isNotEmpty()) {
+      val toolConfig = JsonObject()
+      toolConfig.addProperty("includeServerSideToolInvocations", true)
+      body.add("toolConfig", toolConfig)
+    }
+
     return body
+  }
+
+  private fun newText(text: StringBuilder, content: String): String? {
+    if (text.isEmpty() || content.length < MIN_SNAPSHOT_CHARS) {
+      return content
+    }
+
+    val accumulated = text.toString()
+    if (content == accumulated) {
+      return null
+    }
+
+    if (content.startsWith(accumulated)) {
+      return content.substring(accumulated.length).takeIf { it.isNotEmpty() }
+    }
+
+    if (accumulated.startsWith(content)) {
+      text.setLength(content.length)
+      return null
+    }
+
+    return content
   }
 
   private fun thinkingConfig(request: ChatRequest): JsonObject? {
@@ -280,6 +333,13 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
     val major = MODEL_VERSION.find(id)?.groupValues?.getOrNull(1)?.toIntOrNull()
       ?: return LATEST_ALIAS.containsMatchIn(id)
     return major >= THINKING_LEVEL_MIN_VERSION
+  }
+
+  private fun supportsToolCombination(model: String): Boolean {
+    val id = model.substringAfterLast('/').lowercase()
+    val major = MODEL_VERSION.find(id)?.groupValues?.getOrNull(1)?.toIntOrNull()
+      ?: return LATEST_ALIAS.containsMatchIn(id)
+    return major >= TOOL_COMBINATION_MIN_VERSION
   }
 
   private fun budgetOf(level: ThinkingLevel): Int = when (level) {
@@ -404,17 +464,57 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
   private fun JsonObject.intOrZero(name: String): Int =
     get(name)?.takeIf { it.isJsonPrimitive }?.asInt ?: 0
 
+  private class GroundingCollector {
+
+    private val queries = LinkedHashSet<String>()
+    private val sources = LinkedHashMap<String, GroundingSource>()
+
+    val isNotEmpty: Boolean
+      get() = queries.isNotEmpty() || sources.isNotEmpty()
+
+    fun merge(metadata: JsonObject) {
+      metadata.getAsJsonArray("webSearchQueries")?.forEach { element ->
+        element.takeIf { it.isJsonPrimitive }
+          ?.asString
+          ?.takeIf { it.isNotBlank() }
+          ?.let { queries += it }
+      }
+
+      metadata.getAsJsonArray("groundingChunks")?.forEach { element ->
+        val web = element.takeIf { it.isJsonObject }
+          ?.asJsonObject
+          ?.getAsJsonObject("web")
+          ?: return@forEach
+
+        val url = web.get("uri")?.takeIf { it.isJsonPrimitive }?.asString.orEmpty()
+        if (url.isBlank()) {
+          return@forEach
+        }
+
+        val title = web.get("title")?.takeIf { it.isJsonPrimitive }?.asString.orEmpty()
+        sources.putIfAbsent(url, GroundingSource(title.ifBlank { url }, url))
+      }
+    }
+
+    fun queries(): List<String> = queries.toList()
+
+    fun sources(): List<GroundingSource> = sources.values.toList()
+  }
+
   companion object {
 
     const val DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
     const val DEFAULT_MODEL = "gemini-3.7-flash"
 
     private const val DONE = "[DONE]"
+    private const val GOOGLE_SEARCH = "googleSearch"
+    private const val MIN_SNAPSHOT_CHARS = 16
 
     private const val ROLE_USER = "user"
     private const val ROLE_MODEL = "model"
 
     private const val THINKING_LEVEL_MIN_VERSION = 3
+    private const val TOOL_COMBINATION_MIN_VERSION = 3
     private const val LOW_THINKING_BUDGET = 4096
     private const val MEDIUM_THINKING_BUDGET = 8192
     private const val HIGH_THINKING_BUDGET = 16384

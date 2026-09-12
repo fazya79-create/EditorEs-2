@@ -17,6 +17,12 @@
 
 package com.itsaky.androidide.ai.provider
 
+enum class ContextWindowSource {
+  UNKNOWN,
+  DETECTED,
+  MANUAL
+}
+
 object ContextWindows {
 
   private val KNOWN = listOf(

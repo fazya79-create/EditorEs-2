@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.itsaky.androidide.ai.databinding.LayoutAiInterruptedBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiMessageBinding
+import com.itsaky.androidide.ai.databinding.LayoutAiSourcesBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiThinkingBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiToolCallBinding
 import com.itsaky.androidide.ai.tools.RunShellTool
@@ -40,6 +41,7 @@ class AiChatAdapter(
     is ChatEntry.Tool -> TYPE_TOOL
     is ChatEntry.Thinking -> TYPE_THINKING
     is ChatEntry.Interrupted -> TYPE_INTERRUPTED
+    is ChatEntry.Sources -> TYPE_SOURCES
     else -> TYPE_MESSAGE
   }
 
@@ -61,6 +63,11 @@ class AiChatAdapter(
         onRetry
       )
 
+      TYPE_SOURCES -> SourcesViewHolder(
+        LayoutAiSourcesBinding.inflate(inflater, parent, false),
+        onToggleExpanded
+      )
+
       else -> MessageViewHolder(LayoutAiMessageBinding.inflate(inflater, parent, false))
     }
   }
@@ -70,7 +77,41 @@ class AiChatAdapter(
       is ChatEntry.Tool -> (holder as ToolViewHolder).bind(entry)
       is ChatEntry.Thinking -> (holder as ThinkingViewHolder).bind(entry)
       is ChatEntry.Interrupted -> (holder as InterruptedViewHolder).bind(entry)
+      is ChatEntry.Sources -> (holder as SourcesViewHolder).bind(entry)
       else -> (holder as MessageViewHolder).bind(entry)
+    }
+  }
+
+  class SourcesViewHolder(
+    private val binding: LayoutAiSourcesBinding,
+    private val onToggleExpanded: (Long) -> Unit
+  ) : RecyclerView.ViewHolder(binding.root) {
+
+    fun bind(entry: ChatEntry.Sources) {
+      val context = binding.root.context
+      binding.title.text = context.getString(
+        R.string.msg_ai_builtin_search_sources,
+        entry.sources.size
+      )
+      binding.chevron.text = if (entry.expanded) CHEVRON_UP else CHEVRON_DOWN
+      binding.details.visibility = if (entry.expanded) View.VISIBLE else View.GONE
+
+      if (entry.expanded) {
+        val hasQueries = entry.queries.isNotEmpty()
+        binding.queries.visibility = if (hasQueries) View.VISIBLE else View.GONE
+        if (hasQueries) {
+          binding.queries.text = context.getString(
+            R.string.msg_ai_builtin_search_queries,
+            entry.queries.joinToString(", ")
+          )
+        }
+
+        binding.sources.text = entry.sources
+          .mapIndexed { index, source -> "${index + 1}. ${source.title}\n   ${source.url}" }
+          .joinToString("\n")
+      }
+
+      binding.header.setOnClickListener { onToggleExpanded(entry.id) }
     }
   }
 
@@ -132,6 +173,12 @@ class AiChatAdapter(
 
             NoticeKind.COMPACTION_FAILED ->
               context.getString(R.string.msg_ai_context_compaction_failed)
+
+            NoticeKind.SEARCH_KEY_MISSING ->
+              context.getString(R.string.msg_ai_search_key_missing)
+
+            NoticeKind.BUILT_IN_SEARCH_UNSUPPORTED ->
+              context.getString(R.string.msg_ai_builtin_search_unsupported)
           }
           binding.root.setCardBackgroundColor(
             context.resolveAttr(com.google.android.material.R.attr.colorSurfaceContainerLow)
@@ -234,6 +281,7 @@ class AiChatAdapter(
     private const val TYPE_TOOL = 1
     private const val TYPE_THINKING = 2
     private const val TYPE_INTERRUPTED = 3
+    private const val TYPE_SOURCES = 4
 
     private const val ELLIPSIS = "\u2026"
     private const val CHEVRON_DOWN = "\u2304"

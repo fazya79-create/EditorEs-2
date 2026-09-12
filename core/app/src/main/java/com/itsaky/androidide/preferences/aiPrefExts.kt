@@ -32,6 +32,7 @@ import com.itsaky.androidide.adapters.AiModelAdapter
 import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.prefs.AiPreferences
 import com.itsaky.androidide.ai.prefs.SecretStore
+import com.itsaky.androidide.ai.provider.ContextWindowSource
 import com.itsaky.androidide.ai.provider.ModelCatalog
 import com.itsaky.androidide.ai.provider.ModelFilter
 import com.itsaky.androidide.ai.provider.ModelInfo
@@ -150,9 +151,40 @@ private class AiSearchGroup(
 ) : IPreferenceGroup() {
 
   init {
+    if (AiPreferences.supportsBuiltInSearch(AiPreferences.providerKind())) {
+      addPreference(AiBuiltInSearchPreference())
+    }
     addPreference(AiSearchProviderPreference())
     addPreference(AiSearchApiKeyPreference())
     addPreference(AiSearchResultLimitPreference())
+  }
+}
+
+@Parcelize
+private class AiBuiltInSearchPreference(
+  override val key: String = AiPreferences.GOOGLE_BUILT_IN_SEARCH,
+  override val title: Int = string.idepref_ai_builtin_search,
+) : SwitchPreference(
+  setValue = { AiPreferences.googleBuiltInSearch = it },
+  getValue = { AiPreferences.googleBuiltInSearch }
+) {
+
+  override fun onCreatePreference(context: Context): Preference {
+    return super.onCreatePreference(context).also { updateSummary(it) }
+  }
+
+  override fun onPreferenceChanged(preference: Preference, newValue: Any?): Boolean {
+    return super.onPreferenceChanged(preference, newValue).also { updateSummary(preference) }
+  }
+
+  private fun updateSummary(preference: Preference) {
+    preference.summary = preference.context.getString(
+      if (AiPreferences.googleBuiltInSearch) {
+        string.idepref_ai_builtin_search_on
+      } else {
+        string.idepref_ai_builtin_search_off
+      }
+    )
   }
 }
 
@@ -363,6 +395,38 @@ private abstract class ModelPreference : SimplePreference() {
       flashSuccess(
         preference.context.getString(string.msg_ai_context_window_detected, model.id, window)
       )
+      return
+    }
+
+    val context = preference.context
+    CoroutineScope(SupervisorJob() + Dispatchers.Main).launch {
+      val config = AiPreferences.providerConfig(context.applicationContext, providerKind)
+      val detailed = runCatching { ModelCatalog.detectContextWindow(config, model.id) }
+        .getOrDefault(0)
+
+      if (AiPreferences.modelOf(providerKind) != model.id) {
+        return@launch
+      }
+
+      val resolved = AiPreferences.applyModelContextWindow(
+        kind = providerKind,
+        model = model.id,
+        reported = detailed
+      )
+
+      if (resolved > 0) {
+        flashSuccess(
+          context.getString(string.msg_ai_context_window_detected, model.id, resolved)
+        )
+      } else {
+        flashError(
+          context.getString(
+            string.msg_ai_context_window_unknown,
+            model.id,
+            AiPreferences.contextWindowOf(providerKind)
+          )
+        )
+      }
     }
   }
 
@@ -727,10 +791,20 @@ private class AiContextWindowPreference(
 
   override fun isValid(value: Int): Boolean = value >= 1000
 
-  override fun summaryOf(context: Context): String = context.getString(
-    string.idepref_ai_context_window_current,
-    AiPreferences.contextWindowOf(AiPreferences.providerKind())
-  )
+  override fun summaryOf(context: Context): String {
+    val kind = AiPreferences.providerKind()
+    val tokens = AiPreferences.contextWindowOf(kind)
+    return when (AiPreferences.contextWindowSourceOf(kind)) {
+      ContextWindowSource.UNKNOWN ->
+        context.getString(string.idepref_ai_context_window_unknown, tokens)
+
+      ContextWindowSource.MANUAL ->
+        context.getString(string.idepref_ai_context_window_manual, tokens)
+
+      ContextWindowSource.DETECTED ->
+        context.getString(string.idepref_ai_context_window_current, tokens)
+    }
+  }
 }
 
 @Parcelize

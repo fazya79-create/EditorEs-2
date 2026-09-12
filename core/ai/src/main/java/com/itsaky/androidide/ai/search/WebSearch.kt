@@ -32,6 +32,11 @@ enum class SearchProviderKind {
     }
 }
 
+enum class SearchMode {
+  THIRD_PARTY,
+  BUILT_IN
+}
+
 data class SearchResultItem(
   val title: String,
   val url: String,

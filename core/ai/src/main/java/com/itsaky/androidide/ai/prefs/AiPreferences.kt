@@ -20,11 +20,13 @@ package com.itsaky.androidide.ai.prefs
 import android.content.Context
 import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.provider.AnthropicProvider
+import com.itsaky.androidide.ai.provider.ContextWindowSource
 import com.itsaky.androidide.ai.provider.ContextWindows
 import com.itsaky.androidide.ai.provider.GoogleProvider
 import com.itsaky.androidide.ai.provider.OpenAiProvider
 import com.itsaky.androidide.ai.provider.ProviderConfig
 import com.itsaky.androidide.ai.provider.ProviderKind
+import com.itsaky.androidide.ai.search.SearchMode
 import com.itsaky.androidide.ai.search.SearchProviderKind
 import com.itsaky.androidide.preferences.internal.prefManager
 
@@ -52,6 +54,13 @@ object AiPreferences {
   const val PROMPT_CACHING = "ide.ai.promptCaching"
   const val SEARCH_PROVIDER = "ide.ai.search.provider"
   const val SEARCH_RESULT_LIMIT = "ide.ai.search.resultLimit"
+  const val GOOGLE_BUILT_IN_SEARCH = "ide.ai.google.builtInSearch"
+  const val OPENAI_CONTEXT_WINDOW_MODEL = "ide.ai.openai.contextWindow.model"
+  const val ANTHROPIC_CONTEXT_WINDOW_MODEL = "ide.ai.anthropic.contextWindow.model"
+  const val GOOGLE_CONTEXT_WINDOW_MODEL = "ide.ai.google.contextWindow.model"
+  const val OPENAI_CONTEXT_WINDOW_DETECTED = "ide.ai.openai.contextWindow.detected"
+  const val ANTHROPIC_CONTEXT_WINDOW_DETECTED = "ide.ai.anthropic.contextWindow.detected"
+  const val GOOGLE_CONTEXT_WINDOW_DETECTED = "ide.ai.google.contextWindow.detected"
 
   const val SECRET_OPENAI_KEY = "openai.apiKey"
   const val SECRET_ANTHROPIC_KEY = "anthropic.apiKey"
@@ -168,6 +177,28 @@ object AiPreferences {
       prefManager.putInt(SEARCH_RESULT_LIMIT, value)
     }
 
+  var googleBuiltInSearch: Boolean
+    get() = prefManager.getBoolean(GOOGLE_BUILT_IN_SEARCH, false)
+    set(value) {
+      prefManager.putBoolean(GOOGLE_BUILT_IN_SEARCH, value)
+    }
+
+  fun searchMode(): SearchMode = searchModeOf(providerKind())
+
+  fun searchModeOf(kind: ProviderKind): SearchMode =
+    if (kind == ProviderKind.GOOGLE && googleBuiltInSearch) {
+      SearchMode.BUILT_IN
+    } else {
+      SearchMode.THIRD_PARTY
+    }
+
+  fun supportsBuiltInSearch(kind: ProviderKind): Boolean = kind == ProviderKind.GOOGLE
+
+  fun hasSearchApiKey(context: Context): Boolean {
+    val key = searchApiKeyPrefKey(searchProviderKind())
+    return SecretStore(context.applicationContext).get(key).isNotBlank()
+  }
+
   fun searchProviderKind(): SearchProviderKind =
     SearchProviderKind.entries.getOrElse(searchProviderIndex) { SearchProviderKind.TAVILY }
 
@@ -184,17 +215,63 @@ object AiPreferences {
     ProviderKind.GOOGLE -> GOOGLE_CONTEXT_WINDOW
   }
 
+  fun contextWindowModelPrefKey(kind: ProviderKind): String = when (kind) {
+    ProviderKind.ANTHROPIC -> ANTHROPIC_CONTEXT_WINDOW_MODEL
+    ProviderKind.OPENAI -> OPENAI_CONTEXT_WINDOW_MODEL
+    ProviderKind.GOOGLE -> GOOGLE_CONTEXT_WINDOW_MODEL
+  }
+
+  fun contextWindowSourcePrefKey(kind: ProviderKind): String = when (kind) {
+    ProviderKind.ANTHROPIC -> ANTHROPIC_CONTEXT_WINDOW_DETECTED
+    ProviderKind.OPENAI -> OPENAI_CONTEXT_WINDOW_DETECTED
+    ProviderKind.GOOGLE -> GOOGLE_CONTEXT_WINDOW_DETECTED
+  }
+
   fun contextWindowOf(kind: ProviderKind): Int =
     prefManager.getInt(contextWindowPrefKey(kind), DEFAULT_CONTEXT_WINDOW)
 
-  fun setContextWindowOf(kind: ProviderKind, tokens: Int) {
+  fun setContextWindowOf(
+    kind: ProviderKind,
+    tokens: Int,
+    source: ContextWindowSource = ContextWindowSource.MANUAL
+  ) {
     prefManager.putInt(contextWindowPrefKey(kind), tokens)
+    recordContextWindowSource(kind, modelOf(kind), source)
+  }
+
+  fun contextWindowSourceOf(kind: ProviderKind): ContextWindowSource {
+    val model = modelOf(kind)
+    val recordedFor = prefManager.getString(contextWindowModelPrefKey(kind), "")
+    if (recordedFor.isBlank() || recordedFor != model) {
+      return if (ContextWindows.of(kind, model) > 0) {
+        ContextWindowSource.DETECTED
+      } else {
+        ContextWindowSource.UNKNOWN
+      }
+    }
+    val stored = prefManager.getInt(
+      contextWindowSourcePrefKey(kind),
+      ContextWindowSource.UNKNOWN.ordinal
+    )
+    return ContextWindowSource.entries.getOrElse(stored) { ContextWindowSource.UNKNOWN }
+  }
+
+  private fun recordContextWindowSource(
+    kind: ProviderKind,
+    model: String,
+    source: ContextWindowSource
+  ) {
+    prefManager.putString(contextWindowModelPrefKey(kind), model)
+    prefManager.putInt(contextWindowSourcePrefKey(kind), source.ordinal)
   }
 
   fun applyModelContextWindow(kind: ProviderKind, model: String, reported: Int): Int {
     val window = reported.takeIf { it > 0 } ?: ContextWindows.of(kind, model)
     if (window > 0) {
-      setContextWindowOf(kind, window)
+      prefManager.putInt(contextWindowPrefKey(kind), window)
+      recordContextWindowSource(kind, model, ContextWindowSource.DETECTED)
+    } else {
+      recordContextWindowSource(kind, model, ContextWindowSource.UNKNOWN)
     }
     return window
   }

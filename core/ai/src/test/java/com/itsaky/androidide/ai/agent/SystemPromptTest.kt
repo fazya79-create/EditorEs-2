@@ -30,4 +30,21 @@ class SystemPromptTest {
     assertThat(prompt).contains("anti-cheat, integrity, and abuse-prevention")
     assertThat(prompt).contains("Do not provide instructions or code to bypass, evade, disable")
   }
+
+  @Test
+  fun `an unavailable search tool is announced instead of offered`() {
+    val prompt = SystemPrompt.build(SearchAvailability.UNAVAILABLE)
+
+    assertThat(prompt).contains("no web search tool in this conversation")
+    assertThat(prompt).contains("Never claim to have searched the web")
+    assertThat(prompt).doesNotContain("Use web_search when you need information")
+  }
+
+  @Test
+  fun `built in grounding replaces the third party search instructions`() {
+    val prompt = SystemPrompt.build(SearchAvailability.BUILT_IN)
+
+    assertThat(prompt).contains("Google Search grounding is enabled")
+    assertThat(prompt).doesNotContain("Use web_search when you need information")
+  }
 }

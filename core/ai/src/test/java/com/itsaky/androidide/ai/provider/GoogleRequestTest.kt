@@ -125,6 +125,61 @@ class GoogleRequestTest {
   }
 
   @Test
+  fun `built in search is declared as a googleSearch tool alongside functions`() {
+    val body = buildBody(
+      provider("gemini-3-pro-preview"),
+      defaultRequest("gemini-3-pro-preview").copy(builtInSearch = true)
+    )
+
+    val tools = body.getAsJsonArray("tools")
+    assertThat(tools.size()).isEqualTo(2)
+    assertThat(tools[0].asJsonObject.getAsJsonObject("googleSearch").size()).isEqualTo(0)
+    assertThat(tools[1].asJsonObject.has("functionDeclarations")).isTrue()
+    assertThat(
+      body.getAsJsonObject("toolConfig").get("includeServerSideToolInvocations").asBoolean
+    ).isTrue()
+  }
+
+  @Test
+  fun `models without tool combination support drop the built in search tool`() {
+    val body = buildBody(provider(), defaultRequest().copy(builtInSearch = true))
+
+    val tools = body.getAsJsonArray("tools")
+    assertThat(tools.size()).isEqualTo(1)
+    assertThat(tools[0].asJsonObject.has("functionDeclarations")).isTrue()
+    assertThat(body.has("toolConfig")).isFalse()
+  }
+
+  @Test
+  fun `built in search alone is sent even to models without tool combination`() {
+    val body = buildBody(
+      provider(),
+      defaultRequest().copy(tools = emptyList(), builtInSearch = true)
+    )
+
+    val tools = body.getAsJsonArray("tools")
+    assertThat(tools.size()).isEqualTo(1)
+    assertThat(tools[0].asJsonObject.has("googleSearch")).isTrue()
+    assertThat(body.has("toolConfig")).isFalse()
+  }
+
+  @Test
+  fun `the googleSearch tool is absent when built in search is off`() {
+    val body = buildBody(provider(), defaultRequest())
+
+    val tools = body.getAsJsonArray("tools")
+    assertThat(tools.size()).isEqualTo(1)
+    assertThat(tools[0].asJsonObject.has("functionDeclarations")).isTrue()
+    assertThat(body.has("toolConfig")).isFalse()
+  }
+
+  @Test
+  fun `a request with no tools at all omits the tools array`() {
+    val body = buildBody(provider(), defaultRequest().copy(tools = emptyList()))
+    assertThat(body.has("tools")).isFalse()
+  }
+
+  @Test
   fun `google omits thinkingConfig when thinking is off`() {
     val body = buildBody(provider(), defaultRequest())
     assertThat(body.getAsJsonObject("generationConfig").has("thinkingConfig")).isFalse()

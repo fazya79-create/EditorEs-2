@@ -17,7 +17,10 @@
 
 package com.itsaky.androidide.ai.tools
 
+import android.content.Context
 import com.itsaky.androidide.ai.model.ToolSpec
+import com.itsaky.androidide.ai.prefs.AiPreferences
+import com.itsaky.androidide.ai.search.SearchMode
 
 object ToolRegistry {
 
@@ -30,7 +33,20 @@ object ToolRegistry {
     WebFetchTool()
   ).associateBy { it.spec.name }
 
+  private val searchToolNames = setOf(WebSearchTool.NAME, WebFetchTool.NAME)
+
   fun specs(): List<ToolSpec> = tools.values.map { it.spec }
+
+  fun specs(context: Context): List<ToolSpec> {
+    if (searchToolsAvailable(context)) {
+      return specs()
+    }
+    return tools.values.filterNot { it.spec.name in searchToolNames }.map { it.spec }
+  }
+
+  fun searchToolsAvailable(context: Context): Boolean =
+    AiPreferences.searchMode() == SearchMode.THIRD_PARTY &&
+        AiPreferences.hasSearchApiKey(context)
 
   fun find(name: String): AiTool? = tools[name]
 }

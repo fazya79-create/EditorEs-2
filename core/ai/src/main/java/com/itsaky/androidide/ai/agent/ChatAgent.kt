@@ -20,11 +20,13 @@ package com.itsaky.androidide.ai.agent
 import com.itsaky.androidide.ai.model.ChatMessage
 import com.itsaky.androidide.ai.model.ChatRequest
 import com.itsaky.androidide.ai.model.ChatStreamEvent
+import com.itsaky.androidide.ai.model.GroundingSource
 import com.itsaky.androidide.ai.model.StopReason
 import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.model.TokenUsage
 import com.itsaky.androidide.ai.model.ToolCall
 import com.itsaky.androidide.ai.model.ToolResult
+import com.itsaky.androidide.ai.model.ToolSpec
 import com.itsaky.androidide.ai.provider.LlmProvider
 import com.itsaky.androidide.ai.tools.ToolGate
 import com.itsaky.androidide.ai.tools.ToolRegistry
@@ -56,6 +58,11 @@ sealed interface AgentEvent {
 
   data class UsageUpdated(val usage: TokenUsage, val contextWindow: Int) : AgentEvent
 
+  data class Grounded(
+    val queries: List<String>,
+    val sources: List<GroundingSource>
+  ) : AgentEvent
+
   data object TurnCompleted : AgentEvent
 }
 
@@ -67,7 +74,9 @@ class ChatAgent(
   private val thinkingLevel: ThinkingLevel = ThinkingLevel.OFF,
   private val maxToolRounds: Int = DEFAULT_MAX_TOOL_ROUNDS,
   private val contextWindow: Int = 0,
-  private val compactThresholdPercent: Int = 0
+  private val compactThresholdPercent: Int = 0,
+  private val tools: List<ToolSpec> = ToolRegistry.specs(),
+  private val builtInSearch: Boolean = false
 ) {
 
   fun run(history: List<ChatMessage>): Flow<AgentEvent> = flow {
@@ -78,9 +87,10 @@ class ChatAgent(
       val request = ChatRequest(
         model = model,
         messages = messages.toList(),
-        tools = ToolRegistry.specs(),
+        tools = tools,
         systemPrompt = systemPrompt,
-        thinkingLevel = thinkingLevel
+        thinkingLevel = thinkingLevel,
+        builtInSearch = builtInSearch
       )
 
       var completed: ChatMessage? = null
@@ -94,6 +104,9 @@ class ChatAgent(
           is ChatStreamEvent.TextDelta -> emit(AgentEvent.TextDelta(event.text))
 
           is ChatStreamEvent.ReasoningDelta -> emit(AgentEvent.ReasoningDelta(event.text))
+
+          is ChatStreamEvent.Grounded ->
+            emit(AgentEvent.Grounded(event.queries, event.sources))
 
           is ChatStreamEvent.Completed -> {
             completed = event.message

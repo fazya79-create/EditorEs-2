@@ -102,9 +102,16 @@ data class TokenUsage(
     get() = inputTokens == 0 && outputTokens == 0
 }
 
+data class GroundingSource(val title: String, val url: String)
+
 sealed interface ChatStreamEvent {
 
   data class TextDelta(val text: String) : ChatStreamEvent
+
+  data class Grounded(
+    val queries: List<String>,
+    val sources: List<GroundingSource>
+  ) : ChatStreamEvent
 
   data class ReasoningDelta(val text: String) : ChatStreamEvent
 
@@ -146,5 +153,6 @@ data class ChatRequest(
   val tools: List<ToolSpec> = emptyList(),
   val systemPrompt: String? = null,
   val maxTokens: Int = 4096,
-  val thinkingLevel: ThinkingLevel = ThinkingLevel.OFF
+  val thinkingLevel: ThinkingLevel = ThinkingLevel.OFF,
+  val builtInSearch: Boolean = false
 )

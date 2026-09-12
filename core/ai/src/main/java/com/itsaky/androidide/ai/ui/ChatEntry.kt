@@ -17,6 +17,7 @@
 
 package com.itsaky.androidide.ai.ui
 
+import com.itsaky.androidide.ai.model.GroundingSource
 import com.itsaky.androidide.ai.model.ToolCall
 
 enum class ToolEntryState {
@@ -63,11 +64,20 @@ sealed interface ChatEntry {
     val kind: NoticeKind,
     val count: Int = 0
   ) : ChatEntry
+
+  data class Sources(
+    override val id: Long,
+    val queries: List<String>,
+    val sources: List<GroundingSource>,
+    val expanded: Boolean = false
+  ) : ChatEntry
 }
 
 enum class NoticeKind {
   COMPACTED,
-  COMPACTION_FAILED
+  COMPACTION_FAILED,
+  SEARCH_KEY_MISSING,
+  BUILT_IN_SEARCH_UNSUPPORTED
 }
 
 data class ContextUsage(val used: Int, val window: Int, val cached: Int = 0) {

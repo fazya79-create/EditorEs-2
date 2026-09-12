@@ -19,9 +19,15 @@ package com.itsaky.androidide.ai.agent
 
 import com.itsaky.androidide.projects.IProjectManager
 
+enum class SearchAvailability {
+  THIRD_PARTY,
+  BUILT_IN,
+  UNAVAILABLE
+}
+
 object SystemPrompt {
 
-  fun build(): String {
+  fun build(searchAvailability: SearchAvailability = SearchAvailability.THIRD_PARTY): String {
     val projectDir = runCatching { IProjectManager.getInstance().projectDirPath }
       .getOrNull()
       .orEmpty()
@@ -39,9 +45,27 @@ object SystemPrompt {
       append("- Prefer edit_file for small changes and write_file for new or fully rewritten files.\n")
       append("- Use run_shell for build, test and inspection commands. It is non-interactive, so ")
       append("never run commands that wait for input.\n")
-      append("- Use web_search when you need information that is newer than your training data ")
-      append("or that the project does not contain, and cite the URLs you relied on. Follow up ")
-      append("with web_fetch when a result's snippet is not enough to answer.\n")
+      when (searchAvailability) {
+        SearchAvailability.THIRD_PARTY -> {
+          append("- Use web_search when you need information that is newer than your training ")
+          append("data or that the project does not contain, and cite the URLs you relied on. ")
+          append("Follow up with web_fetch when a result's snippet is not enough to answer.\n")
+        }
+
+        SearchAvailability.BUILT_IN -> {
+          append("- Google Search grounding is enabled for you. Use it when you need information ")
+          append("that is newer than your training data or that the project does not contain, ")
+          append("and cite the sources you relied on. No separate search tool is available.\n")
+        }
+
+        SearchAvailability.UNAVAILABLE -> {
+          append("- You have no web search tool in this conversation because the user has not ")
+          append("configured a search API key. Never claim to have searched the web. If a ")
+          append("question needs current information you do not have, say so plainly and tell ")
+          append("the user to add a search API key in Preferences > AI assistant > Web search, ")
+          append("or to enable Google's built-in search when using the Google provider.\n")
+        }
+      }
       append("- For authorized reverse-engineering or security work, investigate methodically: ")
       append("identify artifacts and versions, inspect evidence, document assumptions, and validate ")
       append("findings with reproducible tests.\n")

@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 
 data class ModelInfo(
   val id: String,
@@ -57,6 +58,34 @@ object ModelCatalog {
     }
 
     parse(config.kind, get(url, headers))
+  }
+
+  suspend fun detectContextWindow(
+    config: ProviderConfig,
+    model: String
+  ): Int = withContext(Dispatchers.IO) {
+    if (config.kind != ProviderKind.OPENAI || model.isBlank()) {
+      return@withContext 0
+    }
+
+    val base = config.baseUrl.trimEnd('/')
+    val encoded = URLEncoder.encode(model, Charsets.UTF_8.name())
+    val headers = mapOf("Authorization" to "Bearer ${config.apiKey}")
+
+    val body = runCatching { get("$base/models/$encoded", headers) }.getOrNull()
+      ?: return@withContext 0
+
+    val entry = runCatching { JsonParser.parseString(body).asJsonObject }.getOrNull()
+      ?: return@withContext 0
+
+    val direct = openAiContextWindow(entry)
+    if (direct > 0) {
+      return@withContext direct
+    }
+
+    entry.getAsJsonObject("data")
+      ?.let { openAiContextWindow(it) }
+      ?: 0
   }
 
   private fun get(url: String, headers: Map<String, String>): String {
@@ -124,11 +153,22 @@ object ModelCatalog {
 
   private fun openAiModel(entry: JsonObject): ModelInfo? {
     val id = entry.string("id") ?: return null
-    val window = OPENAI_CONTEXT_FIELDS.firstNotNullOfOrNull { field ->
-      entry.positiveInt(field).takeIf { it > 0 }
-    } ?: entry.getAsJsonObject("top_provider")?.positiveInt("context_length") ?: 0
+    return ModelInfo(id = id, contextWindow = openAiContextWindow(entry))
+  }
 
-    return ModelInfo(id = id, contextWindow = window)
+  internal fun openAiContextWindow(entry: JsonObject): Int {
+    OPENAI_CONTEXT_FIELDS.forEach { field ->
+      entry.positiveInt(field).takeIf { it > 0 }?.let { return it }
+    }
+
+    OPENAI_CONTEXT_CONTAINERS.forEach { container ->
+      val nested = entry.getAsJsonObject(container) ?: return@forEach
+      OPENAI_CONTEXT_FIELDS.forEach { field ->
+        nested.positiveInt(field).takeIf { it > 0 }?.let { return it }
+      }
+    }
+
+    return 0
   }
 
   private fun JsonObject.string(name: String): String? =
@@ -146,7 +186,25 @@ object ModelCatalog {
   private val OPENAI_CONTEXT_FIELDS = listOf(
     "context_window",
     "context_length",
+    "contextWindow",
+    "contextLength",
     "max_context_length",
-    "max_input_tokens"
+    "max_input_tokens",
+    "maxInputTokens",
+    "max_model_len",
+    "max_seq_len",
+    "n_ctx",
+    "num_ctx",
+    "truncation_length"
+  )
+
+  private val OPENAI_CONTEXT_CONTAINERS = listOf(
+    "top_provider",
+    "capabilities",
+    "model_info",
+    "modelInfo",
+    "limits",
+    "metadata",
+    "spec"
   )
 }
