@@ -376,6 +376,8 @@
   <string name="msg_ai_models_need_key">Add an API key first to list models</string>
   <string name="msg_ai_models_failed">Could not load models: %1$s</string>
   <string name="msg_ai_models_empty">The endpoint returned no models</string>
+  <string name="hint_ai_model_search">Search models</string>
+  <string name="msg_ai_models_no_match">No model matches this search.</string>
   <string name="msg_ai_thinking">Thinking</string>
   <string name="msg_ai_thinking_done">Thought process</string>
   <string name="msg_ai_show_details">Show details</string>

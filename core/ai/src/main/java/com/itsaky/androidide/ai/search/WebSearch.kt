@@ -19,12 +19,16 @@ package com.itsaky.androidide.ai.search
 
 enum class SearchProviderKind {
   TAVILY,
-  BRAVE;
+  FIRECRAWL,
+  SERPER,
+  EXA;
 
   val label: String
     get() = when (this) {
       TAVILY -> "Tavily"
-      BRAVE -> "Brave Search"
+      FIRECRAWL -> "Firecrawl"
+      SERPER -> "Serper"
+      EXA -> "Exa"
     }
 }
 
@@ -65,6 +69,8 @@ object WebSearchProviders {
 
   fun of(kind: SearchProviderKind): WebSearchProvider = when (kind) {
     SearchProviderKind.TAVILY -> TavilySearchProvider
-    SearchProviderKind.BRAVE -> BraveSearchProvider
+    SearchProviderKind.FIRECRAWL -> FirecrawlSearchProvider
+    SearchProviderKind.SERPER -> SerperSearchProvider
+    SearchProviderKind.EXA -> ExaSearchProvider
   }
 }

@@ -127,6 +127,16 @@ class WebSearchFormatTest {
   @Test
   fun `only providers that implement extraction advertise fetch support`() {
     assertThat(TavilySearchProvider.supportsFetch).isTrue()
-    assertThat(BraveSearchProvider.supportsFetch).isFalse()
+    assertThat(FirecrawlSearchProvider.supportsFetch).isTrue()
+    assertThat(ExaSearchProvider.supportsFetch).isTrue()
+    assertThat(SerperSearchProvider.supportsFetch).isFalse()
+  }
+
+  @Test
+  fun `every provider kind resolves to the implementation that declares it`() {
+    SearchProviderKind.entries.forEach { kind ->
+      assertThat(WebSearchProviders.of(kind).kind).isEqualTo(kind)
+      assertThat(kind.label).isNotEmpty()
+    }
   }
 }

@@ -93,7 +93,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     if (isBusy) {
       return
     }
-    val pending = snapshot()
+    val pending = snapshot()?.takeIf { it.info.id != deletedSessionId }
     if (pending != null) {
       viewModelScope.launch { withContext(Dispatchers.IO) { store.save(pending) } }
     }
@@ -132,14 +132,15 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   }
 
   fun deleteSession(id: String) {
+    // Mark before suspending: a save requested in between must not resurrect the session.
+    if (id == sessionId) {
+      deletedSessionId = id
+    }
+
     viewModelScope.launch {
       withContext(Dispatchers.IO) { store.delete(id) }
-      if (id == sessionId) {
-        if (isBusy) {
-          deletedSessionId = id
-        } else {
-          startNewSession()
-        }
+      if (id == sessionId && !isBusy) {
+        startNewSession()
       }
       refreshSessions()
     }

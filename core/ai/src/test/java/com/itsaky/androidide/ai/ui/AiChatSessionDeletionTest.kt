@@ -110,6 +110,21 @@ class AiChatSessionDeletionTest {
   }
 
   @Test
+  fun `starting a new chat right after a delete does not resurrect the deleted conversation`() {
+    val store = store()
+    val session = saveSession(store, "open conversation")
+    val viewModel = resumedViewModel(session)
+
+    // No idling in between: the delete coroutine has not run yet, so the session is still open.
+    viewModel.deleteSession(session.info.id)
+    viewModel.clear()
+    awaitUntil { store.load(session.info.id) != null }
+
+    assertThat(store.load(session.info.id)).isNull()
+    assertThat(store.list().map { it.id }).doesNotContain(session.info.id)
+  }
+
+  @Test
   fun `deleting a different conversation leaves the open one untouched`() {
     val store = store()
     val open = saveSession(store, "open conversation")

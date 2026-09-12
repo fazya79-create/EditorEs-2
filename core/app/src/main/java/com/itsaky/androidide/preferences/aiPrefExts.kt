@@ -19,17 +19,25 @@ package com.itsaky.androidide.preferences
 
 import android.content.Context
 import android.text.InputType
+import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.preference.Preference
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.itsaky.androidide.adapters.AiModelAdapter
 import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.prefs.AiPreferences
 import com.itsaky.androidide.ai.prefs.SecretStore
 import com.itsaky.androidide.ai.provider.ModelCatalog
+import com.itsaky.androidide.ai.provider.ModelFilter
 import com.itsaky.androidide.ai.provider.ModelInfo
 import com.itsaky.androidide.ai.provider.ProviderKind
 import com.itsaky.androidide.ai.search.SearchProviderKind
+import com.itsaky.androidide.databinding.LayoutAiModelPickerBinding
 import com.itsaky.androidide.resources.R.string
 import com.itsaky.androidide.utils.DialogUtils
 import com.itsaky.androidide.utils.flashError
@@ -310,17 +318,32 @@ private abstract class ModelPreference : SimplePreference() {
 
   private fun showPicker(preference: Preference, models: List<ModelInfo>) {
     val context = preference.context
-    val current = AiPreferences.modelOf(providerKind)
-    val labels = models.map { it.id }.toTypedArray<CharSequence>()
+    val binding = LayoutAiModelPickerBinding.inflate(LayoutInflater.from(context))
 
-    DialogUtils.newMaterialDialogBuilder(context)
+    lateinit var dialog: AlertDialog
+    val adapter = AiModelAdapter { model ->
+      selectModel(preference, model)
+      dialog.dismiss()
+    }.apply { selectedModel = AiPreferences.modelOf(providerKind) }
+
+    binding.models.layoutManager = LinearLayoutManager(context)
+    binding.models.adapter = adapter
+
+    fun applyQuery(query: String) {
+      val matches = ModelFilter.filter(models, query)
+      adapter.submitList(matches)
+      binding.models.isVisible = matches.isNotEmpty()
+      binding.modelsEmpty.isVisible = matches.isEmpty()
+    }
+
+    applyQuery("")
+    binding.searchInput.doAfterTextChanged { text -> applyQuery(text?.toString().orEmpty()) }
+
+    dialog = DialogUtils.newMaterialDialogBuilder(context)
       .setTitle(title)
-      .setSingleChoiceItems(labels, models.indexOfFirst { it.id == current }) { dialog, which ->
-        selectModel(preference, models[which])
-        dialog.dismiss()
-      }
-      .setNeutralButton(string.idepref_ai_model_manual) { dialog, _ ->
-        dialog.dismiss()
+      .setView(binding.root)
+      .setNeutralButton(string.idepref_ai_model_manual) { current, _ ->
+        current.dismiss()
         showManualEntry(preference)
       }
       .setNegativeButton(android.R.string.cancel, null)

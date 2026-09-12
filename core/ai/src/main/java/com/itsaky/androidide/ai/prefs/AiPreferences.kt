@@ -57,7 +57,9 @@ object AiPreferences {
   const val SECRET_ANTHROPIC_KEY = "anthropic.apiKey"
   const val SECRET_GOOGLE_KEY = "google.apiKey"
   const val SECRET_TAVILY_KEY = "tavily.apiKey"
-  const val SECRET_BRAVE_KEY = "brave.apiKey"
+  const val SECRET_FIRECRAWL_KEY = "firecrawl.apiKey"
+  const val SECRET_SERPER_KEY = "serper.apiKey"
+  const val SECRET_EXA_KEY = "exa.apiKey"
 
   const val PROVIDER_OPENAI = 0
   const val PROVIDER_ANTHROPIC = 1
@@ -171,7 +173,9 @@ object AiPreferences {
 
   fun searchApiKeyPrefKey(kind: SearchProviderKind): String = when (kind) {
     SearchProviderKind.TAVILY -> SECRET_TAVILY_KEY
-    SearchProviderKind.BRAVE -> SECRET_BRAVE_KEY
+    SearchProviderKind.FIRECRAWL -> SECRET_FIRECRAWL_KEY
+    SearchProviderKind.SERPER -> SECRET_SERPER_KEY
+    SearchProviderKind.EXA -> SECRET_EXA_KEY
   }
 
   fun contextWindowPrefKey(kind: ProviderKind): String = when (kind) {

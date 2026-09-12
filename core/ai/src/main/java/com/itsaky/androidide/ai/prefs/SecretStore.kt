@@ -33,6 +33,13 @@ class SecretStore(context: Context) {
   private val prefs =
     context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
+  init {
+    // Secrets of removed providers would otherwise linger in storage forever.
+    LEGACY_KEYS.filter { prefs.contains(it) }.forEach { key ->
+      prefs.edit().remove(key).apply()
+    }
+  }
+
   fun put(key: String, value: String) {
     if (value.isEmpty()) {
       remove(key)
@@ -122,5 +129,8 @@ class SecretStore(context: Context) {
     private const val KEY_SIZE = 256
     private const val IV_LENGTH = 12
     private const val TAG_LENGTH_BITS = 128
+
+    /** Secrets written by provider integrations that no longer exist. */
+    internal val LEGACY_KEYS = listOf("brave.apiKey")
   }
 }
