@@ -17,10 +17,13 @@
 
 package com.itsaky.androidide.ai.ui
 
+import android.content.Context
 import android.text.Spanned
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import io.noties.markwon.Markwon
+import io.noties.markwon.ext.tables.TableRowSpan
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -73,5 +76,66 @@ class MarkdownRendererTest {
   @Test
   fun `plain text is rendered unchanged`() {
     assertThat(render("just a sentence").toString().trim()).isEqualTo("just a sentence")
+  }
+
+  @Test
+  fun `gfm tables become table row spans instead of raw pipes`() {
+    val rendered = render(
+      """
+      | Name | Role |
+      |------|------|
+      | il2cpp | runtime wrapper |
+      | Tool | main UI |
+      """.trimIndent()
+    )
+
+    assertThat(rendered.toString()).doesNotContain("|")
+    assertThat(rendered.toString()).doesNotContain("---")
+
+    val rows = (rendered as Spanned)
+      .getSpans(0, rendered.length, TableRowSpan::class.java)
+    assertThat(rows).hasLength(3)
+  }
+
+  @Test
+  fun `tables are not left as literal pipe text`() {
+    val withoutTables = Markwon.builder(ApplicationProvider.getApplicationContext<Context>())
+      .build()
+      .toMarkdown("| Name | Role |\n|------|------|\n| Tool | main UI |")
+      .toString()
+
+    assertThat(withoutTables).contains("|")
+
+    val rendered = render("| Name | Role |\n|------|------|\n| Tool | main UI |").toString()
+    assertThat(rendered).doesNotContain("|")
+  }
+
+  @Test
+  fun `task lists are rendered without literal brackets`() {
+    val rendered = render("- [x] done\n- [ ] todo").toString()
+
+    assertThat(rendered).doesNotContain("[x]")
+    assertThat(rendered).doesNotContain("[ ]")
+    assertThat(rendered).contains("done")
+    assertThat(rendered).contains("todo")
+  }
+
+  @Test
+  fun `strikethrough markers are consumed`() {
+    val rendered = render("~~gone~~").toString()
+
+    assertThat(rendered).doesNotContain("~~")
+    assertThat(rendered).contains("gone")
+  }
+
+  @Test
+  fun `blockquotes and numbered lists keep their text`() {
+    val quote = render("> quoted line").toString()
+    assertThat(quote).contains("quoted line")
+    assertThat(quote).doesNotContain(">")
+
+    val ordered = render("1. first\n2. second").toString()
+    assertThat(ordered).contains("first")
+    assertThat(ordered).contains("second")
   }
 }

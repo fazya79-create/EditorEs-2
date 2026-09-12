@@ -39,6 +39,9 @@ common-javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 common-jsonrpc = { module = "org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc", version = "0.22.0" }
 common-markwon-core = { module = "io.noties.markwon:core", version.ref = "markwon" }
 common-markwon-extStrikethrough = { module = "io.noties.markwon:ext-strikethrough", version.ref = "markwon" }
+common-markwon-extTables = { module = "io.noties.markwon:ext-tables", version.ref = "markwon" }
+common-markwon-extTasklist = { module = "io.noties.markwon:ext-tasklist", version.ref = "markwon" }
+common-markwon-linkify = { module = "io.noties.markwon:linkify", version.ref = "markwon" }
 common-hiddenApiBypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version = "4.3" }
 common-shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
 common-shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizuku" }

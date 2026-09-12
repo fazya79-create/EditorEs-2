@@ -31,6 +31,9 @@ dependencies {
   implementation(libs.google.gson)
   implementation(libs.common.markwon.core)
   implementation(libs.common.markwon.extStrikethrough)
+  implementation(libs.common.markwon.extTables)
+  implementation(libs.common.markwon.extTasklist)
+  implementation(libs.common.markwon.linkify)
 
   implementation(libs.androidx.annotation)
   implementation(libs.androidx.constraintlayout)
