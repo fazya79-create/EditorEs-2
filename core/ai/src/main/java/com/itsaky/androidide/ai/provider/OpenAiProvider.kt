@@ -42,6 +42,7 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
 
   override fun stream(request: ChatRequest): Flow<ChatStreamEvent> = callbackFlow {
     val text = StringBuilder()
+    val reasoning = StringBuilder()
     val calls = sortedMapOf<Int, PartialCall>()
     var stopReason = StopReason.END_TURN
 
@@ -56,7 +57,7 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
           if (event.data == DONE) {
             break
           }
-          val reason = handleEvent(event, text, calls)
+          val reason = handleEvent(event, text, reasoning, calls)
           if (reason != null) {
             stopReason = reason
           }
@@ -84,7 +85,7 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
 
     send(
       ChatStreamEvent.Completed(
-        message = ChatMessage.assistant(text.toString(), toolCalls),
+        message = ChatMessage.assistant(text.toString(), toolCalls, reasoning.toString()),
         stopReason = stopReason
       )
     )
@@ -94,6 +95,7 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
   private suspend fun ProducerScope<ChatStreamEvent>.handleEvent(
     event: SseEvent,
     text: StringBuilder,
+    reasoning: StringBuilder,
     calls: MutableMap<Int, PartialCall>
   ): StopReason? {
     val chunk = runCatching { JsonParser.parseString(event.data).asJsonObject }.getOrNull()
@@ -129,6 +131,13 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
         text.append(content)
         send(ChatStreamEvent.TextDelta(content))
       }
+    }
+
+    REASONING_FIELDS.firstNotNullOfOrNull { field ->
+      delta.get(field)?.takeIf { it.isJsonPrimitive }?.asString?.takeIf { it.isNotEmpty() }
+    }?.let { content ->
+      reasoning.append(content)
+      send(ChatStreamEvent.ReasoningDelta(content))
     }
 
     delta.getAsJsonArray("tool_calls")?.forEach { element ->
@@ -167,6 +176,10 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
     body.addProperty("model", request.model)
     body.addProperty("stream", true)
     body.addProperty("max_tokens", request.maxTokens)
+
+    if (request.thinkingLevel.isEnabled) {
+      body.addProperty("reasoning_effort", request.thinkingLevel.wireValue)
+    }
 
     val messages = JsonArray()
     request.systemPrompt?.takeIf { it.isNotBlank() }?.let { prompt ->
@@ -253,5 +266,7 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
     const val DEFAULT_MODEL = "gpt-4o-mini"
 
     private const val DONE = "[DONE]"
+
+    private val REASONING_FIELDS = listOf("reasoning_content", "reasoning")
   }
 }

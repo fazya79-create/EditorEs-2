@@ -18,6 +18,7 @@
 package com.itsaky.androidide.ai.prefs
 
 import android.content.Context
+import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.provider.AnthropicProvider
 import com.itsaky.androidide.ai.provider.OpenAiProvider
 import com.itsaky.androidide.ai.provider.ProviderConfig
@@ -34,6 +35,8 @@ object AiPreferences {
   const val ANTHROPIC_MODEL = "ide.ai.anthropic.model"
   const val YOLO_MODE = "ide.ai.yoloMode"
   const val SHELL_TIMEOUT = "ide.ai.shellTimeoutSeconds"
+  const val OPENAI_THINKING = "ide.ai.openai.thinking"
+  const val ANTHROPIC_THINKING = "ide.ai.anthropic.thinking"
 
   const val SECRET_OPENAI_KEY = "openai.apiKey"
   const val SECRET_ANTHROPIC_KEY = "anthropic.apiKey"
@@ -94,13 +97,55 @@ object AiPreferences {
     else -> ProviderKind.OPENAI
   }
 
+  var thinkingLevel: ThinkingLevel
+    get() {
+      val key = thinkingPrefKey(providerKind())
+      val stored = prefManager.getInt(key, ThinkingLevel.OFF.ordinal)
+      return ThinkingLevel.entries.getOrElse(stored) { ThinkingLevel.OFF }
+    }
+    set(value) {
+      prefManager.putInt(thinkingPrefKey(providerKind()), value.ordinal)
+    }
+
+  fun thinkingPrefKey(kind: ProviderKind): String = when (kind) {
+    ProviderKind.ANTHROPIC -> ANTHROPIC_THINKING
+    ProviderKind.OPENAI -> OPENAI_THINKING
+  }
+
+  fun thinkingLevelOf(kind: ProviderKind): ThinkingLevel {
+    val stored = prefManager.getInt(thinkingPrefKey(kind), ThinkingLevel.OFF.ordinal)
+    return ThinkingLevel.entries.getOrElse(stored) { ThinkingLevel.OFF }
+  }
+
+  fun setThinkingLevelOf(kind: ProviderKind, level: ThinkingLevel) {
+    prefManager.putInt(thinkingPrefKey(kind), level.ordinal)
+  }
+
+  fun modelOf(kind: ProviderKind): String = when (kind) {
+    ProviderKind.ANTHROPIC -> anthropicModel
+    ProviderKind.OPENAI -> openAiModel
+  }
+
+  fun setModelOf(kind: ProviderKind, model: String) {
+    when (kind) {
+      ProviderKind.ANTHROPIC -> anthropicModel = model
+      ProviderKind.OPENAI -> openAiModel = model
+    }
+  }
+
+  fun baseUrlOf(kind: ProviderKind): String = when (kind) {
+    ProviderKind.ANTHROPIC -> anthropicBaseUrl
+    ProviderKind.OPENAI -> openAiBaseUrl
+  }
+
   fun apiKeyPrefKey(kind: ProviderKind): String = when (kind) {
     ProviderKind.ANTHROPIC -> SECRET_ANTHROPIC_KEY
     ProviderKind.OPENAI -> SECRET_OPENAI_KEY
   }
 
-  fun providerConfig(context: Context): ProviderConfig {
-    val kind = providerKind()
+  fun providerConfig(context: Context): ProviderConfig = providerConfig(context, providerKind())
+
+  fun providerConfig(context: Context, kind: ProviderKind): ProviderConfig {
     val apiKey = SecretStore(context).get(apiKeyPrefKey(kind))
     return when (kind) {
       ProviderKind.ANTHROPIC -> ProviderConfig(

@@ -40,6 +40,7 @@ data class ToolResult(
 data class ChatMessage(
   val role: ChatRole,
   val text: String = "",
+  val reasoning: String = "",
   val toolCalls: List<ToolCall> = emptyList(),
   val toolResults: List<ToolResult> = emptyList()
 ) {
@@ -56,8 +57,16 @@ data class ChatMessage(
     fun system(text: String) = ChatMessage(role = ChatRole.SYSTEM, text = text)
 
     @JvmStatic
-    fun assistant(text: String, toolCalls: List<ToolCall> = emptyList()) =
-      ChatMessage(role = ChatRole.ASSISTANT, text = text, toolCalls = toolCalls)
+    fun assistant(
+      text: String,
+      toolCalls: List<ToolCall> = emptyList(),
+      reasoning: String = ""
+    ) = ChatMessage(
+      role = ChatRole.ASSISTANT,
+      text = text,
+      reasoning = reasoning,
+      toolCalls = toolCalls
+    )
 
     @JvmStatic
     fun toolResults(results: List<ToolResult>) =
@@ -83,6 +92,8 @@ sealed interface ChatStreamEvent {
 
   data class TextDelta(val text: String) : ChatStreamEvent
 
+  data class ReasoningDelta(val text: String) : ChatStreamEvent
+
   data class ToolCallStarted(val index: Int, val id: String, val name: String) : ChatStreamEvent
 
   data class ToolCallArgumentsDelta(val index: Int, val json: String) : ChatStreamEvent
@@ -92,10 +103,24 @@ sealed interface ChatStreamEvent {
   data class Failed(val message: String, val cause: Throwable? = null) : ChatStreamEvent
 }
 
+enum class ThinkingLevel {
+  OFF,
+  LOW,
+  MEDIUM,
+  HIGH;
+
+  val isEnabled: Boolean
+    get() = this != OFF
+
+  val wireValue: String
+    get() = name.lowercase()
+}
+
 data class ChatRequest(
   val model: String,
   val messages: List<ChatMessage>,
   val tools: List<ToolSpec> = emptyList(),
   val systemPrompt: String? = null,
-  val maxTokens: Int = 4096
+  val maxTokens: Int = 4096,
+  val thinkingLevel: ThinkingLevel = ThinkingLevel.OFF
 )

@@ -23,11 +23,18 @@ import android.widget.FrameLayout
 import androidx.preference.Preference
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.prefs.AiPreferences
 import com.itsaky.androidide.ai.prefs.SecretStore
+import com.itsaky.androidide.ai.provider.ModelCatalog
 import com.itsaky.androidide.ai.provider.ProviderKind
 import com.itsaky.androidide.resources.R.string
 import com.itsaky.androidide.utils.DialogUtils
+import com.itsaky.androidide.utils.flashError
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -40,6 +47,13 @@ class AiPreferencesScreen(
 
   init {
     addPreference(AiProviderGroup())
+
+    if (AiPreferences.providerKind() == ProviderKind.ANTHROPIC) {
+      addPreference(AnthropicGroup())
+    } else {
+      addPreference(OpenAiGroup())
+    }
+
     addPreference(AiSafetyGroup())
   }
 }
@@ -53,11 +67,35 @@ private class AiProviderGroup(
 
   init {
     addPreference(AiProviderPreference())
+  }
+}
+
+@Parcelize
+private class OpenAiGroup(
+  override val key: String = "idepref_ai_openai",
+  override val title: Int = string.idepref_ai_provider_openai,
+  override val children: List<IPreference> = mutableListOf(),
+) : IPreferenceGroup() {
+
+  init {
     addPreference(OpenAiApiKeyPreference())
     addPreference(OpenAiModelPreference())
+    addPreference(OpenAiThinkingPreference())
     addPreference(OpenAiBaseUrlPreference())
+  }
+}
+
+@Parcelize
+private class AnthropicGroup(
+  override val key: String = "idepref_ai_anthropic",
+  override val title: Int = string.idepref_ai_provider_anthropic,
+  override val children: List<IPreference> = mutableListOf(),
+) : IPreferenceGroup() {
+
+  init {
     addPreference(AnthropicApiKeyPreference())
     addPreference(AnthropicModelPreference())
+    addPreference(AnthropicThinkingPreference())
     addPreference(AnthropicBaseUrlPreference())
   }
 }
@@ -79,6 +117,7 @@ private class AiSafetyGroup(
 private class AiProviderPreference(
   override val key: String = AiPreferences.PROVIDER,
   override val title: Int = string.idepref_ai_provider,
+  override val summary: Int? = string.idepref_ai_provider_summary,
 ) : SingleChoicePreference() {
 
   override fun onCreatePreference(context: Context): Preference {
@@ -106,10 +145,13 @@ private class AiProviderPreference(
     entry: PreferenceChoices.Entry?,
     position: Int
   ) {
-    if (position >= 0) {
-      AiPreferences.providerIndex = position
-      updateSummary(preference)
+    if (position < 0 || position == AiPreferences.providerIndex) {
+      return
     }
+
+    AiPreferences.providerIndex = position
+    updateSummary(preference)
+    preference.summary = preference.context.getString(string.idepref_ai_provider_changed)
   }
 
   private fun updateSummary(preference: Preference) {
@@ -164,6 +206,135 @@ private abstract class ApiKeyPreference : SimplePreference() {
         string.idepref_ai_key_missing
       }
     )
+  }
+}
+
+private abstract class ModelPreference : SimplePreference() {
+
+  abstract val providerKind: ProviderKind
+
+  override fun onCreatePreference(context: Context): Preference {
+    return super.onCreatePreference(context).also { it.summary = AiPreferences.modelOf(providerKind) }
+  }
+
+  override fun onPreferenceClick(preference: Preference): Boolean {
+    val context = preference.context
+    val config = AiPreferences.providerConfig(context.applicationContext, providerKind)
+
+    if (config.apiKey.isBlank()) {
+      flashError(context.getString(string.msg_ai_models_need_key))
+      showManualEntry(preference)
+      return true
+    }
+
+    preference.summary = context.getString(string.msg_ai_models_loading)
+
+    CoroutineScope(SupervisorJob() + Dispatchers.Main).launch {
+      val models = runCatching { ModelCatalog.fetch(config) }
+      preference.summary = AiPreferences.modelOf(providerKind)
+
+      models.onFailure { err ->
+        flashError(
+          context.getString(string.msg_ai_models_failed, err.message ?: err.javaClass.simpleName)
+        )
+        showManualEntry(preference)
+      }
+
+      models.onSuccess { available ->
+        if (available.isEmpty()) {
+          flashError(context.getString(string.msg_ai_models_empty))
+          showManualEntry(preference)
+        } else {
+          showPicker(preference, available)
+        }
+      }
+    }
+
+    return true
+  }
+
+  private fun showPicker(preference: Preference, models: List<String>) {
+    val context = preference.context
+    val current = AiPreferences.modelOf(providerKind)
+    val labels = models.toTypedArray<CharSequence>()
+
+    DialogUtils.newMaterialDialogBuilder(context)
+      .setTitle(title)
+      .setSingleChoiceItems(labels, models.indexOf(current)) { dialog, which ->
+        AiPreferences.setModelOf(providerKind, models[which])
+        preference.summary = models[which]
+        dialog.dismiss()
+      }
+      .setNeutralButton(string.idepref_ai_model_manual) { dialog, _ ->
+        dialog.dismiss()
+        showManualEntry(preference)
+      }
+      .setNegativeButton(android.R.string.cancel, null)
+      .show()
+  }
+
+  private fun showManualEntry(preference: Preference) {
+    val context = preference.context
+    val input = TextInputEditText(context).apply {
+      inputType = InputType.TYPE_CLASS_TEXT
+      setText(AiPreferences.modelOf(providerKind))
+    }
+
+    DialogUtils.newMaterialDialogBuilder(context)
+      .setTitle(title)
+      .setView(wrap(context, input))
+      .setNegativeButton(android.R.string.cancel, null)
+      .setPositiveButton(android.R.string.ok) { dialog, _ ->
+        val model = input.text?.toString()?.trim().orEmpty()
+        if (model.isNotEmpty()) {
+          AiPreferences.setModelOf(providerKind, model)
+          preference.summary = model
+        }
+        dialog.dismiss()
+      }
+      .show()
+  }
+}
+
+private abstract class ThinkingPreference : SingleChoicePreference() {
+
+  abstract val providerKind: ProviderKind
+
+  override fun onCreatePreference(context: Context): Preference {
+    return super.onCreatePreference(context).also { updateSummary(it) }
+  }
+
+  override fun getEntries(preference: Preference): Array<PreferenceChoices.Entry> {
+    val current = AiPreferences.thinkingLevelOf(providerKind)
+    return ThinkingLevel.entries.map { level ->
+      PreferenceChoices.Entry(
+        preference.context.getString(labelOf(level)),
+        level == current,
+        level.ordinal
+      )
+    }.toTypedArray()
+  }
+
+  override fun onChoiceConfirmed(
+    preference: Preference,
+    entry: PreferenceChoices.Entry?,
+    position: Int
+  ) {
+    val level = ThinkingLevel.entries.getOrNull(position) ?: return
+    AiPreferences.setThinkingLevelOf(providerKind, level)
+    updateSummary(preference)
+  }
+
+  private fun updateSummary(preference: Preference) {
+    preference.summary =
+      preference.context.getString(labelOf(AiPreferences.thinkingLevelOf(providerKind)))
+  }
+
+  private fun labelOf(level: ThinkingLevel): Int = when (level) {
+    ThinkingLevel.OFF -> string.idepref_ai_thinking_off
+    ThinkingLevel.LOW -> string.idepref_ai_thinking_low
+    ThinkingLevel.MEDIUM -> string.idepref_ai_thinking_medium
+    ThinkingLevel.HIGH -> string.idepref_ai_thinking_high
   }
 }
 
@@ -234,20 +405,47 @@ private class AnthropicApiKeyPreference(
 @Parcelize
 private class OpenAiModelPreference(
   override val key: String = AiPreferences.OPENAI_MODEL,
-  override val title: Int = string.idepref_ai_openai_model,
-) : TextValuePreference() {
+  override val title: Int = string.idepref_ai_model,
+) : ModelPreference() {
 
-  override fun getValue(): String = AiPreferences.openAiModel
+  override val providerKind: ProviderKind
+    get() = ProviderKind.OPENAI
+}
 
-  override fun setValue(value: String) {
-    AiPreferences.openAiModel = value
-  }
+@Parcelize
+private class AnthropicModelPreference(
+  override val key: String = AiPreferences.ANTHROPIC_MODEL,
+  override val title: Int = string.idepref_ai_model,
+) : ModelPreference() {
+
+  override val providerKind: ProviderKind
+    get() = ProviderKind.ANTHROPIC
+}
+
+@Parcelize
+private class OpenAiThinkingPreference(
+  override val key: String = AiPreferences.OPENAI_THINKING,
+  override val title: Int = string.idepref_ai_thinking,
+) : ThinkingPreference() {
+
+  override val providerKind: ProviderKind
+    get() = ProviderKind.OPENAI
+}
+
+@Parcelize
+private class AnthropicThinkingPreference(
+  override val key: String = AiPreferences.ANTHROPIC_THINKING,
+  override val title: Int = string.idepref_ai_thinking,
+) : ThinkingPreference() {
+
+  override val providerKind: ProviderKind
+    get() = ProviderKind.ANTHROPIC
 }
 
 @Parcelize
 private class OpenAiBaseUrlPreference(
   override val key: String = AiPreferences.OPENAI_BASE_URL,
-  override val title: Int = string.idepref_ai_openai_base_url,
+  override val title: Int = string.idepref_ai_base_url,
 ) : TextValuePreference() {
 
   override fun getValue(): String = AiPreferences.openAiBaseUrl
@@ -258,22 +456,9 @@ private class OpenAiBaseUrlPreference(
 }
 
 @Parcelize
-private class AnthropicModelPreference(
-  override val key: String = AiPreferences.ANTHROPIC_MODEL,
-  override val title: Int = string.idepref_ai_anthropic_model,
-) : TextValuePreference() {
-
-  override fun getValue(): String = AiPreferences.anthropicModel
-
-  override fun setValue(value: String) {
-    AiPreferences.anthropicModel = value
-  }
-}
-
-@Parcelize
 private class AnthropicBaseUrlPreference(
   override val key: String = AiPreferences.ANTHROPIC_BASE_URL,
-  override val title: Int = string.idepref_ai_anthropic_base_url,
+  override val title: Int = string.idepref_ai_base_url,
 ) : TextValuePreference() {
 
   override fun getValue(): String = AiPreferences.anthropicBaseUrl
@@ -287,7 +472,10 @@ private class AnthropicBaseUrlPreference(
 private class AiYoloPreference(
   override val key: String = AiPreferences.YOLO_MODE,
   override val title: Int = string.idepref_ai_yolo,
-) : SwitchPreference(setValue = { AiPreferences.yoloMode = it }, getValue = { AiPreferences.yoloMode }) {
+) : SwitchPreference(
+  setValue = { AiPreferences.yoloMode = it },
+  getValue = { AiPreferences.yoloMode }
+) {
 
   override fun onCreatePreference(context: Context): Preference {
     return super.onCreatePreference(context).also { updateSummary(it) }

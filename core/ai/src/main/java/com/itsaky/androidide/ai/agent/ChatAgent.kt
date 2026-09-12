@@ -21,6 +21,7 @@ import com.itsaky.androidide.ai.model.ChatMessage
 import com.itsaky.androidide.ai.model.ChatRequest
 import com.itsaky.androidide.ai.model.ChatStreamEvent
 import com.itsaky.androidide.ai.model.StopReason
+import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.model.ToolCall
 import com.itsaky.androidide.ai.model.ToolResult
 import com.itsaky.androidide.ai.provider.LlmProvider
@@ -32,6 +33,8 @@ import kotlinx.coroutines.flow.flow
 sealed interface AgentEvent {
 
   data class TextDelta(val text: String) : AgentEvent
+
+  data class ReasoningDelta(val text: String) : AgentEvent
 
   data class AssistantMessage(val message: ChatMessage) : AgentEvent
 
@@ -49,6 +52,7 @@ class ChatAgent(
   private val gate: ToolGate,
   private val model: String,
   private val systemPrompt: String,
+  private val thinkingLevel: ThinkingLevel = ThinkingLevel.OFF,
   private val maxToolRounds: Int = DEFAULT_MAX_TOOL_ROUNDS
 ) {
 
@@ -60,7 +64,8 @@ class ChatAgent(
         model = model,
         messages = messages.toList(),
         tools = ToolRegistry.specs(),
-        systemPrompt = systemPrompt
+        systemPrompt = systemPrompt,
+        thinkingLevel = thinkingLevel
       )
 
       var completed: ChatMessage? = null
@@ -70,6 +75,8 @@ class ChatAgent(
       provider.stream(request).collect { event ->
         when (event) {
           is ChatStreamEvent.TextDelta -> emit(AgentEvent.TextDelta(event.text))
+
+          is ChatStreamEvent.ReasoningDelta -> emit(AgentEvent.ReasoningDelta(event.text))
 
           is ChatStreamEvent.Completed -> {
             completed = event.message

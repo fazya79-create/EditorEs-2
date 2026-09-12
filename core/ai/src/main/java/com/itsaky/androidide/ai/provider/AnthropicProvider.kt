@@ -42,6 +42,7 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
 
   override fun stream(request: ChatRequest): Flow<ChatStreamEvent> = callbackFlow {
     val text = StringBuilder()
+    val reasoning = StringBuilder()
     val blocks = sortedMapOf<Int, PartialBlock>()
     var stopReason = StopReason.END_TURN
 
@@ -59,7 +60,7 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
           if (event.name == EVENT_MESSAGE_STOP) {
             break
           }
-          val reason = handleEvent(event, text, blocks)
+          val reason = handleEvent(event, text, reasoning, blocks)
           if (reason != null) {
             stopReason = reason
           }
@@ -74,7 +75,7 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
     }
 
     val toolCalls = blocks.values
-      .filter { it.isToolUse }
+      .filter { it.kind == BlockKind.TOOL_USE }
       .map { block ->
         ToolCall(
           id = block.id.ifEmpty { "toolu_${block.index}" },
@@ -89,7 +90,7 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
 
     send(
       ChatStreamEvent.Completed(
-        message = ChatMessage.assistant(text.toString(), toolCalls),
+        message = ChatMessage.assistant(text.toString(), toolCalls, reasoning.toString()),
         stopReason = stopReason
       )
     )
@@ -99,6 +100,7 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
   private suspend fun ProducerScope<ChatStreamEvent>.handleEvent(
     event: SseEvent,
     text: StringBuilder,
+    reasoning: StringBuilder,
     blocks: MutableMap<Int, PartialBlock>
   ): StopReason? {
     val payload = runCatching { JsonParser.parseString(event.data).asJsonObject }.getOrNull()
@@ -116,15 +118,19 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
       EVENT_CONTENT_BLOCK_START -> {
         val index = payload.get("index")?.takeIf { it.isJsonPrimitive }?.asInt ?: return null
         val block = payload.getAsJsonObject("content_block") ?: return null
-        if (block.get("type")?.asString == TYPE_TOOL_USE) {
-          val partial = PartialBlock(index, isToolUse = true).apply {
-            id = block.get("id")?.takeIf { it.isJsonPrimitive }?.asString.orEmpty()
-            name = block.get("name")?.takeIf { it.isJsonPrimitive }?.asString.orEmpty()
+        when (block.get("type")?.asString) {
+          TYPE_TOOL_USE -> {
+            val partial = PartialBlock(index, BlockKind.TOOL_USE).apply {
+              id = block.get("id")?.takeIf { it.isJsonPrimitive }?.asString.orEmpty()
+              name = block.get("name")?.takeIf { it.isJsonPrimitive }?.asString.orEmpty()
+            }
+            blocks[index] = partial
+            send(ChatStreamEvent.ToolCallStarted(index, partial.id, partial.name))
           }
-          blocks[index] = partial
-          send(ChatStreamEvent.ToolCallStarted(index, partial.id, partial.name))
-        } else {
-          blocks[index] = PartialBlock(index, isToolUse = false)
+
+          TYPE_THINKING -> blocks[index] = PartialBlock(index, BlockKind.THINKING)
+
+          else -> blocks[index] = PartialBlock(index, BlockKind.TEXT)
         }
       }
 
@@ -141,13 +147,33 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
             }
           }
 
+          TYPE_THINKING_DELTA -> {
+            val content = delta.get("thinking")?.takeIf { it.isJsonPrimitive }?.asString.orEmpty()
+            if (content.isNotEmpty()) {
+              reasoning.append(content)
+              blocks.getOrPut(index) { PartialBlock(index, BlockKind.THINKING) }
+                .arguments
+                .append(content)
+              send(ChatStreamEvent.ReasoningDelta(content))
+            }
+          }
+
+          TYPE_SIGNATURE_DELTA -> {
+            val signature = delta.get("signature")
+              ?.takeIf { it.isJsonPrimitive }
+              ?.asString
+              .orEmpty()
+            blocks.getOrPut(index) { PartialBlock(index, BlockKind.THINKING) }
+              .signature = signature
+          }
+
           TYPE_INPUT_JSON_DELTA -> {
             val json = delta.get("partial_json")
               ?.takeIf { it.isJsonPrimitive }
               ?.asString
               .orEmpty()
             if (json.isNotEmpty()) {
-              blocks.getOrPut(index) { PartialBlock(index, isToolUse = true) }
+              blocks.getOrPut(index) { PartialBlock(index, BlockKind.TOOL_USE) }
                 .arguments
                 .append(json)
               send(ChatStreamEvent.ToolCallArgumentsDelta(index, json))
@@ -182,6 +208,16 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
 
     request.systemPrompt?.takeIf { it.isNotBlank() }?.let { prompt ->
       body.addProperty("system", prompt)
+    }
+
+    if (request.thinkingLevel.isEnabled) {
+      val thinking = JsonObject()
+      thinking.addProperty("type", "adaptive")
+      body.add("thinking", thinking)
+
+      val outputConfig = JsonObject()
+      outputConfig.addProperty("effort", request.thinkingLevel.wireValue)
+      body.add("output_config", outputConfig)
     }
 
     val messages = JsonArray()
@@ -273,10 +309,17 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
     return message
   }
 
-  private class PartialBlock(val index: Int, val isToolUse: Boolean) {
+  private class PartialBlock(val index: Int, val kind: BlockKind) {
     var id: String = ""
     var name: String = ""
+    var signature: String = ""
     val arguments = StringBuilder()
+  }
+
+  private enum class BlockKind {
+    TEXT,
+    THINKING,
+    TOOL_USE
   }
 
   companion object {
@@ -294,7 +337,10 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
 
     private const val TYPE_TOOL_USE = "tool_use"
     private const val TYPE_TOOL_RESULT = "tool_result"
+    private const val TYPE_THINKING = "thinking"
     private const val TYPE_TEXT_DELTA = "text_delta"
+    private const val TYPE_THINKING_DELTA = "thinking_delta"
+    private const val TYPE_SIGNATURE_DELTA = "signature_delta"
     private const val TYPE_INPUT_JSON_DELTA = "input_json_delta"
   }
 }

@@ -43,7 +43,15 @@ sealed interface ChatEntry {
     val call: ToolCall,
     val summary: String,
     val state: ToolEntryState,
-    val output: String = ""
+    val output: String = "",
+    val expanded: Boolean = false
+  ) : ChatEntry
+
+  data class Thinking(
+    override val id: Long,
+    val text: String,
+    val streaming: Boolean = false,
+    val expanded: Boolean = false
   ) : ChatEntry
 
   data class Error(override val id: Long, val text: String) : ChatEntry

@@ -18,34 +18,48 @@
 package com.itsaky.androidide.ai.ui
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.itsaky.androidide.ai.databinding.LayoutAiMessageBinding
+import com.itsaky.androidide.ai.databinding.LayoutAiThinkingBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiToolCallBinding
+import com.itsaky.androidide.ai.tools.RunShellTool
 import com.itsaky.androidide.resources.R
 import com.itsaky.androidide.utils.resolveAttr
 
-class AiChatAdapter : ListAdapter<ChatEntry, RecyclerView.ViewHolder>(DIFF) {
+class AiChatAdapter(private val onToggleExpanded: (Long) -> Unit) :
+  ListAdapter<ChatEntry, RecyclerView.ViewHolder>(DIFF) {
 
   override fun getItemViewType(position: Int): Int = when (getItem(position)) {
     is ChatEntry.Tool -> TYPE_TOOL
+    is ChatEntry.Thinking -> TYPE_THINKING
     else -> TYPE_MESSAGE
   }
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
     val inflater = LayoutInflater.from(parent.context)
-    return if (viewType == TYPE_TOOL) {
-      ToolViewHolder(LayoutAiToolCallBinding.inflate(inflater, parent, false))
-    } else {
-      MessageViewHolder(LayoutAiMessageBinding.inflate(inflater, parent, false))
+    return when (viewType) {
+      TYPE_TOOL -> ToolViewHolder(
+        LayoutAiToolCallBinding.inflate(inflater, parent, false),
+        onToggleExpanded
+      )
+
+      TYPE_THINKING -> ThinkingViewHolder(
+        LayoutAiThinkingBinding.inflate(inflater, parent, false),
+        onToggleExpanded
+      )
+
+      else -> MessageViewHolder(LayoutAiMessageBinding.inflate(inflater, parent, false))
     }
   }
 
   override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
     when (val entry = getItem(position)) {
       is ChatEntry.Tool -> (holder as ToolViewHolder).bind(entry)
+      is ChatEntry.Thinking -> (holder as ThinkingViewHolder).bind(entry)
       else -> (holder as MessageViewHolder).bind(entry)
     }
   }
@@ -84,13 +98,35 @@ class AiChatAdapter : ListAdapter<ChatEntry, RecyclerView.ViewHolder>(DIFF) {
           )
         }
 
-        is ChatEntry.Tool -> Unit
+        else -> Unit
       }
     }
   }
 
-  class ToolViewHolder(private val binding: LayoutAiToolCallBinding) :
-    RecyclerView.ViewHolder(binding.root) {
+  class ThinkingViewHolder(
+    private val binding: LayoutAiThinkingBinding,
+    private val onToggleExpanded: (Long) -> Unit
+  ) : RecyclerView.ViewHolder(binding.root) {
+
+    fun bind(entry: ChatEntry.Thinking) {
+      binding.title.setText(
+        if (entry.streaming) R.string.msg_ai_thinking else R.string.msg_ai_thinking_done
+      )
+      binding.chevron.text = if (entry.expanded) CHEVRON_UP else CHEVRON_DOWN
+      binding.reasoning.text = entry.text
+      binding.reasoning.visibility = if (entry.expanded && entry.text.isNotBlank()) {
+        View.VISIBLE
+      } else {
+        View.GONE
+      }
+      binding.header.setOnClickListener { onToggleExpanded(entry.id) }
+    }
+  }
+
+  class ToolViewHolder(
+    private val binding: LayoutAiToolCallBinding,
+    private val onToggleExpanded: (Long) -> Unit
+  ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(entry: ChatEntry.Tool) {
       val context = binding.root.context
@@ -103,21 +139,69 @@ class AiChatAdapter : ListAdapter<ChatEntry, RecyclerView.ViewHolder>(DIFF) {
         ToolEntryState.FAILED -> context.getString(R.string.title_ai_error)
       }
 
-      binding.output.text = entry.output
-      binding.output.visibility = if (entry.output.isBlank()) {
-        android.view.View.GONE
-      } else {
-        android.view.View.VISIBLE
+      binding.stateIcon.text = when (entry.state) {
+        ToolEntryState.RUNNING -> ICON_RUNNING
+        ToolEntryState.AWAITING_APPROVAL -> ICON_PENDING
+        ToolEntryState.SUCCEEDED -> ICON_OK
+        ToolEntryState.FAILED -> ICON_FAILED
       }
+      binding.stateIcon.setTextColor(
+        context.resolveAttr(
+          when (entry.state) {
+            ToolEntryState.FAILED -> com.google.android.material.R.attr.colorError
+            ToolEntryState.SUCCEEDED -> com.google.android.material.R.attr.colorPrimary
+            else -> com.google.android.material.R.attr.colorOnSurfaceVariant
+          }
+        )
+      )
+
+      binding.chevron.text = if (entry.expanded) CHEVRON_UP else CHEVRON_DOWN
+      binding.details.visibility = if (entry.expanded) View.VISIBLE else View.GONE
+
+      if (entry.expanded) {
+        val colors = syntaxColors(context)
+        binding.arguments.text = CodeFormatter.highlight(
+          CodeFormatter.prettyJson(entry.call.argumentsJson),
+          colors
+        )
+
+        val hasOutput = entry.output.isNotBlank()
+        binding.outputLabel.visibility = if (hasOutput) View.VISIBLE else View.GONE
+        binding.output.visibility = if (hasOutput) View.VISIBLE else View.GONE
+        if (hasOutput) {
+          binding.output.text = if (entry.call.name == RunShellTool.NAME) {
+            entry.output
+          } else {
+            CodeFormatter.highlight(CodeFormatter.prettyJson(entry.output), colors)
+          }
+        }
+      }
+
+      binding.header.setOnClickListener { onToggleExpanded(entry.id) }
     }
+
+    private fun syntaxColors(context: android.content.Context) = SyntaxColors(
+      keyword = context.resolveAttr(com.google.android.material.R.attr.colorPrimary),
+      string = context.resolveAttr(com.google.android.material.R.attr.colorTertiary),
+      number = context.resolveAttr(com.google.android.material.R.attr.colorSecondary),
+      comment = context.resolveAttr(com.google.android.material.R.attr.colorOnSurfaceVariant)
+    )
   }
 
   companion object {
 
     private const val TYPE_MESSAGE = 0
     private const val TYPE_TOOL = 1
+    private const val TYPE_THINKING = 2
 
     private const val ELLIPSIS = "\u2026"
+    private const val CHEVRON_DOWN = "\u2304"
+    private const val CHEVRON_UP = "\u2303"
+
+    private const val ICON_RUNNING = "\u25CF"
+    private const val ICON_PENDING = "\u25CB"
+    private const val ICON_OK = "\u2713"
+    private const val ICON_FAILED = "\u2715"
 
     private val DIFF = object : DiffUtil.ItemCallback<ChatEntry>() {
 

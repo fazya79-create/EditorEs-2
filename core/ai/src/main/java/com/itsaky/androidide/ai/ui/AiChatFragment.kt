@@ -19,7 +19,12 @@ package com.itsaky.androidide.ai.ui
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.view.inputmethod.EditorInfo
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.marginBottom
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,8 +34,8 @@ import com.itsaky.androidide.fragments.FragmentWithBinding
 
 class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChatBinding::inflate) {
 
-  private val viewModel by viewModels<AiChatViewModel>()
-  private val adapter = AiChatAdapter()
+  private val viewModel by viewModels<AiChatViewModel>(ownerProducer = { requireActivity() })
+  private val adapter by lazy { AiChatAdapter(viewModel::toggleExpanded) }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
@@ -39,6 +44,8 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
       stackFromEnd = true
     }
     binding.messages.adapter = adapter
+
+    applyImeInsets()
 
     binding.send.setOnClickListener { onSendClicked() }
     binding.input.setOnEditorActionListener { _, actionId, _ ->
@@ -82,6 +89,30 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
   override fun onResume() {
     super.onResume()
     viewModel.refreshYoloMode()
+  }
+
+  private fun applyImeInsets() {
+    val baseMargin = binding.inputRow.marginBottom
+    ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+      val ime = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+      binding.inputRow.updateLayoutParams<MarginLayoutParams> {
+        bottomMargin = baseMargin + ime
+      }
+      if (ime > 0) {
+        scrollToEnd()
+      }
+      insets
+    }
+    ViewCompat.requestApplyInsets(binding.root)
+  }
+
+  private fun scrollToEnd() {
+    val count = adapter.itemCount
+    if (count > 0) {
+      binding.messages.post {
+        _binding?.messages?.scrollToPosition(count - 1)
+      }
+    }
   }
 
   private fun onSendClicked() {

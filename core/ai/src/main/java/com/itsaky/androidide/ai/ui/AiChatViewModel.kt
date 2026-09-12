@@ -104,7 +104,8 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       provider = createProvider(config),
       gate = gate,
       model = config.model,
-      systemPrompt = SystemPrompt.build()
+      systemPrompt = SystemPrompt.build(),
+      thinkingLevel = AiPreferences.thinkingLevel
     )
 
     busy.value = true
@@ -158,11 +159,27 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
 
   private suspend fun collect(agent: ChatAgent) {
     var streamingId: Long? = null
+    var thinkingId: Long? = null
     val streamed = StringBuilder()
+    val thought = StringBuilder()
 
     agent.run(history.toList()).collect { event ->
       when (event) {
+        is AgentEvent.ReasoningDelta -> {
+          thought.append(event.text)
+          val id = thinkingId ?: nextId().also { created ->
+            thinkingId = created
+            append(ChatEntry.Thinking(created, "", streaming = true))
+          }
+          replace(id, ChatEntry.Thinking(id, thought.toString(), streaming = true, expanded = isExpanded(id)))
+        }
+
         is AgentEvent.TextDelta -> {
+          thinkingId?.let { id ->
+            replace(id, ChatEntry.Thinking(id, thought.toString(), streaming = false, expanded = isExpanded(id)))
+            thinkingId = null
+            thought.setLength(0)
+          }
           streamed.append(event.text)
           val id = streamingId ?: nextId().also { created ->
             streamingId = created
@@ -173,6 +190,11 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
 
         is AgentEvent.AssistantMessage -> {
           history += event.message
+          thinkingId?.let { id ->
+            replace(id, ChatEntry.Thinking(id, thought.toString(), streaming = false, expanded = isExpanded(id)))
+            thinkingId = null
+            thought.setLength(0)
+          }
           val id = streamingId
           if (id != null) {
             replace(id, ChatEntry.Assistant(id, event.message.text, streaming = false))
@@ -213,6 +235,23 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     }
   }
 
+  fun toggleExpanded(id: Long) {
+    val index = items.indexOfFirst { it.id == id }
+    if (index < 0) {
+      return
+    }
+
+    items[index] = when (val entry = items[index]) {
+      is ChatEntry.Tool -> entry.copy(expanded = !entry.expanded)
+      is ChatEntry.Thinking -> entry.copy(expanded = !entry.expanded)
+      else -> return
+    }
+    publish()
+  }
+
+  private fun isExpanded(id: Long): Boolean =
+    (items.firstOrNull { it.id == id } as? ChatEntry.Thinking)?.expanded ?: false
+
   private fun createProvider(config: ProviderConfig): LlmProvider = when (config.kind) {
     ProviderKind.ANTHROPIC -> AnthropicProvider(config)
     ProviderKind.OPENAI -> OpenAiProvider(config)
@@ -222,6 +261,9 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     var changed = false
     items.replaceAll { entry ->
       if (entry is ChatEntry.Assistant && entry.streaming) {
+        changed = true
+        entry.copy(streaming = false)
+      } else if (entry is ChatEntry.Thinking && entry.streaming) {
         changed = true
         entry.copy(streaming = false)
       } else if (entry is ChatEntry.Tool && entry.state == ToolEntryState.RUNNING) {

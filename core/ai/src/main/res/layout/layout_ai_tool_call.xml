@@ -28,42 +28,130 @@
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingStart="12dp"
-    android:paddingTop="8dp"
-    android:paddingEnd="12dp"
-    android:paddingBottom="8dp">
+    android:orientation="vertical">
 
-    <com.google.android.material.textview.MaterialTextView
-      android:id="@+id/summary"
+    <LinearLayout
+      android:id="@+id/header"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:drawablePadding="8dp"
-      android:fontFamily="monospace"
-      android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-      tools:text="Run: ./gradlew assembleDebug" />
+      android:background="?attr/selectableItemBackground"
+      android:gravity="center_vertical"
+      android:orientation="horizontal"
+      android:paddingStart="12dp"
+      android:paddingTop="10dp"
+      android:paddingEnd="12dp"
+      android:paddingBottom="10dp">
 
-    <com.google.android.material.textview.MaterialTextView
-      android:id="@+id/status"
+      <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/state_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+        tools:text="●" />
+
+      <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <com.google.android.material.textview.MaterialTextView
+          android:id="@+id/summary"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:ellipsize="middle"
+          android:fontFamily="monospace"
+          android:maxLines="1"
+          android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+          tools:text="Run: ./gradlew assembleDebug" />
+
+        <com.google.android.material.textview.MaterialTextView
+          android:id="@+id/status"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+          android:textColor="?attr/colorOnSurfaceVariant"
+          tools:text="Waiting for your approval" />
+
+      </LinearLayout>
+
+      <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/chevron"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        tools:text="⌄" />
+
+    </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/details"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginTop="2dp"
-      android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
-      android:textColor="?attr/colorOnSurfaceVariant"
-      tools:text="Waiting for your approval" />
-
-    <com.google.android.material.textview.MaterialTextView
-      android:id="@+id/output"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="4dp"
-      android:fontFamily="monospace"
-      android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-      android:textColor="?attr/colorOnSurfaceVariant"
-      android:textIsSelectable="true"
+      android:orientation="vertical"
+      android:paddingStart="12dp"
+      android:paddingEnd="12dp"
+      android:paddingBottom="10dp"
       android:visibility="gone"
-      tools:text="exit code: 0"
-      tools:visibility="visible" />
+      tools:visibility="visible">
+
+      <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/arguments_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/msg_ai_tool_arguments"
+        android:textAllCaps="true"
+        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+        android:textColor="?attr/colorOnSurfaceVariant" />
+
+      <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:scrollbars="none">
+
+        <com.google.android.material.textview.MaterialTextView
+          android:id="@+id/arguments"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:fontFamily="monospace"
+          android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+          android:textIsSelectable="true"
+          tools:text="{\n  &quot;path&quot;: &quot;app/build.gradle&quot;\n}" />
+
+      </HorizontalScrollView>
+
+      <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/output_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/msg_ai_tool_output"
+        android:textAllCaps="true"
+        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+        android:textColor="?attr/colorOnSurfaceVariant" />
+
+      <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:scrollbars="none">
+
+        <com.google.android.material.textview.MaterialTextView
+          android:id="@+id/output"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:fontFamily="monospace"
+          android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+          android:textIsSelectable="true"
+          tools:text="exit code: 0" />
+
+      </HorizontalScrollView>
+
+    </LinearLayout>
 
   </LinearLayout>
 
