@@ -41,7 +41,7 @@ object MarkdownRenderer {
   private var markwon: Markwon? = null
 
   fun render(view: TextView, markdown: String) {
-    instance(view.context).setMarkdown(view, markdown)
+    instance(view.context).setMarkdown(view, MarkdownNormalizer.normalize(markdown))
   }
 
   private fun instance(context: Context): Markwon {

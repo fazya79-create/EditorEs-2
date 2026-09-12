@@ -138,4 +138,22 @@ class MarkdownRendererTest {
     assertThat(ordered).contains("first")
     assertThat(ordered).contains("second")
   }
+
+  @Test
+  fun `tables directly after a paragraph line still render`() {
+    val rendered = render(
+      """
+      Components (includes/)
+      | Dir | Role |
+      |------|------|
+      | il2cpp | runtime wrapper |
+      """.trimIndent()
+    )
+
+    assertThat(rendered.toString()).doesNotContain("|")
+
+    val rows = (rendered as Spanned)
+      .getSpans(0, rendered.length, TableRowSpan::class.java)
+    assertThat(rows).hasLength(2)
+  }
 }

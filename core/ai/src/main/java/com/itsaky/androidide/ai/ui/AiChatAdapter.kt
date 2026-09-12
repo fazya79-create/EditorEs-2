@@ -80,6 +80,7 @@ class AiChatAdapter(private val onToggleExpanded: (Long) -> Unit) :
 
         is ChatEntry.Assistant -> {
           binding.role.setText(R.string.title_ai_assistant)
+          binding.message.setTextIsSelectable(!entry.streaming)
           if (entry.streaming && entry.text.isEmpty()) {
             binding.message.text = ELLIPSIS
           } else {

@@ -26,6 +26,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.itsaky.androidide.ai.databinding.FragmentAiChatBinding
 import com.itsaky.androidide.ai.tools.ApprovalDecision
 import com.itsaky.androidide.fragments.FragmentWithBinding
@@ -47,6 +48,7 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
       stackFromEnd = true
     }
     binding.messages.adapter = adapter
+    (binding.messages.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
 
     applyImeInsets()
 
