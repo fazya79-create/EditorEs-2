@@ -21,8 +21,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.inputmethod.EditorInfo
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.marginBottom
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
@@ -31,11 +29,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.itsaky.androidide.ai.databinding.FragmentAiChatBinding
 import com.itsaky.androidide.ai.tools.ApprovalDecision
 import com.itsaky.androidide.fragments.FragmentWithBinding
+import com.itsaky.androidide.fragments.ImeInsetsAware
 
-class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChatBinding::inflate) {
+class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChatBinding::inflate),
+  ImeInsetsAware {
 
   private val viewModel by viewModels<AiChatViewModel>(ownerProducer = { requireActivity() })
   private val adapter by lazy { AiChatAdapter(viewModel::toggleExpanded) }
+
+  private var baseInputMargin = 0
+  private var lastImeInset = 0
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
@@ -92,18 +95,24 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
   }
 
   private fun applyImeInsets() {
-    val baseMargin = binding.inputRow.marginBottom
-    ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
-      val ime = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-      binding.inputRow.updateLayoutParams<MarginLayoutParams> {
-        bottomMargin = baseMargin + ime
-      }
-      if (ime > 0) {
-        scrollToEnd()
-      }
-      insets
+    baseInputMargin = binding.inputRow.marginBottom
+    applyImeInset(lastImeInset)
+  }
+
+  override fun onImeInsetChanged(bottom: Int) {
+    lastImeInset = bottom
+    if (_binding != null) {
+      applyImeInset(bottom)
     }
-    ViewCompat.requestApplyInsets(binding.root)
+  }
+
+  private fun applyImeInset(bottom: Int) {
+    binding.inputRow.updateLayoutParams<MarginLayoutParams> {
+      bottomMargin = baseInputMargin + bottom
+    }
+    if (bottom > 0) {
+      scrollToEnd()
+    }
   }
 
   private fun scrollToEnd() {

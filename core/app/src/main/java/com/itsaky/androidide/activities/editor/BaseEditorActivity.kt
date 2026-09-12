@@ -37,6 +37,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.graphics.Insets
 import androidx.core.view.GravityCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
@@ -124,6 +125,10 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
 
   private val onBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
     override fun handleOnBackPressed() {
+      if (isImeVisible && hideSoftInput()) {
+        return
+      }
+
       if (binding.root.isDrawerOpen(GravityCompat.START)) {
         binding.root.closeDrawer(GravityCompat.START)
       } else if (editorBottomSheet?.state != BottomSheetBehavior.STATE_COLLAPSED) {
@@ -133,6 +138,14 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
       } else {
         doConfirmProjectClose()
       }
+    }
+  }
+
+  private fun hideSoftInput(): Boolean {
+    val focused = currentFocus ?: return false
+    return WindowCompat.getInsetsController(window, focused).let { controller ->
+      controller.hide(WindowInsetsCompat.Type.ime())
+      true
     }
   }
 
@@ -195,18 +208,22 @@ abstract class BaseEditorActivity : EdgeToEdgeIDEActivity(), TabLayout.OnTabSele
 
   override fun onApplyWindowInsets(insets: WindowInsetsCompat) {
     super.onApplyWindowInsets(insets)
-    val height = contentCardRealHeight ?: return
     val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
 
-    _binding?.content?.bottomSheet?.setImeVisible(imeInsets.bottom > 0)
-    _binding?.contentCard?.updateLayoutParams<ViewGroup.LayoutParams> {
-      this.height = height - imeInsets.bottom
-    }
+    _binding?.drawerSidebar?.getFragment<EditorSidebarFragment>()
+      ?.onImeInsetChanged(imeInsets.bottom)
 
     val isImeVisible = imeInsets.bottom > 0
     if (this.isImeVisible != isImeVisible) {
       this.isImeVisible = isImeVisible
       onSoftInputChanged()
+    }
+
+    val height = contentCardRealHeight ?: return
+
+    _binding?.content?.bottomSheet?.setImeVisible(imeInsets.bottom > 0)
+    _binding?.contentCard?.updateLayoutParams<ViewGroup.LayoutParams> {
+      this.height = height - imeInsets.bottom
     }
   }
 

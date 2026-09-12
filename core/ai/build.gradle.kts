@@ -29,6 +29,8 @@ android {
 dependencies {
   implementation(libs.common.kotlin.coroutines.android)
   implementation(libs.google.gson)
+  implementation(libs.common.markwon.core)
+  implementation(libs.common.markwon.extStrikethrough)
 
   implementation(libs.androidx.annotation)
   implementation(libs.androidx.constraintlayout)
@@ -43,4 +45,5 @@ dependencies {
   testImplementation(libs.tests.junit)
   testImplementation(libs.tests.google.truth)
   testImplementation(libs.tests.robolectric)
+  testImplementation(libs.tests.androidx.test.core)
 }

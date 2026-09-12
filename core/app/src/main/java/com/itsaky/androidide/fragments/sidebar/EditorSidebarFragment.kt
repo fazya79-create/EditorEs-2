@@ -26,8 +26,10 @@ import androidx.core.view.marginTop
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updateMarginsRelative
 import androidx.core.view.updatePadding
+import androidx.navigation.fragment.NavHostFragment
 import com.itsaky.androidide.databinding.FragmentEditorSidebarBinding
 import com.itsaky.androidide.fragments.FragmentWithBinding
+import com.itsaky.androidide.fragments.ImeInsetsAware
 import com.itsaky.androidide.utils.EditorSidebarActions
 
 /**
@@ -39,8 +41,7 @@ class EditorSidebarFragment : FragmentWithBinding<FragmentEditorSidebarBinding>(
   FragmentEditorSidebarBinding::inflate
 ) {
 
-  internal fun onApplyWindowInsets(insets: Insets) {
-    _binding?.apply {
+  internal fun onApplyWindowInsets(insets: Insets) {    _binding?.apply {
       title.updateLayoutParams<MarginLayoutParams> {
         updateMarginsRelative(
           top = title.marginTop + insets.top,
@@ -68,4 +69,11 @@ class EditorSidebarFragment : FragmentWithBinding<FragmentEditorSidebarBinding>(
    * Get the (nullable) binding object for this fragment.
    */
   internal fun getBinding() = _binding
+
+  internal fun onImeInsetChanged(bottom: Int) {
+    val host = _binding?.fragmentContainer?.getFragment<NavHostFragment>() ?: return
+    host.childFragmentManager.fragments.forEach { fragment ->
+      (fragment as? ImeInsetsAware)?.onImeInsetChanged(bottom)
+    }
+  }
 }
