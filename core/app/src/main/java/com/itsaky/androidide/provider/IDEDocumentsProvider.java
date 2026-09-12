@@ -40,8 +40,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A document provider for the Storage Access Framework which exposes the files in the $HOME/
- * directory to other apps.
+ * A document provider for the Storage Access Framework which exposes the app's private files
+ * directory to other apps. The exposed root is the parent of both $HOME and $PREFIX, so the
+ * installed rootfs (usr/, etc/, opt/ ...) is reachable and not just the home directory.
  *
  * <p>Note that this replaces providing an activity matching the ACTION_GET_CONTENT intent:
  *
@@ -84,11 +85,11 @@ public class IDEDocumentsProvider extends DocumentsProvider {
 
   @NonNull
   private File getBaseDir() {
-    if (Environment.HOME == null) {
+    if (Environment.ROOT == null) {
       Environment.init(getContext());
     }
 
-    return Environment.HOME;
+    return Environment.ROOT;
   }
 
   @Override
@@ -98,12 +99,24 @@ public class IDEDocumentsProvider extends DocumentsProvider {
 
   @Override
   public boolean isChildDocument(String parentDocumentId, String documentId) {
-    return documentId.startsWith(parentDocumentId);
+    if (parentDocumentId == null || documentId == null) {
+      return false;
+    }
+
+    final String parent = normalize(parentDocumentId);
+    final String child = normalize(documentId);
+    return child.startsWith(parent.endsWith("/") ? parent : parent + "/");
+  }
+
+  private static String normalize(String documentId) {
+    return new File(documentId).getAbsolutePath();
   }
 
   @Override
   public String createDocument(String parentDocumentId, String mimeType, String displayName)
       throws FileNotFoundException {
+    getFileForDocId(parentDocumentId);
+
     File newFile = new File(parentDocumentId, displayName);
     int noConflictId = 2;
     while (newFile.exists()) {
@@ -145,7 +158,7 @@ public class IDEDocumentsProvider extends DocumentsProvider {
     LOG.debug("queryRoots() before all add, 1");
     row.add(Root.COLUMN_DOCUMENT_ID, getDocIdForFile(getBaseDir()));
     LOG.debug("queryRoots() before all add, 2");
-    row.add(Root.COLUMN_SUMMARY, null);
+    row.add(Root.COLUMN_SUMMARY, getBaseDir().getAbsolutePath());
     LOG.debug("queryRoots() before all add, 3");
     row.add(
         Root.COLUMN_FLAGS,
@@ -186,8 +199,11 @@ public class IDEDocumentsProvider extends DocumentsProvider {
     final MatrixCursor result =
         new MatrixCursor(projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION);
     final File parent = getFileForDocId(parentDocumentId);
-    for (File file : parent.listFiles()) {
-      includeFile(result, null, file);
+    final File[] children = parent.listFiles();
+    if (children != null) {
+      for (File file : children) {
+        includeFile(result, null, file);
+      }
     }
     return result;
   }
@@ -209,18 +225,20 @@ public class IDEDocumentsProvider extends DocumentsProvider {
     final int MAX_SEARCH_RESULTS = 50;
     while (!pending.isEmpty() && result.getCount() < MAX_SEARCH_RESULTS) {
       final File file = pending.removeFirst();
-      // Avoid directories outside the $HOME directory linked with symlinks (to avoid e.g.
-      // search
-      // through the whole SD card).
-      boolean isInsideHome;
+      // Symlinks are followed only while they stay inside the exposed root, so a link into
+      // shared storage cannot turn this into a whole-device search.
+      boolean isInsideRoot;
       try {
-        isInsideHome = file.getCanonicalPath().startsWith(Environment.HOME.getAbsolutePath());
+        isInsideRoot = file.getCanonicalPath().startsWith(getBaseDir().getCanonicalPath());
       } catch (IOException e) {
-        isInsideHome = true;
+        isInsideRoot = false;
       }
-      if (isInsideHome) {
+      if (isInsideRoot) {
         if (file.isDirectory()) {
-          Collections.addAll(pending, file.listFiles());
+          final File[] children = file.listFiles();
+          if (children != null) {
+            Collections.addAll(pending, children);
+          }
         } else {
           if (file.getName().toLowerCase(Locale.ROOT).contains(query)) {
             includeFile(result, null, file);
@@ -279,7 +297,8 @@ public class IDEDocumentsProvider extends DocumentsProvider {
     } else if (file.canWrite()) {
       flags |= Document.FLAG_SUPPORTS_WRITE;
     }
-    if (file.getParentFile().canWrite()) {
+    final File parent = file.getParentFile();
+    if (parent != null && parent.canWrite()) {
       flags |= Document.FLAG_SUPPORTS_DELETE;
     }
 
@@ -302,12 +321,30 @@ public class IDEDocumentsProvider extends DocumentsProvider {
   /**
    * Get the file given a document id (the reverse of {@link #getDocIdForFile(File)}).
    */
-  private static File getFileForDocId(String docId) throws FileNotFoundException {
+  private File getFileForDocId(String docId) throws FileNotFoundException {
     final File f = new File(docId);
     if (!f.exists()) {
       throw new FileNotFoundException(f.getAbsolutePath() + " not found");
     }
+    if (!isInsideBaseDir(f)) {
+      throw new FileNotFoundException(docId + " is outside the exposed root");
+    }
     return f;
+  }
+
+  /**
+   * Whether the given file resolves to a location inside the exposed root. Symlinks are resolved
+   * first so a link cannot be used to hand out a descriptor for a file elsewhere on the device.
+   */
+  private boolean isInsideBaseDir(File file) {
+    try {
+      final String base = getBaseDir().getCanonicalPath();
+      final String target = file.getCanonicalPath();
+      return target.equals(base) || target.startsWith(base + "/");
+    } catch (IOException e) {
+      LOG.warn("Unable to resolve {} against the exposed root", file, e);
+      return false;
+    }
   }
 
   private static String getMimeType(File file) {
