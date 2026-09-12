@@ -15,22 +15,25 @@
  *   along with AndroidIDE.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.itsaky.androidide.ai.tools
+package com.itsaky.androidide.ai.provider
 
-import com.itsaky.androidide.ai.model.ToolSpec
+import com.google.gson.JsonObject
 
-object ToolRegistry {
+object PromptCache {
 
-  private val tools: Map<String, AiTool> = listOf(
-    ReadFileTool(),
-    WriteFileTool(),
-    EditFileTool(),
-    RunShellTool(),
-    WebSearchTool(),
-    WebFetchTool()
-  ).associateBy { it.spec.name }
+  private const val CHARS_PER_TOKEN = 4
+  private const val MIN_CACHEABLE_TOKENS = 1024
 
-  fun specs(): List<ToolSpec> = tools.values.map { it.spec }
+  const val MIN_CACHEABLE_CHARS = MIN_CACHEABLE_TOKENS * CHARS_PER_TOKEN
 
-  fun find(name: String): AiTool? = tools[name]
+  fun isWorthCaching(text: String): Boolean = text.length >= MIN_CACHEABLE_CHARS
+
+  fun isWorthCaching(vararg parts: String): Boolean =
+    parts.sumOf { it.length } >= MIN_CACHEABLE_CHARS
+
+  fun ephemeral(): JsonObject {
+    val control = JsonObject()
+    control.addProperty("type", "ephemeral")
+    return control
+  }
 }

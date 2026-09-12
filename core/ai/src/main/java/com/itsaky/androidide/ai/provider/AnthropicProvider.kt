@@ -109,12 +109,21 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
       ?: payload.getAsJsonObject("message")?.getAsJsonObject("usage")
       ?: return current
 
-    val input = usage.get("input_tokens")?.takeIf { it.isJsonPrimitive }?.asInt
+    val cacheRead = usage.get("cache_read_input_tokens")?.takeIf { it.isJsonPrimitive }?.asInt
+    val cacheWrite = usage.get("cache_creation_input_tokens")?.takeIf { it.isJsonPrimitive }?.asInt
+    val uncached = usage.get("input_tokens")?.takeIf { it.isJsonPrimitive }?.asInt
     val output = usage.get("output_tokens")?.takeIf { it.isJsonPrimitive }?.asInt
+
+    val input = if (uncached == null) {
+      null
+    } else {
+      uncached + (cacheRead ?: 0) + (cacheWrite ?: 0)
+    }
 
     return TokenUsage(
       inputTokens = input ?: current.inputTokens,
-      outputTokens = output ?: current.outputTokens
+      outputTokens = output ?: current.outputTokens,
+      cachedInputTokens = cacheRead ?: current.cachedInputTokens
     )
   }
 
@@ -227,8 +236,23 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
     body.addProperty("stream", true)
     body.addProperty("max_tokens", request.maxTokens)
 
+    val toolsText = request.tools.joinToString("") { spec ->
+      spec.name + spec.description + spec.parametersSchemaJson
+    }
+
     request.systemPrompt?.takeIf { it.isNotBlank() }?.let { prompt ->
-      body.addProperty("system", prompt)
+      if (config.promptCaching && PromptCache.isWorthCaching(toolsText, prompt)) {
+        val block = JsonObject()
+        block.addProperty("type", "text")
+        block.addProperty("text", prompt)
+        block.add("cache_control", PromptCache.ephemeral())
+
+        val system = JsonArray()
+        system.add(block)
+        body.add("system", system)
+      } else {
+        body.addProperty("system", prompt)
+      }
     }
 
     if (request.thinkingLevel.isEnabled) {
@@ -243,21 +267,50 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
 
     val messages = JsonArray()
     request.messages.forEach { message -> appendMessage(messages, message) }
+    if (config.promptCaching) {
+      markCacheBreakpoint(messages)
+    }
     body.add("messages", messages)
 
     if (request.tools.isNotEmpty()) {
       val tools = JsonArray()
-      request.tools.forEach { spec ->
+      request.tools.forEachIndexed { index, spec ->
         val tool = JsonObject()
         tool.addProperty("name", spec.name)
         tool.addProperty("description", spec.description)
         tool.add("input_schema", JsonParser.parseString(spec.parametersSchemaJson))
+        if (config.promptCaching &&
+          index == request.tools.lastIndex &&
+          PromptCache.isWorthCaching(toolsText)
+        ) {
+          tool.add("cache_control", PromptCache.ephemeral())
+        }
         tools.add(tool)
       }
       body.add("tools", tools)
     }
 
     return body
+  }
+
+  private fun markCacheBreakpoint(messages: JsonArray) {
+    val index = messages.indexOfLast { element ->
+      val entry = element.takeIf { it.isJsonObject }?.asJsonObject
+      entry != null && entry.get("role")?.asString == "assistant"
+    }
+    if (index < 0) {
+      return
+    }
+
+    val blocks = messages[index].asJsonObject.getAsJsonArray("content") ?: return
+    val last = blocks.lastOrNull()?.takeIf { it.isJsonObject }?.asJsonObject ?: return
+
+    val cacheable = messages.take(index + 1).sumOf { it.toString().length }
+    if (cacheable < PromptCache.MIN_CACHEABLE_CHARS) {
+      return
+    }
+
+    last.add("cache_control", PromptCache.ephemeral())
   }
 
   private fun appendMessage(messages: JsonArray, message: ChatMessage) {

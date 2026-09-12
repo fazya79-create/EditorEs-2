@@ -23,14 +23,16 @@ import kotlinx.coroutines.flow.Flow
 
 enum class ProviderKind {
   OPENAI,
-  ANTHROPIC
+  ANTHROPIC,
+  GOOGLE
 }
 
 data class ProviderConfig(
   val kind: ProviderKind,
   val baseUrl: String,
   val apiKey: String,
-  val model: String
+  val model: String,
+  val promptCaching: Boolean = true
 )
 
 interface LlmProvider {

@@ -20,9 +20,12 @@ package com.itsaky.androidide.ai.prefs
 import android.content.Context
 import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.provider.AnthropicProvider
+import com.itsaky.androidide.ai.provider.ContextWindows
+import com.itsaky.androidide.ai.provider.GoogleProvider
 import com.itsaky.androidide.ai.provider.OpenAiProvider
 import com.itsaky.androidide.ai.provider.ProviderConfig
 import com.itsaky.androidide.ai.provider.ProviderKind
+import com.itsaky.androidide.ai.search.SearchProviderKind
 import com.itsaky.androidide.preferences.internal.prefManager
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -33,26 +36,38 @@ object AiPreferences {
   const val OPENAI_MODEL = "ide.ai.openai.model"
   const val ANTHROPIC_BASE_URL = "ide.ai.anthropic.baseUrl"
   const val ANTHROPIC_MODEL = "ide.ai.anthropic.model"
+  const val GOOGLE_BASE_URL = "ide.ai.google.baseUrl"
+  const val GOOGLE_MODEL = "ide.ai.google.model"
   const val YOLO_MODE = "ide.ai.yoloMode"
   const val SHELL_TIMEOUT = "ide.ai.shellTimeoutSeconds"
   const val OPENAI_THINKING = "ide.ai.openai.thinking"
   const val ANTHROPIC_THINKING = "ide.ai.anthropic.thinking"
+  const val GOOGLE_THINKING = "ide.ai.google.thinking"
   const val MAX_TOOL_ROUNDS = "ide.ai.maxToolRounds"
   const val AUTO_COMPACT = "ide.ai.autoCompact"
   const val COMPACT_THRESHOLD = "ide.ai.compactThresholdPercent"
   const val OPENAI_CONTEXT_WINDOW = "ide.ai.openai.contextWindow"
   const val ANTHROPIC_CONTEXT_WINDOW = "ide.ai.anthropic.contextWindow"
+  const val GOOGLE_CONTEXT_WINDOW = "ide.ai.google.contextWindow"
+  const val PROMPT_CACHING = "ide.ai.promptCaching"
+  const val SEARCH_PROVIDER = "ide.ai.search.provider"
+  const val SEARCH_RESULT_LIMIT = "ide.ai.search.resultLimit"
 
   const val SECRET_OPENAI_KEY = "openai.apiKey"
   const val SECRET_ANTHROPIC_KEY = "anthropic.apiKey"
+  const val SECRET_GOOGLE_KEY = "google.apiKey"
+  const val SECRET_TAVILY_KEY = "tavily.apiKey"
+  const val SECRET_BRAVE_KEY = "brave.apiKey"
 
   const val PROVIDER_OPENAI = 0
   const val PROVIDER_ANTHROPIC = 1
+  const val PROVIDER_GOOGLE = 2
 
   const val DEFAULT_SHELL_TIMEOUT = 120
   const val DEFAULT_MAX_TOOL_ROUNDS = 25
   const val DEFAULT_COMPACT_THRESHOLD = 80
   const val DEFAULT_CONTEXT_WINDOW = 200_000
+  const val DEFAULT_SEARCH_RESULT_LIMIT = 5
   const val UNLIMITED_TOOL_ROUNDS = 0
 
   var providerIndex: Int
@@ -89,10 +104,30 @@ object AiPreferences {
       prefManager.putString(ANTHROPIC_MODEL, value)
     }
 
+  var googleBaseUrl: String
+    get() = prefManager.getString(GOOGLE_BASE_URL, GoogleProvider.DEFAULT_BASE_URL)
+      .ifBlank { GoogleProvider.DEFAULT_BASE_URL }
+    set(value) {
+      prefManager.putString(GOOGLE_BASE_URL, value)
+    }
+
+  var googleModel: String
+    get() = prefManager.getString(GOOGLE_MODEL, GoogleProvider.DEFAULT_MODEL)
+      .ifBlank { GoogleProvider.DEFAULT_MODEL }
+    set(value) {
+      prefManager.putString(GOOGLE_MODEL, value)
+    }
+
   var yoloMode: Boolean
     get() = prefManager.getBoolean(YOLO_MODE, false)
     set(value) {
       prefManager.putBoolean(YOLO_MODE, value)
+    }
+
+  var promptCaching: Boolean
+    get() = prefManager.getBoolean(PROMPT_CACHING, true)
+    set(value) {
+      prefManager.putBoolean(PROMPT_CACHING, value)
     }
 
   var shellTimeoutSeconds: Int
@@ -119,9 +154,30 @@ object AiPreferences {
       prefManager.putInt(COMPACT_THRESHOLD, value)
     }
 
+  var searchProviderIndex: Int
+    get() = prefManager.getInt(SEARCH_PROVIDER, SearchProviderKind.TAVILY.ordinal)
+    set(value) {
+      prefManager.putInt(SEARCH_PROVIDER, value)
+    }
+
+  var searchResultLimit: Int
+    get() = prefManager.getInt(SEARCH_RESULT_LIMIT, DEFAULT_SEARCH_RESULT_LIMIT)
+    set(value) {
+      prefManager.putInt(SEARCH_RESULT_LIMIT, value)
+    }
+
+  fun searchProviderKind(): SearchProviderKind =
+    SearchProviderKind.entries.getOrElse(searchProviderIndex) { SearchProviderKind.TAVILY }
+
+  fun searchApiKeyPrefKey(kind: SearchProviderKind): String = when (kind) {
+    SearchProviderKind.TAVILY -> SECRET_TAVILY_KEY
+    SearchProviderKind.BRAVE -> SECRET_BRAVE_KEY
+  }
+
   fun contextWindowPrefKey(kind: ProviderKind): String = when (kind) {
     ProviderKind.ANTHROPIC -> ANTHROPIC_CONTEXT_WINDOW
     ProviderKind.OPENAI -> OPENAI_CONTEXT_WINDOW
+    ProviderKind.GOOGLE -> GOOGLE_CONTEXT_WINDOW
   }
 
   fun contextWindowOf(kind: ProviderKind): Int =
@@ -131,11 +187,20 @@ object AiPreferences {
     prefManager.putInt(contextWindowPrefKey(kind), tokens)
   }
 
+  fun applyModelContextWindow(kind: ProviderKind, model: String, reported: Int): Int {
+    val window = reported.takeIf { it > 0 } ?: ContextWindows.of(kind, model)
+    if (window > 0) {
+      setContextWindowOf(kind, window)
+    }
+    return window
+  }
+
   fun effectiveCompactThreshold(): Int =
     if (autoCompact) compactThresholdPercent else 0
 
   fun providerKind(): ProviderKind = when (providerIndex) {
     PROVIDER_ANTHROPIC -> ProviderKind.ANTHROPIC
+    PROVIDER_GOOGLE -> ProviderKind.GOOGLE
     else -> ProviderKind.OPENAI
   }
 
@@ -152,6 +217,7 @@ object AiPreferences {
   fun thinkingPrefKey(kind: ProviderKind): String = when (kind) {
     ProviderKind.ANTHROPIC -> ANTHROPIC_THINKING
     ProviderKind.OPENAI -> OPENAI_THINKING
+    ProviderKind.GOOGLE -> GOOGLE_THINKING
   }
 
   fun thinkingLevelOf(kind: ProviderKind): ThinkingLevel {
@@ -166,43 +232,36 @@ object AiPreferences {
   fun modelOf(kind: ProviderKind): String = when (kind) {
     ProviderKind.ANTHROPIC -> anthropicModel
     ProviderKind.OPENAI -> openAiModel
+    ProviderKind.GOOGLE -> googleModel
   }
 
   fun setModelOf(kind: ProviderKind, model: String) {
     when (kind) {
       ProviderKind.ANTHROPIC -> anthropicModel = model
       ProviderKind.OPENAI -> openAiModel = model
+      ProviderKind.GOOGLE -> googleModel = model
     }
   }
 
   fun baseUrlOf(kind: ProviderKind): String = when (kind) {
     ProviderKind.ANTHROPIC -> anthropicBaseUrl
     ProviderKind.OPENAI -> openAiBaseUrl
+    ProviderKind.GOOGLE -> googleBaseUrl
   }
 
   fun apiKeyPrefKey(kind: ProviderKind): String = when (kind) {
     ProviderKind.ANTHROPIC -> SECRET_ANTHROPIC_KEY
     ProviderKind.OPENAI -> SECRET_OPENAI_KEY
+    ProviderKind.GOOGLE -> SECRET_GOOGLE_KEY
   }
 
   fun providerConfig(context: Context): ProviderConfig = providerConfig(context, providerKind())
 
-  fun providerConfig(context: Context, kind: ProviderKind): ProviderConfig {
-    val apiKey = SecretStore(context).get(apiKeyPrefKey(kind))
-    return when (kind) {
-      ProviderKind.ANTHROPIC -> ProviderConfig(
-        kind = kind,
-        baseUrl = anthropicBaseUrl,
-        apiKey = apiKey,
-        model = anthropicModel
-      )
-
-      ProviderKind.OPENAI -> ProviderConfig(
-        kind = kind,
-        baseUrl = openAiBaseUrl,
-        apiKey = apiKey,
-        model = openAiModel
-      )
-    }
-  }
+  fun providerConfig(context: Context, kind: ProviderKind): ProviderConfig = ProviderConfig(
+    kind = kind,
+    baseUrl = baseUrlOf(kind),
+    apiKey = SecretStore(context).get(apiKeyPrefKey(kind)),
+    model = modelOf(kind),
+    promptCaching = promptCaching
+  )
 }

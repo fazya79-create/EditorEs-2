@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
+import java.net.URL
 
 class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
 
@@ -100,9 +101,16 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
     val chunk = runCatching { JsonParser.parseString(event.data).asJsonObject }.getOrNull()
       ?: return null
     val usage = chunk.getAsJsonObject("usage") ?: return null
+    val cached = usage.getAsJsonObject("prompt_tokens_details")
+      ?.get("cached_tokens")
+      ?.takeIf { it.isJsonPrimitive }
+      ?.asInt
+      ?: 0
+
     return TokenUsage(
       inputTokens = usage.get("prompt_tokens")?.takeIf { it.isJsonPrimitive }?.asInt ?: 0,
-      outputTokens = usage.get("completion_tokens")?.takeIf { it.isJsonPrimitive }?.asInt ?: 0
+      outputTokens = usage.get("completion_tokens")?.takeIf { it.isJsonPrimitive }?.asInt ?: 0,
+      cachedInputTokens = cached
     )
   }
 
@@ -199,6 +207,18 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
       body.addProperty("reasoning_effort", request.thinkingLevel.wireValue)
     }
 
+    val toolsText = request.tools.joinToString("") { spec ->
+      spec.name + spec.description + spec.parametersSchemaJson
+    }
+    val prefix = request.systemPrompt.orEmpty() + toolsText
+
+    if (config.promptCaching &&
+      isOfficialEndpoint() &&
+      PromptCache.isWorthCaching(prefix)
+    ) {
+      body.addProperty("prompt_cache_key", cacheKey(request.model, prefix))
+    }
+
     val messages = JsonArray()
     request.systemPrompt?.takeIf { it.isNotBlank() }?.let { prompt ->
       messages.add(textMessage("system", prompt))
@@ -272,6 +292,15 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
     return message
   }
 
+  private fun isOfficialEndpoint(): Boolean =
+    runCatching { URL(config.baseUrl).host.lowercase() }
+      .getOrNull()
+      ?.let { host -> host == OPENAI_HOST || host.endsWith(".$OPENAI_HOST") }
+      ?: false
+
+  private fun cacheKey(model: String, prefix: String): String =
+    "ide-ai-$model-${prefix.hashCode().toUInt().toString(HASH_RADIX)}"
+
   private class PartialCall(val index: Int) {
     var id: String = ""
     var name: String = ""
@@ -284,6 +313,9 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
     const val DEFAULT_MODEL = "gpt-4o-mini"
 
     private const val DONE = "[DONE]"
+
+    private const val HASH_RADIX = 36
+    private const val OPENAI_HOST = "api.openai.com"
 
     private val REASONING_FIELDS = listOf("reasoning_content", "reasoning")
   }

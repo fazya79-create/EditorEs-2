@@ -27,7 +27,8 @@ enum class ChatRole {
 data class ToolCall(
   val id: String,
   val name: String,
-  val argumentsJson: String
+  val argumentsJson: String,
+  val signature: String = ""
 )
 
 data class ToolResult(
@@ -90,7 +91,8 @@ enum class StopReason {
 
 data class TokenUsage(
   val inputTokens: Int = 0,
-  val outputTokens: Int = 0
+  val outputTokens: Int = 0,
+  val cachedInputTokens: Int = 0
 ) {
 
   val total: Int

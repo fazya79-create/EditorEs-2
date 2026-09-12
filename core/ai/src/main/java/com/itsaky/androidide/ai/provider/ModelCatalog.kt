@@ -17,6 +17,7 @@
 
 package com.itsaky.androidide.ai.provider
 
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.itsaky.androidide.ai.net.HttpStatusException
 import kotlinx.coroutines.Dispatchers
@@ -25,17 +26,23 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
+data class ModelInfo(
+  val id: String,
+  val contextWindow: Int = 0
+)
+
 object ModelCatalog {
 
   private const val CONNECT_TIMEOUT = 20_000
   private const val READ_TIMEOUT = 30_000
   private const val PAGE_LIMIT = 1000
 
-  suspend fun fetch(config: ProviderConfig): List<String> = withContext(Dispatchers.IO) {
+  suspend fun fetch(config: ProviderConfig): List<ModelInfo> = withContext(Dispatchers.IO) {
     val base = config.baseUrl.trimEnd('/')
     val url = when (config.kind) {
       ProviderKind.ANTHROPIC -> "$base/models?limit=$PAGE_LIMIT"
       ProviderKind.OPENAI -> "$base/models"
+      ProviderKind.GOOGLE -> "$base/models?pageSize=$PAGE_LIMIT"
     }
 
     val headers = when (config.kind) {
@@ -45,9 +52,11 @@ object ModelCatalog {
       )
 
       ProviderKind.OPENAI -> mapOf("Authorization" to "Bearer ${config.apiKey}")
+
+      ProviderKind.GOOGLE -> mapOf("x-goog-api-key" to config.apiKey)
     }
 
-    parse(get(url, headers))
+    parse(config.kind, get(url, headers))
   }
 
   private fun get(url: String, headers: Map<String, String>): String {
@@ -75,22 +84,69 @@ object ModelCatalog {
     }
   }
 
-  private fun parse(body: String): List<String> {
+  internal fun parse(kind: ProviderKind, body: String): List<ModelInfo> {
     val root = runCatching { JsonParser.parseString(body).asJsonObject }.getOrNull()
       ?: return emptyList()
 
-    return root.getAsJsonArray("data")
-      ?.mapNotNull { element ->
-        element.takeIf { it.isJsonObject }
-          ?.asJsonObject
-          ?.get("id")
-          ?.takeIf { it.isJsonPrimitive }
-          ?.asString
+    val entries = when (kind) {
+      ProviderKind.GOOGLE -> root.getAsJsonArray("models")
+      else -> root.getAsJsonArray("data")
+    } ?: return emptyList()
+
+    return entries.mapNotNull { element ->
+      val entry = element.takeIf { it.isJsonObject }?.asJsonObject ?: return@mapNotNull null
+      when (kind) {
+        ProviderKind.GOOGLE -> googleModel(entry)
+        ProviderKind.ANTHROPIC -> anthropicModel(entry)
+        ProviderKind.OPENAI -> openAiModel(entry)
       }
-      ?.filter { it.isNotBlank() }
-      ?.distinct()
-      ?: emptyList()
+    }
+      .filter { it.id.isNotBlank() }
+      .distinctBy { it.id }
   }
 
+  private fun googleModel(entry: JsonObject): ModelInfo? {
+    val methods = entry.getAsJsonArray("supportedGenerationMethods")
+      ?.mapNotNull { it.takeIf { method -> method.isJsonPrimitive }?.asString }
+      .orEmpty()
+    if (methods.isNotEmpty() && GENERATE_CONTENT !in methods) {
+      return null
+    }
+
+    val name = entry.string("name")?.substringAfter("models/") ?: return null
+    return ModelInfo(id = name, contextWindow = entry.positiveInt("inputTokenLimit"))
+  }
+
+  private fun anthropicModel(entry: JsonObject): ModelInfo? {
+    val id = entry.string("id") ?: return null
+    return ModelInfo(id = id, contextWindow = entry.positiveInt("max_input_tokens"))
+  }
+
+  private fun openAiModel(entry: JsonObject): ModelInfo? {
+    val id = entry.string("id") ?: return null
+    val window = OPENAI_CONTEXT_FIELDS.firstNotNullOfOrNull { field ->
+      entry.positiveInt(field).takeIf { it > 0 }
+    } ?: entry.getAsJsonObject("top_provider")?.positiveInt("context_length") ?: 0
+
+    return ModelInfo(id = id, contextWindow = window)
+  }
+
+  private fun JsonObject.string(name: String): String? =
+    get(name)?.takeIf { it.isJsonPrimitive }?.asString?.takeIf { it.isNotBlank() }
+
+  private fun JsonObject.positiveInt(name: String): Int =
+    get(name)?.takeIf { it.isJsonPrimitive }
+      ?.let { runCatching { it.asInt }.getOrNull() }
+      ?.takeIf { it > 0 }
+      ?: 0
+
   private const val ANTHROPIC_VERSION = "2023-06-01"
+  private const val GENERATE_CONTENT = "generateContent"
+
+  private val OPENAI_CONTEXT_FIELDS = listOf(
+    "context_window",
+    "context_length",
+    "max_context_length",
+    "max_input_tokens"
+  )
 }

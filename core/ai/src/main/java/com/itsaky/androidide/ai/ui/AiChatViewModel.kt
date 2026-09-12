@@ -28,6 +28,7 @@ import com.itsaky.androidide.ai.agent.SystemPrompt
 import com.itsaky.androidide.ai.model.ChatMessage
 import com.itsaky.androidide.ai.prefs.AiPreferences
 import com.itsaky.androidide.ai.provider.AnthropicProvider
+import com.itsaky.androidide.ai.provider.GoogleProvider
 import com.itsaky.androidide.ai.provider.LlmProvider
 import com.itsaky.androidide.ai.provider.ProviderConfig
 import com.itsaky.androidide.ai.provider.ProviderKind
@@ -242,7 +243,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
         is AgentEvent.UsageUpdated -> {
           contextUsage.postValue(
             if (event.contextWindow > 0) {
-              ContextUsage(event.usage.total, event.contextWindow)
+              ContextUsage(event.usage.total, event.contextWindow, event.usage.cachedInputTokens)
             } else {
               null
             }
@@ -280,6 +281,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   private fun createProvider(config: ProviderConfig): LlmProvider = when (config.kind) {
     ProviderKind.ANTHROPIC -> AnthropicProvider(config)
     ProviderKind.OPENAI -> OpenAiProvider(config)
+    ProviderKind.GOOGLE -> GoogleProvider(config)
   }
 
   private fun finishStreaming() {

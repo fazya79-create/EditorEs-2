@@ -93,10 +93,18 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
         binding.contextUsage.visibility = View.GONE
       } else {
         binding.contextUsage.visibility = View.VISIBLE
-        binding.contextUsage.text = getString(
-          com.itsaky.androidide.resources.R.string.msg_ai_context_usage,
-          usage.percent
-        )
+        binding.contextUsage.text = if (usage.cachedPercent > 0) {
+          getString(
+            com.itsaky.androidide.resources.R.string.msg_ai_context_usage_cached,
+            usage.percent,
+            usage.cachedPercent
+          )
+        } else {
+          getString(
+            com.itsaky.androidide.resources.R.string.msg_ai_context_usage,
+            usage.percent
+          )
+        }
       }
     }
   }

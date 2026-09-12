@@ -67,8 +67,11 @@ enum class NoticeKind {
   COMPACTED
 }
 
-data class ContextUsage(val used: Int, val window: Int) {
+data class ContextUsage(val used: Int, val window: Int, val cached: Int = 0) {
 
   val percent: Int
     get() = if (window <= 0) 0 else ((used.toLong() * 100) / window).toInt().coerceIn(0, 100)
+
+  val cachedPercent: Int
+    get() = if (used <= 0) 0 else ((cached.toLong() * 100) / used).toInt().coerceIn(0, 100)
 }

@@ -27,10 +27,13 @@ import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.prefs.AiPreferences
 import com.itsaky.androidide.ai.prefs.SecretStore
 import com.itsaky.androidide.ai.provider.ModelCatalog
+import com.itsaky.androidide.ai.provider.ModelInfo
 import com.itsaky.androidide.ai.provider.ProviderKind
+import com.itsaky.androidide.ai.search.SearchProviderKind
 import com.itsaky.androidide.resources.R.string
 import com.itsaky.androidide.utils.DialogUtils
 import com.itsaky.androidide.utils.flashError
+import com.itsaky.androidide.utils.flashSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -48,13 +51,14 @@ class AiPreferencesScreen(
   init {
     addPreference(AiProviderGroup())
 
-    if (AiPreferences.providerKind() == ProviderKind.ANTHROPIC) {
-      addPreference(AnthropicGroup())
-    } else {
-      addPreference(OpenAiGroup())
+    when (AiPreferences.providerKind()) {
+      ProviderKind.ANTHROPIC -> addPreference(AnthropicGroup())
+      ProviderKind.GOOGLE -> addPreference(GoogleGroup())
+      ProviderKind.OPENAI -> addPreference(OpenAiGroup())
     }
 
     addPreference(AiSafetyGroup())
+    addPreference(AiSearchGroup())
     addPreference(AiContextGroup())
   }
 }
@@ -116,6 +120,35 @@ private class AiSafetyGroup(
 }
 
 @Parcelize
+private class GoogleGroup(
+  override val key: String = "idepref_ai_google",
+  override val title: Int = string.idepref_ai_provider_google,
+  override val children: List<IPreference> = mutableListOf(),
+) : IPreferenceGroup() {
+
+  init {
+    addPreference(GoogleApiKeyPreference())
+    addPreference(GoogleModelPreference())
+    addPreference(GoogleThinkingPreference())
+    addPreference(GoogleBaseUrlPreference())
+  }
+}
+
+@Parcelize
+private class AiSearchGroup(
+  override val key: String = "idepref_ai_search",
+  override val title: Int = string.idepref_ai_search_group,
+  override val children: List<IPreference> = mutableListOf(),
+) : IPreferenceGroup() {
+
+  init {
+    addPreference(AiSearchProviderPreference())
+    addPreference(AiSearchApiKeyPreference())
+    addPreference(AiSearchResultLimitPreference())
+  }
+}
+
+@Parcelize
 private class AiContextGroup(
   override val key: String = "idepref_ai_context",
   override val title: Int = string.idepref_ai_context_group,
@@ -126,6 +159,7 @@ private class AiContextGroup(
     addPreference(AiAutoCompactPreference())
     addPreference(AiCompactThresholdPreference())
     addPreference(AiContextWindowPreference())
+    addPreference(AiPromptCachingPreference())
   }
 }
 
@@ -152,6 +186,11 @@ private class AiProviderPreference(
         preference.context.getString(string.idepref_ai_provider_anthropic),
         current == AiPreferences.PROVIDER_ANTHROPIC,
         AiPreferences.PROVIDER_ANTHROPIC
+      ),
+      PreferenceChoices.Entry(
+        preference.context.getString(string.idepref_ai_provider_google),
+        current == AiPreferences.PROVIDER_GOOGLE,
+        AiPreferences.PROVIDER_GOOGLE
       )
     )
   }
@@ -172,10 +211,10 @@ private class AiProviderPreference(
 
   private fun updateSummary(preference: Preference) {
     preference.summary = preference.context.getString(
-      if (AiPreferences.providerIndex == AiPreferences.PROVIDER_ANTHROPIC) {
-        string.idepref_ai_provider_anthropic
-      } else {
-        string.idepref_ai_provider_openai
+      when (AiPreferences.providerIndex) {
+        AiPreferences.PROVIDER_ANTHROPIC -> string.idepref_ai_provider_anthropic
+        AiPreferences.PROVIDER_GOOGLE -> string.idepref_ai_provider_google
+        else -> string.idepref_ai_provider_openai
       }
     )
   }
@@ -269,16 +308,15 @@ private abstract class ModelPreference : SimplePreference() {
     return true
   }
 
-  private fun showPicker(preference: Preference, models: List<String>) {
+  private fun showPicker(preference: Preference, models: List<ModelInfo>) {
     val context = preference.context
     val current = AiPreferences.modelOf(providerKind)
-    val labels = models.toTypedArray<CharSequence>()
+    val labels = models.map { it.id }.toTypedArray<CharSequence>()
 
     DialogUtils.newMaterialDialogBuilder(context)
       .setTitle(title)
-      .setSingleChoiceItems(labels, models.indexOf(current)) { dialog, which ->
-        AiPreferences.setModelOf(providerKind, models[which])
-        preference.summary = models[which]
+      .setSingleChoiceItems(labels, models.indexOfFirst { it.id == current }) { dialog, which ->
+        selectModel(preference, models[which])
         dialog.dismiss()
       }
       .setNeutralButton(string.idepref_ai_model_manual) { dialog, _ ->
@@ -287,6 +325,22 @@ private abstract class ModelPreference : SimplePreference() {
       }
       .setNegativeButton(android.R.string.cancel, null)
       .show()
+  }
+
+  private fun selectModel(preference: Preference, model: ModelInfo) {
+    AiPreferences.setModelOf(providerKind, model.id)
+    preference.summary = model.id
+
+    val window = AiPreferences.applyModelContextWindow(
+      kind = providerKind,
+      model = model.id,
+      reported = model.contextWindow
+    )
+    if (window > 0) {
+      flashSuccess(
+        preference.context.getString(string.msg_ai_context_window_detected, model.id, window)
+      )
+    }
   }
 
   private fun showManualEntry(preference: Preference) {
@@ -303,8 +357,7 @@ private abstract class ModelPreference : SimplePreference() {
       .setPositiveButton(android.R.string.ok) { dialog, _ ->
         val model = input.text?.toString()?.trim().orEmpty()
         if (model.isNotEmpty()) {
-          AiPreferences.setModelOf(providerKind, model)
-          preference.summary = model
+          selectModel(preference, ModelInfo(model))
         }
         dialog.dismiss()
       }
@@ -683,4 +736,172 @@ private class AiAutoCompactPreference(
       }
     )
   }
+}
+
+@Parcelize
+private class GoogleApiKeyPreference(
+  override val key: String = AiPreferences.SECRET_GOOGLE_KEY,
+  override val title: Int = string.idepref_ai_google_key,
+) : ApiKeyPreference() {
+
+  override val providerKind: ProviderKind
+    get() = ProviderKind.GOOGLE
+}
+
+@Parcelize
+private class GoogleModelPreference(
+  override val key: String = AiPreferences.GOOGLE_MODEL,
+  override val title: Int = string.idepref_ai_model,
+) : ModelPreference() {
+
+  override val providerKind: ProviderKind
+    get() = ProviderKind.GOOGLE
+}
+
+@Parcelize
+private class GoogleThinkingPreference(
+  override val key: String = AiPreferences.GOOGLE_THINKING,
+  override val title: Int = string.idepref_ai_thinking,
+) : ThinkingPreference() {
+
+  override val providerKind: ProviderKind
+    get() = ProviderKind.GOOGLE
+}
+
+@Parcelize
+private class GoogleBaseUrlPreference(
+  override val key: String = AiPreferences.GOOGLE_BASE_URL,
+  override val title: Int = string.idepref_ai_base_url,
+) : TextValuePreference() {
+
+  override fun getValue(): String = AiPreferences.googleBaseUrl
+
+  override fun setValue(value: String) {
+    AiPreferences.googleBaseUrl = value
+  }
+}
+
+@Parcelize
+private class AiPromptCachingPreference(
+  override val key: String = AiPreferences.PROMPT_CACHING,
+  override val title: Int = string.idepref_ai_prompt_caching,
+) : SwitchPreference(
+  setValue = { AiPreferences.promptCaching = it },
+  getValue = { AiPreferences.promptCaching }
+) {
+
+  override fun onCreatePreference(context: Context): Preference {
+    return super.onCreatePreference(context).also { updateSummary(it) }
+  }
+
+  override fun onPreferenceChanged(preference: Preference, newValue: Any?): Boolean {
+    return super.onPreferenceChanged(preference, newValue).also { updateSummary(preference) }
+  }
+
+  private fun updateSummary(preference: Preference) {
+    preference.summary = preference.context.getString(
+      if (AiPreferences.promptCaching) {
+        string.idepref_ai_prompt_caching_on
+      } else {
+        string.idepref_ai_prompt_caching_off
+      }
+    )
+  }
+}
+
+@Parcelize
+private class AiSearchProviderPreference(
+  override val key: String = AiPreferences.SEARCH_PROVIDER,
+  override val title: Int = string.idepref_ai_search_provider,
+) : SingleChoicePreference() {
+
+  override fun onCreatePreference(context: Context): Preference {
+    return super.onCreatePreference(context).also { updateSummary(it) }
+  }
+
+  override fun getEntries(preference: Preference): Array<PreferenceChoices.Entry> {
+    val current = AiPreferences.searchProviderKind()
+    return SearchProviderKind.entries.map { kind ->
+      PreferenceChoices.Entry(kind.label, kind == current, kind.ordinal)
+    }.toTypedArray()
+  }
+
+  override fun onChoiceConfirmed(
+    preference: Preference,
+    entry: PreferenceChoices.Entry?,
+    position: Int
+  ) {
+    if (position < 0 || position >= SearchProviderKind.entries.size) {
+      return
+    }
+    AiPreferences.searchProviderIndex = position
+    updateSummary(preference)
+  }
+
+  private fun updateSummary(preference: Preference) {
+    preference.summary = AiPreferences.searchProviderKind().label
+  }
+}
+
+@Parcelize
+private class AiSearchApiKeyPreference(
+  override val key: String = "idepref_ai_search_key",
+  override val title: Int = string.idepref_ai_search_key,
+) : SimplePreference() {
+
+  override fun onCreatePreference(context: Context): Preference {
+    return super.onCreatePreference(context).also { updateSummary(it) }
+  }
+
+  override fun onPreferenceClick(preference: Preference): Boolean {
+    val context = preference.context
+    val store = SecretStore(context.applicationContext)
+    val secretKey = AiPreferences.searchApiKeyPrefKey(AiPreferences.searchProviderKind())
+
+    val input = TextInputEditText(context).apply {
+      inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+      setText(store.get(secretKey))
+    }
+
+    DialogUtils.newMaterialDialogBuilder(context)
+      .setTitle(title)
+      .setView(wrap(context, input))
+      .setNegativeButton(android.R.string.cancel, null)
+      .setPositiveButton(android.R.string.ok) { dialog, _ ->
+        store.put(secretKey, input.text?.toString()?.trim().orEmpty())
+        updateSummary(preference)
+        dialog.dismiss()
+      }
+      .show()
+
+    return true
+  }
+
+  private fun updateSummary(preference: Preference) {
+    val store = SecretStore(preference.context.applicationContext)
+    val secretKey = AiPreferences.searchApiKeyPrefKey(AiPreferences.searchProviderKind())
+    preference.summary = preference.context.getString(
+      if (store.has(secretKey)) string.idepref_ai_key_set else string.idepref_ai_key_missing
+    )
+  }
+}
+
+@Parcelize
+private class AiSearchResultLimitPreference(
+  override val key: String = AiPreferences.SEARCH_RESULT_LIMIT,
+  override val title: Int = string.idepref_ai_search_result_limit,
+) : NumberPreference() {
+
+  override fun getValue(): Int = AiPreferences.searchResultLimit
+
+  override fun setValue(value: Int) {
+    AiPreferences.searchResultLimit = value
+  }
+
+  override fun isValid(value: Int): Boolean = value in 1..10
+
+  override fun summaryOf(context: Context): String = context.getString(
+    string.idepref_ai_search_result_limit_current,
+    AiPreferences.searchResultLimit
+  )
 }

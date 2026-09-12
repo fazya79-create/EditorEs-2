@@ -128,6 +128,7 @@ class ChatAgent(
       }
 
       if (stopReason != StopReason.TOOL_USE || assistant.toolCalls.isEmpty()) {
+        compactIfNeeded(usage, messages)?.let { emit(it) }
         emit(AgentEvent.TurnCompleted)
         return@flow
       }
@@ -149,10 +150,18 @@ class ChatAgent(
       messages += ChatMessage.toolResults(results)
       round++
 
-      if (ContextCompactor.shouldCompact(usage.total, contextWindow, compactThresholdPercent)) {
-        compact(messages)?.let { emit(it) }
-      }
+      compactIfNeeded(usage, messages)?.let { emit(it) }
     }
+  }
+
+  private suspend fun compactIfNeeded(
+    usage: TokenUsage,
+    messages: MutableList<ChatMessage>
+  ): AgentEvent? {
+    if (!ContextCompactor.shouldCompact(usage.total, contextWindow, compactThresholdPercent)) {
+      return null
+    }
+    return compact(messages)
   }
 
   private suspend fun compact(messages: MutableList<ChatMessage>): AgentEvent? {

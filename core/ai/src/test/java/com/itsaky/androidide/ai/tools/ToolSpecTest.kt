@@ -24,11 +24,15 @@ import org.junit.Test
 class ToolSpecTest {
 
   @Test
-  fun `only read_file is auto approved`() {
+  fun `only read-only tools are auto approved`() {
     val mutating = ToolRegistry.specs().filter { it.mutating }.map { it.name }.toSet()
     val readOnly = ToolRegistry.specs().filterNot { it.mutating }.map { it.name }.toSet()
 
-    assertThat(readOnly).containsExactly(ReadFileTool.NAME)
+    assertThat(readOnly).containsExactly(
+      ReadFileTool.NAME,
+      WebSearchTool.NAME,
+      WebFetchTool.NAME
+    )
     assertThat(mutating).containsExactly(
       WriteFileTool.NAME,
       EditFileTool.NAME,

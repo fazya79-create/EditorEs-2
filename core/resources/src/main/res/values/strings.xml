@@ -322,6 +322,7 @@
   <string name="title_ai_notice">Context</string>
   <string name="msg_ai_context_compacted">Older messages were summarised to free up context (%1$d messages replaced).</string>
   <string name="msg_ai_context_usage">Context %1$d%%</string>
+  <string name="msg_ai_context_usage_cached">Context %1$d%% (%2$d%% cached)</string>
   <string name="msg_ai_tool_running">Running\u2026</string>
   <string name="hint_ai_message">Ask about this project\u2026</string>
   <string name="action_ai_send">Send</string>
@@ -387,4 +388,17 @@
   <string name="idepref_ai_compact_threshold_current">%1$d%% of the context window</string>
   <string name="idepref_ai_context_window">Context window</string>
   <string name="idepref_ai_context_window_current">%1$d tokens</string>
+  <string name="idepref_ai_provider_google">Google Gemini</string>
+  <string name="idepref_ai_google_key">Google API key</string>
+  <string name="idepref_ai_google_base_url">Google base URL</string>
+  <string name="idepref_ai_google_model">Google model</string>
+  <string name="idepref_ai_prompt_caching">Prompt caching</string>
+  <string name="idepref_ai_prompt_caching_on">On: stable parts of the request are marked cacheable</string>
+  <string name="idepref_ai_prompt_caching_off">Off: every request is sent without cache hints</string>
+  <string name="idepref_ai_search_group">Web search</string>
+  <string name="idepref_ai_search_provider">Search provider</string>
+  <string name="idepref_ai_search_key">Search API key</string>
+  <string name="idepref_ai_search_result_limit">Results per search</string>
+  <string name="idepref_ai_search_result_limit_current">%1$d results</string>
+  <string name="msg_ai_context_window_detected">Context window for %1$s set to %2$d tokens</string>
 </resources>
