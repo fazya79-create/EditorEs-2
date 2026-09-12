@@ -88,6 +88,18 @@ enum class StopReason {
   ABORTED
 }
 
+data class TokenUsage(
+  val inputTokens: Int = 0,
+  val outputTokens: Int = 0
+) {
+
+  val total: Int
+    get() = inputTokens + outputTokens
+
+  val isEmpty: Boolean
+    get() = inputTokens == 0 && outputTokens == 0
+}
+
 sealed interface ChatStreamEvent {
 
   data class TextDelta(val text: String) : ChatStreamEvent
@@ -98,7 +110,11 @@ sealed interface ChatStreamEvent {
 
   data class ToolCallArgumentsDelta(val index: Int, val json: String) : ChatStreamEvent
 
-  data class Completed(val message: ChatMessage, val stopReason: StopReason) : ChatStreamEvent
+  data class Completed(
+    val message: ChatMessage,
+    val stopReason: StopReason,
+    val usage: TokenUsage = TokenUsage()
+  ) : ChatStreamEvent
 
   data class Failed(val message: String, val cause: Throwable? = null) : ChatStreamEvent
 }

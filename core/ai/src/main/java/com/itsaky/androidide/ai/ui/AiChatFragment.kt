@@ -87,6 +87,18 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
       binding.approvalBar.visibility = if (request == null) View.GONE else View.VISIBLE
       binding.approvalSummary.text = request?.summary.orEmpty()
     }
+
+    viewModel.contextUsage.observe(viewLifecycleOwner) { usage ->
+      if (usage == null) {
+        binding.contextUsage.visibility = View.GONE
+      } else {
+        binding.contextUsage.visibility = View.VISIBLE
+        binding.contextUsage.text = getString(
+          com.itsaky.androidide.resources.R.string.msg_ai_context_usage,
+          usage.percent
+        )
+      }
+    }
   }
 
   override fun onResume() {

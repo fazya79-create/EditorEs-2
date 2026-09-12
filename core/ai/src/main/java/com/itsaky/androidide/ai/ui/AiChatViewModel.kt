@@ -57,6 +57,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   val busy = MutableLiveData(false)
   val approvalRequest = MutableLiveData<ToolApprovalRequest?>(null)
   val yoloMode = MutableLiveData(AiPreferences.yoloMode)
+  val contextUsage = MutableLiveData<ContextUsage?>(null)
 
   val isBusy: Boolean
     get() = busy.value == true
@@ -76,6 +77,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     }
     history.clear()
     items.clear()
+    contextUsage.value = null
     publish()
   }
 
@@ -109,7 +111,10 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       gate = gate,
       model = config.model,
       systemPrompt = SystemPrompt.build(),
-      thinkingLevel = AiPreferences.thinkingLevel
+      thinkingLevel = AiPreferences.thinkingLevel,
+      maxToolRounds = AiPreferences.maxToolRounds,
+      contextWindow = AiPreferences.contextWindowOf(config.kind),
+      compactThresholdPercent = AiPreferences.effectiveCompactThreshold()
     )
 
     busy.value = true
@@ -233,6 +238,22 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
         }
 
         is AgentEvent.Failed -> append(ChatEntry.Error(nextId(), event.message))
+
+        is AgentEvent.UsageUpdated -> {
+          contextUsage.postValue(
+            if (event.contextWindow > 0) {
+              ContextUsage(event.usage.total, event.contextWindow)
+            } else {
+              null
+            }
+          )
+        }
+
+        is AgentEvent.ContextCompacted -> {
+          history.clear()
+          history += event.history
+          append(ChatEntry.Notice(nextId(), NoticeKind.COMPACTED, event.replaced))
+        }
 
         AgentEvent.TurnCompleted -> finishStreaming()
       }

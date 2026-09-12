@@ -99,6 +99,17 @@ class AiChatAdapter(private val onToggleExpanded: (Long) -> Unit) :
           )
         }
 
+        is ChatEntry.Notice -> {
+          binding.role.setText(R.string.title_ai_notice)
+          binding.message.text = when (entry.kind) {
+            NoticeKind.COMPACTED ->
+              context.getString(R.string.msg_ai_context_compacted, entry.count)
+          }
+          binding.root.setCardBackgroundColor(
+            context.resolveAttr(com.google.android.material.R.attr.colorSurfaceContainerLow)
+          )
+        }
+
         else -> Unit
       }
     }

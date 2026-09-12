@@ -37,6 +37,11 @@ object AiPreferences {
   const val SHELL_TIMEOUT = "ide.ai.shellTimeoutSeconds"
   const val OPENAI_THINKING = "ide.ai.openai.thinking"
   const val ANTHROPIC_THINKING = "ide.ai.anthropic.thinking"
+  const val MAX_TOOL_ROUNDS = "ide.ai.maxToolRounds"
+  const val AUTO_COMPACT = "ide.ai.autoCompact"
+  const val COMPACT_THRESHOLD = "ide.ai.compactThresholdPercent"
+  const val OPENAI_CONTEXT_WINDOW = "ide.ai.openai.contextWindow"
+  const val ANTHROPIC_CONTEXT_WINDOW = "ide.ai.anthropic.contextWindow"
 
   const val SECRET_OPENAI_KEY = "openai.apiKey"
   const val SECRET_ANTHROPIC_KEY = "anthropic.apiKey"
@@ -45,6 +50,10 @@ object AiPreferences {
   const val PROVIDER_ANTHROPIC = 1
 
   const val DEFAULT_SHELL_TIMEOUT = 120
+  const val DEFAULT_MAX_TOOL_ROUNDS = 25
+  const val DEFAULT_COMPACT_THRESHOLD = 80
+  const val DEFAULT_CONTEXT_WINDOW = 200_000
+  const val UNLIMITED_TOOL_ROUNDS = 0
 
   var providerIndex: Int
     get() = prefManager.getInt(PROVIDER, PROVIDER_OPENAI)
@@ -91,6 +100,39 @@ object AiPreferences {
     set(value) {
       prefManager.putInt(SHELL_TIMEOUT, value)
     }
+
+  var maxToolRounds: Int
+    get() = prefManager.getInt(MAX_TOOL_ROUNDS, DEFAULT_MAX_TOOL_ROUNDS)
+    set(value) {
+      prefManager.putInt(MAX_TOOL_ROUNDS, value)
+    }
+
+  var autoCompact: Boolean
+    get() = prefManager.getBoolean(AUTO_COMPACT, true)
+    set(value) {
+      prefManager.putBoolean(AUTO_COMPACT, value)
+    }
+
+  var compactThresholdPercent: Int
+    get() = prefManager.getInt(COMPACT_THRESHOLD, DEFAULT_COMPACT_THRESHOLD)
+    set(value) {
+      prefManager.putInt(COMPACT_THRESHOLD, value)
+    }
+
+  fun contextWindowPrefKey(kind: ProviderKind): String = when (kind) {
+    ProviderKind.ANTHROPIC -> ANTHROPIC_CONTEXT_WINDOW
+    ProviderKind.OPENAI -> OPENAI_CONTEXT_WINDOW
+  }
+
+  fun contextWindowOf(kind: ProviderKind): Int =
+    prefManager.getInt(contextWindowPrefKey(kind), DEFAULT_CONTEXT_WINDOW)
+
+  fun setContextWindowOf(kind: ProviderKind, tokens: Int) {
+    prefManager.putInt(contextWindowPrefKey(kind), tokens)
+  }
+
+  fun effectiveCompactThreshold(): Int =
+    if (autoCompact) compactThresholdPercent else 0
 
   fun providerKind(): ProviderKind = when (providerIndex) {
     PROVIDER_ANTHROPIC -> ProviderKind.ANTHROPIC

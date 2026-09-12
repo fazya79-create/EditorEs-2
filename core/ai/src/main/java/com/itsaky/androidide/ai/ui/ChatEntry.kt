@@ -55,4 +55,20 @@ sealed interface ChatEntry {
   ) : ChatEntry
 
   data class Error(override val id: Long, val text: String) : ChatEntry
+
+  data class Notice(
+    override val id: Long,
+    val kind: NoticeKind,
+    val count: Int = 0
+  ) : ChatEntry
+}
+
+enum class NoticeKind {
+  COMPACTED
+}
+
+data class ContextUsage(val used: Int, val window: Int) {
+
+  val percent: Int
+    get() = if (window <= 0) 0 else ((used.toLong() * 100) / window).toInt().coerceIn(0, 100)
 }

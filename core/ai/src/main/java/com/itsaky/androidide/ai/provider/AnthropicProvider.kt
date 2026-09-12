@@ -25,6 +25,7 @@ import com.itsaky.androidide.ai.model.ChatRequest
 import com.itsaky.androidide.ai.model.ChatRole
 import com.itsaky.androidide.ai.model.ChatStreamEvent
 import com.itsaky.androidide.ai.model.StopReason
+import com.itsaky.androidide.ai.model.TokenUsage
 import com.itsaky.androidide.ai.model.ToolCall
 import com.itsaky.androidide.ai.net.SseClient
 import com.itsaky.androidide.ai.net.SseEvent
@@ -45,6 +46,7 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
     val reasoning = StringBuilder()
     val blocks = sortedMapOf<Int, PartialBlock>()
     var stopReason = StopReason.END_TURN
+    var usage = TokenUsage()
 
     try {
       SseClient.post(
@@ -57,6 +59,7 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
       ).use { connection ->
         while (isActive) {
           val event = connection.next() ?: break
+          usage = mergeUsage(event, usage)
           if (event.name == EVENT_MESSAGE_STOP) {
             break
           }
@@ -91,11 +94,29 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
     send(
       ChatStreamEvent.Completed(
         message = ChatMessage.assistant(text.toString(), toolCalls, reasoning.toString()),
-        stopReason = stopReason
+        stopReason = stopReason,
+        usage = usage
       )
     )
     close()
   }.flowOn(Dispatchers.IO)
+
+  private fun mergeUsage(event: SseEvent, current: TokenUsage): TokenUsage {
+    val payload = runCatching { JsonParser.parseString(event.data).asJsonObject }.getOrNull()
+      ?: return current
+
+    val usage = payload.getAsJsonObject("usage")
+      ?: payload.getAsJsonObject("message")?.getAsJsonObject("usage")
+      ?: return current
+
+    val input = usage.get("input_tokens")?.takeIf { it.isJsonPrimitive }?.asInt
+    val output = usage.get("output_tokens")?.takeIf { it.isJsonPrimitive }?.asInt
+
+    return TokenUsage(
+      inputTokens = input ?: current.inputTokens,
+      outputTokens = output ?: current.outputTokens
+    )
+  }
 
   private suspend fun ProducerScope<ChatStreamEvent>.handleEvent(
     event: SseEvent,

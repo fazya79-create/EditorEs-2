@@ -319,6 +319,9 @@
   <string name="title_ai_assistant">Assistant</string>
   <string name="title_ai_you">You</string>
   <string name="title_ai_error">Error</string>
+  <string name="title_ai_notice">Context</string>
+  <string name="msg_ai_context_compacted">Older messages were summarised to free up context (%1$d messages replaced).</string>
+  <string name="msg_ai_context_usage">Context %1$d%%</string>
   <string name="msg_ai_tool_running">Running\u2026</string>
   <string name="hint_ai_message">Ask about this project\u2026</string>
   <string name="action_ai_send">Send</string>
@@ -373,4 +376,15 @@
   <string name="idepref_ai_yolo_off">Off: every file write and shell command needs your approval</string>
   <string name="idepref_ai_shell_timeout">Shell command timeout</string>
   <string name="idepref_ai_shell_timeout_current">%1$d seconds</string>
+  <string name="idepref_ai_max_tool_rounds">Maximum tool rounds</string>
+  <string name="idepref_ai_max_tool_rounds_current">Stop after %1$d rounds</string>
+  <string name="idepref_ai_max_tool_rounds_unlimited">Unlimited (0)</string>
+  <string name="idepref_ai_context_group">Context</string>
+  <string name="idepref_ai_auto_compact">Auto compact</string>
+  <string name="idepref_ai_auto_compact_on">On: older messages are summarised automatically</string>
+  <string name="idepref_ai_auto_compact_off">Off: the conversation grows until the model rejects it</string>
+  <string name="idepref_ai_compact_threshold">Compact at</string>
+  <string name="idepref_ai_compact_threshold_current">%1$d%% of the context window</string>
+  <string name="idepref_ai_context_window">Context window</string>
+  <string name="idepref_ai_context_window_current">%1$d tokens</string>
 </resources>

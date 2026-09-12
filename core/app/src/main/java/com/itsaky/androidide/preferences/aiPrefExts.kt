@@ -55,6 +55,7 @@ class AiPreferencesScreen(
     }
 
     addPreference(AiSafetyGroup())
+    addPreference(AiContextGroup())
   }
 }
 
@@ -110,6 +111,21 @@ private class AiSafetyGroup(
   init {
     addPreference(AiYoloPreference())
     addPreference(AiShellTimeoutPreference())
+    addPreference(AiMaxToolRoundsPreference())
+  }
+}
+
+@Parcelize
+private class AiContextGroup(
+  override val key: String = "idepref_ai_context",
+  override val title: Int = string.idepref_ai_context_group,
+  override val children: List<IPreference> = mutableListOf(),
+) : IPreferenceGroup() {
+
+  init {
+    addPreference(AiAutoCompactPreference())
+    addPreference(AiCompactThresholdPreference())
+    addPreference(AiContextWindowPreference())
   }
 }
 
@@ -534,6 +550,137 @@ private class AiShellTimeoutPreference(
     preference.summary = preference.context.getString(
       string.idepref_ai_shell_timeout_current,
       AiPreferences.shellTimeoutSeconds
+    )
+  }
+}
+
+private abstract class NumberPreference : SimplePreference() {
+
+  abstract fun getValue(): Int
+
+  abstract fun setValue(value: Int)
+
+  abstract fun summaryOf(context: Context): String
+
+  open fun isValid(value: Int): Boolean = value > 0
+
+  override fun onCreatePreference(context: Context): Preference {
+    return super.onCreatePreference(context).also { it.summary = summaryOf(context) }
+  }
+
+  override fun onPreferenceClick(preference: Preference): Boolean {
+    val context = preference.context
+    val input = TextInputEditText(context).apply {
+      inputType = InputType.TYPE_CLASS_NUMBER
+      setText(getValue().toString())
+    }
+
+    DialogUtils.newMaterialDialogBuilder(context)
+      .setTitle(title)
+      .setView(wrap(context, input))
+      .setNegativeButton(android.R.string.cancel, null)
+      .setPositiveButton(android.R.string.ok) { dialog, _ ->
+        val value = input.text?.toString()?.trim()?.toIntOrNull()
+        if (value != null && isValid(value)) {
+          setValue(value)
+          preference.summary = summaryOf(context)
+        }
+        dialog.dismiss()
+      }
+      .show()
+
+    return true
+  }
+}
+
+@Parcelize
+private class AiMaxToolRoundsPreference(
+  override val key: String = AiPreferences.MAX_TOOL_ROUNDS,
+  override val title: Int = string.idepref_ai_max_tool_rounds,
+) : NumberPreference() {
+
+  override fun getValue(): Int = AiPreferences.maxToolRounds
+
+  override fun setValue(value: Int) {
+    AiPreferences.maxToolRounds = value
+  }
+
+  override fun isValid(value: Int): Boolean = value >= 0
+
+  override fun summaryOf(context: Context): String {
+    val rounds = AiPreferences.maxToolRounds
+    return if (rounds == AiPreferences.UNLIMITED_TOOL_ROUNDS) {
+      context.getString(string.idepref_ai_max_tool_rounds_unlimited)
+    } else {
+      context.getString(string.idepref_ai_max_tool_rounds_current, rounds)
+    }
+  }
+}
+
+@Parcelize
+private class AiCompactThresholdPreference(
+  override val key: String = AiPreferences.COMPACT_THRESHOLD,
+  override val title: Int = string.idepref_ai_compact_threshold,
+) : NumberPreference() {
+
+  override fun getValue(): Int = AiPreferences.compactThresholdPercent
+
+  override fun setValue(value: Int) {
+    AiPreferences.compactThresholdPercent = value
+  }
+
+  override fun isValid(value: Int): Boolean = value in 10..99
+
+  override fun summaryOf(context: Context): String = context.getString(
+    string.idepref_ai_compact_threshold_current,
+    AiPreferences.compactThresholdPercent
+  )
+}
+
+@Parcelize
+private class AiContextWindowPreference(
+  override val key: String = AiPreferences.OPENAI_CONTEXT_WINDOW,
+  override val title: Int = string.idepref_ai_context_window,
+) : NumberPreference() {
+
+  override fun getValue(): Int = AiPreferences.contextWindowOf(AiPreferences.providerKind())
+
+  override fun setValue(value: Int) {
+    AiPreferences.setContextWindowOf(AiPreferences.providerKind(), value)
+  }
+
+  override fun isValid(value: Int): Boolean = value >= 1000
+
+  override fun summaryOf(context: Context): String = context.getString(
+    string.idepref_ai_context_window_current,
+    AiPreferences.contextWindowOf(AiPreferences.providerKind())
+  )
+}
+
+@Parcelize
+private class AiAutoCompactPreference(
+  override val key: String = AiPreferences.AUTO_COMPACT,
+  override val title: Int = string.idepref_ai_auto_compact,
+) : SwitchPreference(
+  setValue = { AiPreferences.autoCompact = it },
+  getValue = { AiPreferences.autoCompact }
+) {
+
+  override fun onCreatePreference(context: Context): Preference {
+    return super.onCreatePreference(context).also { updateSummary(it) }
+  }
+
+  override fun onPreferenceChanged(preference: Preference, newValue: Any?): Boolean {
+    return super.onPreferenceChanged(preference, newValue).also { updateSummary(preference) }
+  }
+
+  private fun updateSummary(preference: Preference) {
+    preference.summary = preference.context.getString(
+      if (AiPreferences.autoCompact) {
+        string.idepref_ai_auto_compact_on
+      } else {
+        string.idepref_ai_auto_compact_off
+      }
     )
   }
 }

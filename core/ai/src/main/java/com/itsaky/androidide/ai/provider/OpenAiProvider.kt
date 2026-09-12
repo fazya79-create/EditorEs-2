@@ -25,6 +25,7 @@ import com.itsaky.androidide.ai.model.ChatRequest
 import com.itsaky.androidide.ai.model.ChatRole
 import com.itsaky.androidide.ai.model.ChatStreamEvent
 import com.itsaky.androidide.ai.model.StopReason
+import com.itsaky.androidide.ai.model.TokenUsage
 import com.itsaky.androidide.ai.model.ToolCall
 import com.itsaky.androidide.ai.net.SseClient
 import com.itsaky.androidide.ai.net.SseEvent
@@ -45,6 +46,7 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
     val reasoning = StringBuilder()
     val calls = sortedMapOf<Int, PartialCall>()
     var stopReason = StopReason.END_TURN
+    var usage = TokenUsage()
 
     try {
       SseClient.post(
@@ -57,6 +59,7 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
           if (event.data == DONE) {
             break
           }
+          readUsage(event)?.let { usage = it }
           val reason = handleEvent(event, text, reasoning, calls)
           if (reason != null) {
             stopReason = reason
@@ -86,11 +89,22 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
     send(
       ChatStreamEvent.Completed(
         message = ChatMessage.assistant(text.toString(), toolCalls, reasoning.toString()),
-        stopReason = stopReason
+        stopReason = stopReason,
+        usage = usage
       )
     )
     close()
   }.flowOn(Dispatchers.IO)
+
+  private fun readUsage(event: SseEvent): TokenUsage? {
+    val chunk = runCatching { JsonParser.parseString(event.data).asJsonObject }.getOrNull()
+      ?: return null
+    val usage = chunk.getAsJsonObject("usage") ?: return null
+    return TokenUsage(
+      inputTokens = usage.get("prompt_tokens")?.takeIf { it.isJsonPrimitive }?.asInt ?: 0,
+      outputTokens = usage.get("completion_tokens")?.takeIf { it.isJsonPrimitive }?.asInt ?: 0
+    )
+  }
 
   private suspend fun ProducerScope<ChatStreamEvent>.handleEvent(
     event: SseEvent,
@@ -176,6 +190,10 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
     body.addProperty("model", request.model)
     body.addProperty("stream", true)
     body.addProperty("max_tokens", request.maxTokens)
+
+    val streamOptions = JsonObject()
+    streamOptions.addProperty("include_usage", true)
+    body.add("stream_options", streamOptions)
 
     if (request.thinkingLevel.isEnabled) {
       body.addProperty("reasoning_effort", request.thinkingLevel.wireValue)

@@ -22,6 +22,7 @@ import com.itsaky.androidide.ai.model.ChatRequest
 import com.itsaky.androidide.ai.model.ChatStreamEvent
 import com.itsaky.androidide.ai.model.StopReason
 import com.itsaky.androidide.ai.model.ThinkingLevel
+import com.itsaky.androidide.ai.model.TokenUsage
 import com.itsaky.androidide.ai.model.ToolCall
 import com.itsaky.androidide.ai.model.ToolResult
 import com.itsaky.androidide.ai.provider.LlmProvider
@@ -44,6 +45,13 @@ sealed interface AgentEvent {
 
   data class Failed(val message: String) : AgentEvent
 
+  data class ContextCompacted(
+    val history: List<ChatMessage>,
+    val replaced: Int
+  ) : AgentEvent
+
+  data class UsageUpdated(val usage: TokenUsage, val contextWindow: Int) : AgentEvent
+
   data object TurnCompleted : AgentEvent
 }
 
@@ -53,13 +61,16 @@ class ChatAgent(
   private val model: String,
   private val systemPrompt: String,
   private val thinkingLevel: ThinkingLevel = ThinkingLevel.OFF,
-  private val maxToolRounds: Int = DEFAULT_MAX_TOOL_ROUNDS
+  private val maxToolRounds: Int = DEFAULT_MAX_TOOL_ROUNDS,
+  private val contextWindow: Int = 0,
+  private val compactThresholdPercent: Int = 0
 ) {
 
   fun run(history: List<ChatMessage>): Flow<AgentEvent> = flow {
     val messages = history.toMutableList()
+    var round = 0
 
-    for (round in 0..maxToolRounds) {
+    while (true) {
       val request = ChatRequest(
         model = model,
         messages = messages.toList(),
@@ -70,6 +81,7 @@ class ChatAgent(
 
       var completed: ChatMessage? = null
       var stopReason = StopReason.END_TURN
+      var usage = TokenUsage()
       var failed = false
 
       provider.stream(request).collect { event ->
@@ -81,6 +93,7 @@ class ChatAgent(
           is ChatStreamEvent.Completed -> {
             completed = event.message
             stopReason = event.stopReason
+            usage = event.usage
           }
 
           is ChatStreamEvent.Failed -> {
@@ -105,6 +118,10 @@ class ChatAgent(
         return@flow
       }
 
+      if (!usage.isEmpty) {
+        emit(AgentEvent.UsageUpdated(usage, contextWindow))
+      }
+
       if (!assistant.isBlank) {
         messages += assistant
         emit(AgentEvent.AssistantMessage(assistant))
@@ -115,7 +132,7 @@ class ChatAgent(
         return@flow
       }
 
-      if (round == maxToolRounds) {
+      if (maxToolRounds in 1..round) {
         emit(AgentEvent.Failed("Stopped after $maxToolRounds tool rounds."))
         emit(AgentEvent.TurnCompleted)
         return@flow
@@ -130,13 +147,56 @@ class ChatAgent(
       }
 
       messages += ChatMessage.toolResults(results)
+      round++
+
+      if (ContextCompactor.shouldCompact(usage.total, contextWindow, compactThresholdPercent)) {
+        compact(messages)?.let { emit(it) }
+      }
+    }
+  }
+
+  private suspend fun compact(messages: MutableList<ChatMessage>): AgentEvent? {
+    val (older, recent) = ContextCompactor.split(messages)
+    if (older.isEmpty()) {
+      return null
     }
 
-    emit(AgentEvent.TurnCompleted)
+    val summary = summarise(older) ?: return null
+    val replaced = older.size
+
+    messages.clear()
+    messages += ContextCompactor.asSummaryMessage(summary)
+    messages += recent
+
+    return AgentEvent.ContextCompacted(messages.toList(), replaced)
+  }
+
+  private suspend fun summarise(older: List<ChatMessage>): String? {
+    val request = ChatRequest(
+      model = model,
+      messages = ContextCompactor.summaryRequest(older),
+      systemPrompt = null,
+      maxTokens = SUMMARY_MAX_TOKENS
+    )
+
+    val text = StringBuilder()
+    var failed = false
+
+    provider.stream(request).collect { event ->
+      when (event) {
+        is ChatStreamEvent.Completed -> text.append(event.message.text)
+        is ChatStreamEvent.Failed -> failed = true
+        else -> Unit
+      }
+    }
+
+    return if (failed || text.isBlank()) null else text.toString()
   }
 
   companion object {
 
     const val DEFAULT_MAX_TOOL_ROUNDS = 12
+
+    private const val SUMMARY_MAX_TOKENS = 2048
   }
 }
