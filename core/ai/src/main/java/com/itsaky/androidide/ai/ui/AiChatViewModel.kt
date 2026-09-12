@@ -18,6 +18,7 @@
 package com.itsaky.androidide.ai.ui
 
 import android.app.Application
+import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -37,6 +38,7 @@ import com.itsaky.androidide.ai.tools.ToolGate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.itsaky.androidide.ai.provider.OpenAiProvider
 
@@ -48,6 +50,8 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   private var nextId = 0L
   private var turn: Job? = null
   private var pendingApproval: CompletableDeferred<ApprovalDecision>? = null
+  private var pendingPublish: Job? = null
+  private var lastPublish = 0L
 
   val entries = MutableLiveData<List<ChatEntry>>(emptyList())
   val busy = MutableLiveData(false)
@@ -258,24 +262,18 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   }
 
   private fun finishStreaming() {
-    var changed = false
     items.replaceAll { entry ->
       if (entry is ChatEntry.Assistant && entry.streaming) {
-        changed = true
         entry.copy(streaming = false)
       } else if (entry is ChatEntry.Thinking && entry.streaming) {
-        changed = true
         entry.copy(streaming = false)
       } else if (entry is ChatEntry.Tool && entry.state == ToolEntryState.RUNNING) {
-        changed = true
         entry.copy(state = ToolEntryState.FAILED, output = "Cancelled.")
       } else {
         entry
       }
     }
-    if (changed) {
-      publish()
-    }
+    publish()
   }
 
   private fun updateTool(callId: String, transform: (ChatEntry.Tool) -> ChatEntry.Tool) {
@@ -298,12 +296,35 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       return
     }
     items[index] = entry
+    publishThrottled()
+  }
+
+  private fun publishThrottled() {
+    val now = SystemClock.uptimeMillis()
+    if (now - lastPublish < STREAM_PUBLISH_INTERVAL_MS) {
+      if (pendingPublish == null) {
+        pendingPublish = viewModelScope.launch {
+          delay(STREAM_PUBLISH_INTERVAL_MS)
+          pendingPublish = null
+          publish()
+        }
+      }
+      return
+    }
     publish()
   }
 
   private fun publish() {
+    pendingPublish?.cancel()
+    pendingPublish = null
+    lastPublish = SystemClock.uptimeMillis()
     entries.postValue(items.toList())
   }
 
   private fun nextId(): Long = nextId++
+
+  companion object {
+
+    private const val STREAM_PUBLISH_INTERVAL_MS = 80L
+  }
 }

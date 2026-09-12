@@ -81,10 +81,10 @@ class AiChatAdapter(private val onToggleExpanded: (Long) -> Unit) :
         is ChatEntry.Assistant -> {
           binding.role.setText(R.string.title_ai_assistant)
           binding.message.setTextIsSelectable(!entry.streaming)
-          if (entry.streaming && entry.text.isEmpty()) {
-            binding.message.text = ELLIPSIS
-          } else {
-            MarkdownRenderer.render(binding.message, entry.text)
+          when {
+            entry.streaming && entry.text.isEmpty() -> binding.message.text = ELLIPSIS
+            entry.streaming -> binding.message.text = entry.text
+            else -> MarkdownRenderer.render(binding.message, entry.text)
           }
           binding.root.setCardBackgroundColor(
             context.resolveAttr(com.google.android.material.R.attr.colorSurfaceContainer)

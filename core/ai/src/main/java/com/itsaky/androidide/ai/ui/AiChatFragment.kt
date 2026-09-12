@@ -26,7 +26,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.SimpleItemAnimator
 import com.itsaky.androidide.ai.databinding.FragmentAiChatBinding
 import com.itsaky.androidide.ai.tools.ApprovalDecision
 import com.itsaky.androidide.fragments.FragmentWithBinding
@@ -44,11 +43,9 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    binding.messages.layoutManager = LinearLayoutManager(requireContext()).apply {
-      stackFromEnd = true
-    }
+    binding.messages.layoutManager = LinearLayoutManager(requireContext())
     binding.messages.adapter = adapter
-    (binding.messages.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
+    binding.messages.itemAnimator = null
 
     applyImeInsets()
 
@@ -71,9 +68,10 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
     }
 
     viewModel.entries.observe(viewLifecycleOwner) { entries ->
+      val atBottom = isAtBottom()
       adapter.submitList(entries) {
-        if (entries.isNotEmpty()) {
-          binding.messages.scrollToPosition(entries.lastIndex)
+        if (entries.isNotEmpty() && atBottom) {
+          scrollToEnd()
         }
       }
       binding.emptyState.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
@@ -117,11 +115,24 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
     }
   }
 
+  private fun isAtBottom(): Boolean {
+    val binding = _binding ?: return true
+    return !binding.messages.canScrollVertically(1)
+  }
+
   private fun scrollToEnd() {
-    val count = adapter.itemCount
-    if (count > 0) {
-      binding.messages.post {
-        _binding?.messages?.scrollToPosition(count - 1)
+    val binding = _binding ?: return
+    if (adapter.itemCount == 0) {
+      return
+    }
+
+    binding.messages.post {
+      val view = _binding?.messages ?: return@post
+      val overflow = view.computeVerticalScrollRange() -
+          view.computeVerticalScrollOffset() -
+          view.computeVerticalScrollExtent()
+      if (overflow > 0) {
+        view.scrollBy(0, overflow)
       }
     }
   }
