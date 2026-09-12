@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.itsaky.androidide.ai.databinding.LayoutAiInterruptedBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiMessageBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiThinkingBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiToolCallBinding
@@ -30,12 +31,15 @@ import com.itsaky.androidide.ai.tools.RunShellTool
 import com.itsaky.androidide.resources.R
 import com.itsaky.androidide.utils.resolveAttr
 
-class AiChatAdapter(private val onToggleExpanded: (Long) -> Unit) :
-  ListAdapter<ChatEntry, RecyclerView.ViewHolder>(DIFF) {
+class AiChatAdapter(
+  private val onToggleExpanded: (Long) -> Unit,
+  private val onRetry: () -> Unit
+) : ListAdapter<ChatEntry, RecyclerView.ViewHolder>(DIFF) {
 
   override fun getItemViewType(position: Int): Int = when (getItem(position)) {
     is ChatEntry.Tool -> TYPE_TOOL
     is ChatEntry.Thinking -> TYPE_THINKING
+    is ChatEntry.Interrupted -> TYPE_INTERRUPTED
     else -> TYPE_MESSAGE
   }
 
@@ -52,6 +56,11 @@ class AiChatAdapter(private val onToggleExpanded: (Long) -> Unit) :
         onToggleExpanded
       )
 
+      TYPE_INTERRUPTED -> InterruptedViewHolder(
+        LayoutAiInterruptedBinding.inflate(inflater, parent, false),
+        onRetry
+      )
+
       else -> MessageViewHolder(LayoutAiMessageBinding.inflate(inflater, parent, false))
     }
   }
@@ -60,7 +69,23 @@ class AiChatAdapter(private val onToggleExpanded: (Long) -> Unit) :
     when (val entry = getItem(position)) {
       is ChatEntry.Tool -> (holder as ToolViewHolder).bind(entry)
       is ChatEntry.Thinking -> (holder as ThinkingViewHolder).bind(entry)
+      is ChatEntry.Interrupted -> (holder as InterruptedViewHolder).bind(entry)
       else -> (holder as MessageViewHolder).bind(entry)
+    }
+  }
+
+  class InterruptedViewHolder(
+    private val binding: LayoutAiInterruptedBinding,
+    private val onRetry: () -> Unit
+  ) : RecyclerView.ViewHolder(binding.root) {
+
+    fun bind(entry: ChatEntry.Interrupted) {
+      val context = binding.root.context
+      binding.message.text = context.getString(
+        R.string.msg_ai_interrupted_detail,
+        entry.text.ifBlank { context.getString(R.string.msg_ai_interrupted) }
+      )
+      binding.retry.setOnClickListener { onRetry() }
     }
   }
 
@@ -205,6 +230,7 @@ class AiChatAdapter(private val onToggleExpanded: (Long) -> Unit) :
     private const val TYPE_MESSAGE = 0
     private const val TYPE_TOOL = 1
     private const val TYPE_THINKING = 2
+    private const val TYPE_INTERRUPTED = 3
 
     private const val ELLIPSIS = "\u2026"
     private const val CHEVRON_DOWN = "\u2304"

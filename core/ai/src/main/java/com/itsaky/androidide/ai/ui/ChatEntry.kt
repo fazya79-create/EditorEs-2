@@ -56,6 +56,8 @@ sealed interface ChatEntry {
 
   data class Error(override val id: Long, val text: String) : ChatEntry
 
+  data class Interrupted(override val id: Long, val text: String) : ChatEntry
+
   data class Notice(
     override val id: Long,
     val kind: NoticeKind,

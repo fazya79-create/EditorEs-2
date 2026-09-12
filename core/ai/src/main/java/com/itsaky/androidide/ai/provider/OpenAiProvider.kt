@@ -70,7 +70,18 @@ class OpenAiProvider(private val config: ProviderConfig) : LlmProvider {
     } catch (err: CancellationException) {
       throw err
     } catch (err: Throwable) {
-      send(ChatStreamEvent.Failed(err.message ?: "Request failed", err))
+      val message = err.message ?: "Request failed"
+      if (text.isEmpty() && reasoning.isEmpty()) {
+        send(ChatStreamEvent.Failed(message, err))
+      } else {
+        send(
+          ChatStreamEvent.Interrupted(
+            message = message,
+            partial = ChatMessage.assistant(text.toString(), reasoning = reasoning.toString()),
+            cause = err
+          )
+        )
+      }
       close()
       return@callbackFlow
     }

@@ -119,6 +119,12 @@ sealed interface ChatStreamEvent {
   ) : ChatStreamEvent
 
   data class Failed(val message: String, val cause: Throwable? = null) : ChatStreamEvent
+
+  data class Interrupted(
+    val message: String,
+    val partial: ChatMessage,
+    val cause: Throwable? = null
+  ) : ChatStreamEvent
 }
 
 enum class ThinkingLevel {

@@ -25,8 +25,14 @@ import androidx.lifecycle.viewModelScope
 import com.itsaky.androidide.ai.agent.AgentEvent
 import com.itsaky.androidide.ai.agent.ChatAgent
 import com.itsaky.androidide.ai.agent.SystemPrompt
+import com.itsaky.androidide.ai.history.ChatHistoryStore
+import com.itsaky.androidide.ai.history.ChatSession
+import com.itsaky.androidide.ai.history.ChatSessionInfo
+import com.itsaky.androidide.ai.history.TitleGenerator
 import com.itsaky.androidide.ai.model.ChatMessage
+import com.itsaky.androidide.ai.model.ChatRole
 import com.itsaky.androidide.ai.prefs.AiPreferences
+import com.itsaky.androidide.ai.service.AiStreamingService
 import com.itsaky.androidide.ai.provider.AnthropicProvider
 import com.itsaky.androidide.ai.provider.GoogleProvider
 import com.itsaky.androidide.ai.provider.LlmProvider
@@ -38,27 +44,37 @@ import com.itsaky.androidide.ai.tools.ToolApprover
 import com.itsaky.androidide.ai.tools.ToolGate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.itsaky.androidide.ai.provider.OpenAiProvider
 
 class AiChatViewModel(application: Application) : AndroidViewModel(application), ToolApprover {
 
   private val history = mutableListOf<ChatMessage>()
   private val items = mutableListOf<ChatEntry>()
+  private val store = ChatHistoryStore(application)
 
   private var nextId = 0L
   private var turn: Job? = null
   private var pendingApproval: CompletableDeferred<ApprovalDecision>? = null
   private var pendingPublish: Job? = null
   private var lastPublish = 0L
+  private var sessionId = store.newSessionId()
+  private var sessionCreatedAt = System.currentTimeMillis()
+  private var sessionTitle = ""
+  private var titleGenerated = false
+  private var lastPrompt: String? = null
 
   val entries = MutableLiveData<List<ChatEntry>>(emptyList())
   val busy = MutableLiveData(false)
   val approvalRequest = MutableLiveData<ToolApprovalRequest?>(null)
   val yoloMode = MutableLiveData(AiPreferences.yoloMode)
   val contextUsage = MutableLiveData<ContextUsage?>(null)
+  val sessions = MutableLiveData<List<ChatSessionInfo>>(emptyList())
 
   val isBusy: Boolean
     get() = busy.value == true
@@ -76,10 +92,80 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     if (isBusy) {
       return
     }
+    val pending = snapshot()
+    if (pending != null) {
+      viewModelScope.launch { withContext(Dispatchers.IO) { store.save(pending) } }
+    }
     history.clear()
     items.clear()
+    lastPrompt = null
+    sessionId = store.newSessionId()
+    sessionCreatedAt = System.currentTimeMillis()
+    sessionTitle = ""
+    titleGenerated = false
     contextUsage.value = null
     publish()
+  }
+
+  fun refreshSessions() {
+    viewModelScope.launch {
+      val saved = withContext(Dispatchers.IO) { store.list() }
+      sessions.value = saved.filter { it.id != sessionId || history.isNotEmpty() }
+    }
+  }
+
+  fun resume(id: String) {
+    if (isBusy || id == sessionId) {
+      return
+    }
+
+    viewModelScope.launch {
+      val session = withContext(Dispatchers.IO) { store.load(id) } ?: return@launch
+
+      persist()
+
+      history.clear()
+      history += session.messages
+      items.clear()
+      items += entriesOf(session.messages)
+      lastPrompt = null
+      sessionId = session.info.id
+      sessionCreatedAt = session.info.createdAt
+      sessionTitle = session.info.title
+      titleGenerated = session.info.titleGenerated
+      contextUsage.value = null
+      publish()
+    }
+  }
+
+  fun deleteSession(id: String) {
+    viewModelScope.launch {
+      withContext(Dispatchers.IO) { store.delete(id) }
+      refreshSessions()
+    }
+  }
+
+  fun retry() {
+    val prompt = lastPrompt ?: return
+    if (isBusy) {
+      return
+    }
+
+    val index = history.indexOfLast { it.role == ChatRole.USER && it.text == prompt }
+    if (index >= 0) {
+      while (history.size > index) {
+        history.removeAt(history.size - 1)
+      }
+    }
+
+    val interrupted = items.indexOfLast { it is ChatEntry.Interrupted }
+    if (interrupted >= 0) {
+      items.removeAt(interrupted)
+      publish()
+    }
+
+    lastPrompt = null
+    send(prompt)
   }
 
   fun send(text: String) {
@@ -105,10 +191,12 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
 
     history += ChatMessage.user(message)
     append(ChatEntry.User(nextId(), message))
+    lastPrompt = message
 
     val gate = ToolGate(context, this)
+    val provider = createProvider(config)
     val agent = ChatAgent(
-      provider = createProvider(config),
+      provider = provider,
       gate = gate,
       model = config.model,
       systemPrompt = SystemPrompt.build(),
@@ -119,16 +207,27 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     )
 
     busy.value = true
+    AiStreamingService.start(context)
     turn = viewModelScope.launch {
+      var cancelled = false
       try {
         collect(agent)
+        lastPrompt = null
       } catch (err: CancellationException) {
+        cancelled = true
         finishStreaming()
         throw err
+      } catch (err: Throwable) {
+        interrupt(err.message)
       } finally {
+        AiStreamingService.stop(context)
         busy.postValue(false)
         approvalRequest.postValue(null)
         pendingApproval = null
+        persist()
+        if (!cancelled) {
+          generateTitleIfNeeded(provider, config.model)
+        }
       }
     }
   }
@@ -141,6 +240,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     turn = null
     finishStreaming()
     busy.value = false
+    AiStreamingService.stop(getApplication())
   }
 
   override suspend fun requestApproval(request: ToolApprovalRequest): ApprovalDecision {
@@ -240,6 +340,11 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
 
         is AgentEvent.Failed -> append(ChatEntry.Error(nextId(), event.message))
 
+        is AgentEvent.Interrupted -> {
+          finishStreaming()
+          append(ChatEntry.Interrupted(nextId(), event.message))
+        }
+
         is AgentEvent.UsageUpdated -> {
           contextUsage.postValue(
             if (event.contextWindow > 0) {
@@ -277,6 +382,80 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
 
   private fun isExpanded(id: Long): Boolean =
     (items.firstOrNull { it.id == id } as? ChatEntry.Thinking)?.expanded ?: false
+
+  private fun interrupt(message: String?) {
+    finishStreaming()
+    append(
+      ChatEntry.Interrupted(
+        nextId(),
+        message ?: getApplication<Application>().getString(
+          com.itsaky.androidide.resources.R.string.msg_ai_interrupted
+        )
+      )
+    )
+  }
+
+  private suspend fun persist() {
+    val session = snapshot() ?: return
+    withContext(NonCancellable + Dispatchers.IO) { store.save(session) }
+  }
+
+  private fun snapshot(): ChatSession? {
+    if (history.isEmpty()) {
+      return null
+    }
+
+    val now = System.currentTimeMillis()
+    return ChatSession(
+      info = ChatSessionInfo(
+        id = sessionId,
+        title = sessionTitle.ifBlank { ChatHistoryStore.previewTitle(history) },
+        createdAt = if (sessionCreatedAt > 0) sessionCreatedAt else now,
+        updatedAt = now,
+        messageCount = history.size,
+        titleGenerated = titleGenerated
+      ),
+      messages = history.toList()
+    )
+  }
+
+  private suspend fun generateTitleIfNeeded(provider: LlmProvider, model: String) {
+    if (titleGenerated || history.isEmpty()) {
+      return
+    }
+
+    val id = sessionId
+    val title = runCatching { TitleGenerator.generate(provider, model, history.toList()) }
+      .getOrNull()
+      ?: return
+
+    if (id != sessionId) {
+      withContext(Dispatchers.IO) { store.updateTitle(id, title) }
+      return
+    }
+
+    sessionTitle = title
+    titleGenerated = true
+    withContext(Dispatchers.IO) { store.updateTitle(id, title) }
+  }
+
+  private fun entriesOf(messages: List<ChatMessage>): List<ChatEntry> =
+    messages.mapNotNull { message ->
+      when (message.role) {
+        ChatRole.USER -> ChatEntry.User(nextId(), message.text)
+
+        ChatRole.ASSISTANT -> message.text
+          .takeIf { it.isNotBlank() }
+          ?.let { ChatEntry.Assistant(nextId(), it) }
+
+        else -> null
+      }
+    }
+
+  override fun onCleared() {
+    super.onCleared()
+    AiStreamingService.stop(getApplication())
+  }
 
   private fun createProvider(config: ProviderConfig): LlmProvider = when (config.kind) {
     ProviderKind.ANTHROPIC -> AnthropicProvider(config)

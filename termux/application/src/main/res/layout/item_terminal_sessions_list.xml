@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:minHeight="48dp"
     android:background="@drawable/session_background_selected"
+    android:descendantFocusability="blocksDescendants"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingStart="16dp"

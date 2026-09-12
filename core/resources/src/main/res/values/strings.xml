@@ -336,6 +336,18 @@
   <string name="msg_ai_awaiting_approval">Waiting for your approval</string>
   <string name="msg_ai_tool_rejected">Rejected</string>
   <string name="title_ai_approval">Allow this action?</string>
+  <string name="title_ai_interrupted">Interrupted</string>
+  <string name="msg_ai_interrupted">The connection was interrupted before the reply finished.</string>
+  <string name="msg_ai_interrupted_detail">%1$s\nThe reply so far was kept. Tap Retry to ask again.</string>
+  <string name="action_ai_retry">Retry</string>
+  <string name="title_ai_history">Chat history</string>
+  <string name="action_ai_history">Chat history</string>
+  <string name="action_ai_new_chat">New chat</string>
+  <string name="msg_ai_history_empty">No saved conversations yet.</string>
+  <string name="msg_ai_history_untitled">Untitled conversation</string>
+  <string name="title_ai_streaming_notification">AI assistant</string>
+  <string name="msg_ai_streaming_notification">The assistant is responding\u2026</string>
+  <string name="title_ai_streaming_notification_channel">AI assistant responses</string>
 
   <string name="idepref_ai_title">AI assistant</string>
   <string name="idepref_ai_summary">Provider, API keys and tool safety</string>

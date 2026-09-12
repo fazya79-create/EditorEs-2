@@ -18,6 +18,7 @@
 package com.itsaky.androidide.ai.ui
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.inputmethod.EditorInfo
@@ -27,15 +28,18 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.itsaky.androidide.ai.databinding.FragmentAiChatBinding
+import com.itsaky.androidide.ai.databinding.LayoutAiHistoryBinding
+import com.itsaky.androidide.ai.history.ChatSessionInfo
 import com.itsaky.androidide.ai.tools.ApprovalDecision
 import com.itsaky.androidide.fragments.FragmentWithBinding
 import com.itsaky.androidide.fragments.ImeInsetsAware
+import com.itsaky.androidide.utils.DialogUtils
 
 class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChatBinding::inflate),
   ImeInsetsAware {
 
   private val viewModel by viewModels<AiChatViewModel>(ownerProducer = { requireActivity() })
-  private val adapter by lazy { AiChatAdapter(viewModel::toggleExpanded) }
+  private val adapter by lazy { AiChatAdapter(viewModel::toggleExpanded, ::onRetryClicked) }
 
   private var baseInputMargin = 0
   private var lastImeInset = 0
@@ -66,6 +70,9 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
     binding.approvalReject.setOnClickListener {
       viewModel.resolveApproval(ApprovalDecision.REJECTED)
     }
+
+    binding.newChat.setOnClickListener { viewModel.clear() }
+    binding.history.setOnClickListener { showHistory() }
 
     viewModel.entries.observe(viewLifecycleOwner) { entries ->
       val atBottom = isAtBottom()
@@ -112,6 +119,49 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
   override fun onResume() {
     super.onResume()
     viewModel.refreshYoloMode()
+  }
+
+  private fun onRetryClicked() {
+    viewModel.retry()
+  }
+
+  private fun showHistory() {
+    viewModel.refreshSessions()
+
+    val historyBinding = LayoutAiHistoryBinding.inflate(LayoutInflater.from(requireContext()))
+    val dialog = DialogUtils.newMaterialDialogBuilder(requireContext())
+      .setTitle(com.itsaky.androidide.resources.R.string.title_ai_history)
+      .setView(historyBinding.root)
+      .setNegativeButton(android.R.string.cancel, null)
+      .create()
+
+    val historyAdapter = AiHistoryAdapter(
+      onResume = { info ->
+        viewModel.resume(info.id)
+        dialog.dismiss()
+      },
+      onDelete = { info -> viewModel.deleteSession(info.id) }
+    )
+
+    historyBinding.sessions.layoutManager = LinearLayoutManager(requireContext())
+    historyBinding.sessions.adapter = historyAdapter
+
+    viewModel.sessions.observe(viewLifecycleOwner) { saved ->
+      submitSessions(historyBinding, historyAdapter, saved)
+    }
+
+    dialog.setOnDismissListener { viewModel.sessions.removeObservers(viewLifecycleOwner) }
+    dialog.show()
+  }
+
+  private fun submitSessions(
+    historyBinding: LayoutAiHistoryBinding,
+    historyAdapter: AiHistoryAdapter,
+    saved: List<ChatSessionInfo>
+  ) {
+    historyAdapter.submitList(saved)
+    historyBinding.historyEmpty.visibility = if (saved.isEmpty()) View.VISIBLE else View.GONE
+    historyBinding.sessions.visibility = if (saved.isEmpty()) View.GONE else View.VISIBLE
   }
 
   private fun applyImeInsets() {

@@ -45,6 +45,8 @@ sealed interface AgentEvent {
 
   data class Failed(val message: String) : AgentEvent
 
+  data class Interrupted(val message: String, val partial: String) : AgentEvent
+
   data class ContextCompacted(
     val history: List<ChatMessage>,
     val replaced: Int
@@ -83,6 +85,7 @@ class ChatAgent(
       var stopReason = StopReason.END_TURN
       var usage = TokenUsage()
       var failed = false
+      var interrupted = false
 
       provider.stream(request).collect { event ->
         when (event) {
@@ -101,12 +104,21 @@ class ChatAgent(
             emit(AgentEvent.Failed(event.message))
           }
 
+          is ChatStreamEvent.Interrupted -> {
+            interrupted = true
+            if (!event.partial.isBlank) {
+              messages += event.partial
+              emit(AgentEvent.AssistantMessage(event.partial))
+            }
+            emit(AgentEvent.Interrupted(event.message, event.partial.text))
+          }
+
           is ChatStreamEvent.ToolCallStarted,
           is ChatStreamEvent.ToolCallArgumentsDelta -> Unit
         }
       }
 
-      if (failed) {
+      if (failed || interrupted) {
         emit(AgentEvent.TurnCompleted)
         return@flow
       }
@@ -195,6 +207,7 @@ class ChatAgent(
       when (event) {
         is ChatStreamEvent.Completed -> text.append(event.message.text)
         is ChatStreamEvent.Failed -> failed = true
+        is ChatStreamEvent.Interrupted -> failed = true
         else -> Unit
       }
     }
