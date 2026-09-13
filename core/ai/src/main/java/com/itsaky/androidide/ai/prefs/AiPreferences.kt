@@ -26,7 +26,6 @@ import com.itsaky.androidide.ai.provider.GoogleProvider
 import com.itsaky.androidide.ai.provider.OpenAiProvider
 import com.itsaky.androidide.ai.provider.ProviderConfig
 import com.itsaky.androidide.ai.provider.ProviderKind
-import com.itsaky.androidide.ai.search.SearchMode
 import com.itsaky.androidide.ai.search.SearchProviderKind
 import com.itsaky.androidide.preferences.internal.prefManager
 
@@ -54,7 +53,6 @@ object AiPreferences {
   const val PROMPT_CACHING = "ide.ai.promptCaching"
   const val SEARCH_PROVIDER = "ide.ai.search.provider"
   const val SEARCH_RESULT_LIMIT = "ide.ai.search.resultLimit"
-  const val GOOGLE_BUILT_IN_SEARCH = "ide.ai.google.builtInSearch"
   const val OPENAI_CONTEXT_WINDOW_MODEL = "ide.ai.openai.contextWindow.model"
   const val ANTHROPIC_CONTEXT_WINDOW_MODEL = "ide.ai.anthropic.contextWindow.model"
   const val GOOGLE_CONTEXT_WINDOW_MODEL = "ide.ai.google.contextWindow.model"
@@ -176,23 +174,6 @@ object AiPreferences {
     set(value) {
       prefManager.putInt(SEARCH_RESULT_LIMIT, value)
     }
-
-  var googleBuiltInSearch: Boolean
-    get() = prefManager.getBoolean(GOOGLE_BUILT_IN_SEARCH, false)
-    set(value) {
-      prefManager.putBoolean(GOOGLE_BUILT_IN_SEARCH, value)
-    }
-
-  fun searchMode(): SearchMode = searchModeOf(providerKind())
-
-  fun searchModeOf(kind: ProviderKind): SearchMode =
-    if (kind == ProviderKind.GOOGLE && googleBuiltInSearch) {
-      SearchMode.BUILT_IN
-    } else {
-      SearchMode.THIRD_PARTY
-    }
-
-  fun supportsBuiltInSearch(kind: ProviderKind): Boolean = kind == ProviderKind.GOOGLE
 
   fun hasSearchApiKey(context: Context): Boolean {
     val key = searchApiKeyPrefKey(searchProviderKind())

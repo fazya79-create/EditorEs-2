@@ -151,40 +151,9 @@ private class AiSearchGroup(
 ) : IPreferenceGroup() {
 
   init {
-    if (AiPreferences.supportsBuiltInSearch(AiPreferences.providerKind())) {
-      addPreference(AiBuiltInSearchPreference())
-    }
     addPreference(AiSearchProviderPreference())
     addPreference(AiSearchApiKeyPreference())
     addPreference(AiSearchResultLimitPreference())
-  }
-}
-
-@Parcelize
-private class AiBuiltInSearchPreference(
-  override val key: String = AiPreferences.GOOGLE_BUILT_IN_SEARCH,
-  override val title: Int = string.idepref_ai_builtin_search,
-) : SwitchPreference(
-  setValue = { AiPreferences.googleBuiltInSearch = it },
-  getValue = { AiPreferences.googleBuiltInSearch }
-) {
-
-  override fun onCreatePreference(context: Context): Preference {
-    return super.onCreatePreference(context).also { updateSummary(it) }
-  }
-
-  override fun onPreferenceChanged(preference: Preference, newValue: Any?): Boolean {
-    return super.onPreferenceChanged(preference, newValue).also { updateSummary(preference) }
-  }
-
-  private fun updateSummary(preference: Preference) {
-    preference.summary = preference.context.getString(
-      if (AiPreferences.googleBuiltInSearch) {
-        string.idepref_ai_builtin_search_on
-      } else {
-        string.idepref_ai_builtin_search_off
-      }
-    )
   }
 }
 

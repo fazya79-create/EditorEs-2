@@ -419,11 +419,5 @@
   <string name="msg_ai_context_window_unknown">Could not detect the context window for %1$s. Using %2$d tokens; set the real value under Context &gt; Context window.</string>
   <string name="idepref_ai_context_window_unknown">%1$d tokens (not auto-detected \u2014 tap to set the real value)</string>
   <string name="idepref_ai_context_window_manual">%1$d tokens (set manually)</string>
-  <string name="idepref_ai_builtin_search">Use Google\'s built-in search</string>
-  <string name="idepref_ai_builtin_search_on">On: Gemini grounds answers with Google Search, no search API key needed</string>
-  <string name="idepref_ai_builtin_search_off">Off: the assistant searches through the third-party provider below</string>
-  <string name="msg_ai_builtin_search_sources">Grounded with Google Search \u00b7 %1$d sources</string>
-  <string name="msg_ai_builtin_search_queries">Searched for: %1$s</string>
-  <string name="msg_ai_search_key_missing">Web search is unavailable: no API key is configured for the selected search provider. Add one in Preferences &gt; AI assistant &gt; Web search, or switch a Google provider to its built-in search.</string>
-  <string name="msg_ai_builtin_search_unsupported">Google\'s built-in search cannot be combined with the assistant\'s file and shell tools on this model, so it was not used for this message. Switch to a Gemini 3 model to use both together, or turn the built-in search off and configure a third-party search API key.</string>
+  <string name="msg_ai_search_key_missing">Web search is unavailable: no API key is configured for the selected search provider. Add one in Preferences &gt; AI assistant &gt; Web search, or pick a different provider there.</string>
 </resources>

@@ -40,11 +40,4 @@ class SystemPromptTest {
     assertThat(prompt).doesNotContain("Use web_search when you need information")
   }
 
-  @Test
-  fun `built in grounding replaces the third party search instructions`() {
-    val prompt = SystemPrompt.build(SearchAvailability.BUILT_IN)
-
-    assertThat(prompt).contains("Google Search grounding is enabled")
-    assertThat(prompt).doesNotContain("Use web_search when you need information")
-  }
 }

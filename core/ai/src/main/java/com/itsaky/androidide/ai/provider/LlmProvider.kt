@@ -39,7 +39,5 @@ interface LlmProvider {
 
   val kind: ProviderKind
 
-  fun supportsBuiltInSearchWith(model: String, hasFunctionTools: Boolean): Boolean = false
-
   fun stream(request: ChatRequest): Flow<ChatStreamEvent>
 }

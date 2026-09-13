@@ -33,7 +33,6 @@ import com.itsaky.androidide.ai.history.TitleGenerator
 import com.itsaky.androidide.ai.model.ChatMessage
 import com.itsaky.androidide.ai.model.ChatRole
 import com.itsaky.androidide.ai.prefs.AiPreferences
-import com.itsaky.androidide.ai.search.SearchMode
 import com.itsaky.androidide.ai.service.AiStreamingService
 import com.itsaky.androidide.ai.provider.AnthropicProvider
 import com.itsaky.androidide.ai.provider.GoogleProvider
@@ -210,25 +209,19 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     append(ChatEntry.User(nextId(), message))
     lastPrompt = message
 
-    val searchMode = AiPreferences.searchModeOf(config.kind)
     val tools = ToolRegistry.specs(context)
     val searchAvailable = ToolRegistry.searchToolsAvailable(context)
     val gate = ToolGate(context, this)
     val provider = createProvider(config)
 
-    val builtInSearch = searchMode == SearchMode.BUILT_IN &&
-        provider.supportsBuiltInSearchWith(config.model, tools.isNotEmpty())
-
-    if (searchMode == SearchMode.BUILT_IN && !builtInSearch) {
-      append(ChatEntry.Notice(nextId(), NoticeKind.BUILT_IN_SEARCH_UNSUPPORTED))
-    } else if (!builtInSearch && !searchAvailable) {
+    if (!searchAvailable) {
       append(ChatEntry.Notice(nextId(), NoticeKind.SEARCH_KEY_MISSING))
     }
 
-    val searchAvailability = when {
-      builtInSearch -> SearchAvailability.BUILT_IN
-      searchAvailable -> SearchAvailability.THIRD_PARTY
-      else -> SearchAvailability.UNAVAILABLE
+    val searchAvailability = if (searchAvailable) {
+      SearchAvailability.THIRD_PARTY
+    } else {
+      SearchAvailability.UNAVAILABLE
     }
 
     val agent = ChatAgent(
@@ -240,8 +233,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       maxToolRounds = AiPreferences.maxToolRounds,
       contextWindow = AiPreferences.contextWindowOf(config.kind),
       compactThresholdPercent = AiPreferences.effectiveCompactThreshold(),
-      tools = tools,
-      builtInSearch = builtInSearch
+      tools = tools
     )
 
     busy.value = true
@@ -378,12 +370,6 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
 
         is AgentEvent.Failed -> append(ChatEntry.Error(nextId(), event.message))
 
-        is AgentEvent.Grounded -> {
-          if (event.sources.isNotEmpty() || event.queries.isNotEmpty()) {
-            append(ChatEntry.Sources(nextId(), event.queries, event.sources))
-          }
-        }
-
         is AgentEvent.Interrupted -> {
           finishStreaming()
           append(ChatEntry.Interrupted(nextId(), event.message))
@@ -422,7 +408,6 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     items[index] = when (val entry = items[index]) {
       is ChatEntry.Tool -> entry.copy(expanded = !entry.expanded)
       is ChatEntry.Thinking -> entry.copy(expanded = !entry.expanded)
-      is ChatEntry.Sources -> entry.copy(expanded = !entry.expanded)
       else -> return
     }
     publish()

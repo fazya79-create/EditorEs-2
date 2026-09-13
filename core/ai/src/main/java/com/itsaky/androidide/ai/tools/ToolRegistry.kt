@@ -20,7 +20,6 @@ package com.itsaky.androidide.ai.tools
 import android.content.Context
 import com.itsaky.androidide.ai.model.ToolSpec
 import com.itsaky.androidide.ai.prefs.AiPreferences
-import com.itsaky.androidide.ai.search.SearchMode
 
 object ToolRegistry {
 
@@ -45,8 +44,7 @@ object ToolRegistry {
   }
 
   fun searchToolsAvailable(context: Context): Boolean =
-    AiPreferences.searchMode() == SearchMode.THIRD_PARTY &&
-        AiPreferences.hasSearchApiKey(context)
+    AiPreferences.hasSearchApiKey(context)
 
   fun find(name: String): AiTool? = tools[name]
 }

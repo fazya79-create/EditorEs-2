@@ -25,13 +25,13 @@ import com.itsaky.androidide.ai.model.ChatMessage
 import com.itsaky.androidide.ai.model.ChatRequest
 import com.itsaky.androidide.ai.model.ChatRole
 import com.itsaky.androidide.ai.model.ChatStreamEvent
-import com.itsaky.androidide.ai.model.GroundingSource
 import com.itsaky.androidide.ai.model.StopReason
 import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.model.TokenUsage
 import com.itsaky.androidide.ai.model.ToolCall
 import com.itsaky.androidide.ai.net.SseClient
 import com.itsaky.androidide.ai.net.SseEvent
+import com.itsaky.androidide.ai.net.HttpStatusException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ProducerScope
@@ -44,14 +44,10 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
 
   override val kind: ProviderKind = ProviderKind.GOOGLE
 
-  override fun supportsBuiltInSearchWith(model: String, hasFunctionTools: Boolean): Boolean =
-    !hasFunctionTools || supportsToolCombination(model)
-
   override fun stream(request: ChatRequest): Flow<ChatStreamEvent> = callbackFlow {
     val text = StringBuilder()
     val reasoning = StringBuilder()
     val calls = mutableListOf<ToolCall>()
-    val grounding = GroundingCollector()
     var stopReason = StopReason.END_TURN
     var usage = TokenUsage()
 
@@ -67,7 +63,7 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
             break
           }
           readUsage(event)?.let { usage = it }
-          val reason = handleEvent(event, text, reasoning, calls, grounding)
+          val reason = handleEvent(event, text, reasoning, calls)
           if (reason != null) {
             stopReason = reason
           }
@@ -76,7 +72,7 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
     } catch (err: CancellationException) {
       throw err
     } catch (err: Throwable) {
-      val message = err.message ?: "Request failed"
+      val message = describe(err)
       if (text.isEmpty() && reasoning.isEmpty()) {
         send(ChatStreamEvent.Failed(message, err))
       } else {
@@ -96,10 +92,6 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
       stopReason = StopReason.TOOL_USE
     }
 
-    if (grounding.isNotEmpty) {
-      send(ChatStreamEvent.Grounded(grounding.queries(), grounding.sources()))
-    }
-
     send(
       ChatStreamEvent.Completed(
         message = ChatMessage.assistant(text.toString(), calls.toList(), reasoning.toString()),
@@ -113,6 +105,26 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
   private fun streamUrl(model: String): String {
     val base = config.baseUrl.trimEnd('/')
     return "$base/models/${model.removePrefix("models/")}:streamGenerateContent?alt=sse"
+  }
+
+  private fun describe(err: Throwable): String {
+    if (err !is HttpStatusException) {
+      return err.message ?: "Request failed"
+    }
+
+    val message = runCatching { JsonParser.parseString(err.body).asJsonObject }
+      .getOrNull()
+      ?.getAsJsonObject("error")
+      ?.get("message")
+      ?.takeIf { it.isJsonPrimitive }
+      ?.asString
+      ?.takeIf { it.isNotBlank() }
+
+    return if (message == null) {
+      "The provider rejected the request (HTTP ${err.status})."
+    } else {
+      "HTTP ${err.status}: $message"
+    }
   }
 
   private fun readUsage(event: SseEvent): TokenUsage? {
@@ -135,8 +147,7 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
     event: SseEvent,
     text: StringBuilder,
     reasoning: StringBuilder,
-    calls: MutableList<ToolCall>,
-    grounding: GroundingCollector
+    calls: MutableList<ToolCall>
   ): StopReason? {
     val chunk = runCatching { JsonParser.parseString(event.data).asJsonObject }.getOrNull()
       ?: return null
@@ -161,10 +172,6 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
       ?.takeIf { it.isJsonObject }
       ?.asJsonObject
       ?: return null
-
-    candidate.getAsJsonObject("groundingMetadata")?.let { metadata ->
-      grounding.merge(metadata)
-    }
 
     val stopReason = candidate.get("finishReason")
       ?.takeIf { it.isJsonPrimitive }
@@ -252,13 +259,6 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
     body.add("generationConfig", generationConfig)
 
     val tools = JsonArray()
-    val builtInSearch = request.builtInSearch &&
-        (request.tools.isEmpty() || supportsToolCombination(request.model))
-    if (builtInSearch) {
-      val search = JsonObject()
-      search.add(GOOGLE_SEARCH, JsonObject())
-      tools.add(search)
-    }
 
     if (request.tools.isNotEmpty()) {
       val declarations = JsonArray()
@@ -278,12 +278,6 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
 
     if (tools.size() > 0) {
       body.add("tools", tools)
-    }
-
-    if (builtInSearch && request.tools.isNotEmpty()) {
-      val toolConfig = JsonObject()
-      toolConfig.addProperty("includeServerSideToolInvocations", true)
-      body.add("toolConfig", toolConfig)
     }
 
     return body
@@ -333,13 +327,6 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
     val major = MODEL_VERSION.find(id)?.groupValues?.getOrNull(1)?.toIntOrNull()
       ?: return LATEST_ALIAS.containsMatchIn(id)
     return major >= THINKING_LEVEL_MIN_VERSION
-  }
-
-  private fun supportsToolCombination(model: String): Boolean {
-    val id = model.substringAfterLast('/').lowercase()
-    val major = MODEL_VERSION.find(id)?.groupValues?.getOrNull(1)?.toIntOrNull()
-      ?: return LATEST_ALIAS.containsMatchIn(id)
-    return major >= TOOL_COMBINATION_MIN_VERSION
   }
 
   private fun budgetOf(level: ThinkingLevel): Int = when (level) {
@@ -464,57 +451,18 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
   private fun JsonObject.intOrZero(name: String): Int =
     get(name)?.takeIf { it.isJsonPrimitive }?.asInt ?: 0
 
-  private class GroundingCollector {
-
-    private val queries = LinkedHashSet<String>()
-    private val sources = LinkedHashMap<String, GroundingSource>()
-
-    val isNotEmpty: Boolean
-      get() = queries.isNotEmpty() || sources.isNotEmpty()
-
-    fun merge(metadata: JsonObject) {
-      metadata.getAsJsonArray("webSearchQueries")?.forEach { element ->
-        element.takeIf { it.isJsonPrimitive }
-          ?.asString
-          ?.takeIf { it.isNotBlank() }
-          ?.let { queries += it }
-      }
-
-      metadata.getAsJsonArray("groundingChunks")?.forEach { element ->
-        val web = element.takeIf { it.isJsonObject }
-          ?.asJsonObject
-          ?.getAsJsonObject("web")
-          ?: return@forEach
-
-        val url = web.get("uri")?.takeIf { it.isJsonPrimitive }?.asString.orEmpty()
-        if (url.isBlank()) {
-          return@forEach
-        }
-
-        val title = web.get("title")?.takeIf { it.isJsonPrimitive }?.asString.orEmpty()
-        sources.putIfAbsent(url, GroundingSource(title.ifBlank { url }, url))
-      }
-    }
-
-    fun queries(): List<String> = queries.toList()
-
-    fun sources(): List<GroundingSource> = sources.values.toList()
-  }
-
   companion object {
 
     const val DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
     const val DEFAULT_MODEL = "gemini-3.7-flash"
 
     private const val DONE = "[DONE]"
-    private const val GOOGLE_SEARCH = "googleSearch"
     private const val MIN_SNAPSHOT_CHARS = 16
 
     private const val ROLE_USER = "user"
     private const val ROLE_MODEL = "model"
 
     private const val THINKING_LEVEL_MIN_VERSION = 3
-    private const val TOOL_COMBINATION_MIN_VERSION = 3
     private const val LOW_THINKING_BUDGET = 4096
     private const val MEDIUM_THINKING_BUDGET = 8192
     private const val HIGH_THINKING_BUDGET = 16384

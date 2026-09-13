@@ -25,6 +25,7 @@ import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.model.ToolCall
 import com.itsaky.androidide.ai.model.ToolResult
 import com.itsaky.androidide.ai.model.ToolSpec
+import com.itsaky.androidide.ai.net.HttpStatusException
 import org.junit.Test
 
 class GoogleRequestTest {
@@ -125,58 +126,27 @@ class GoogleRequestTest {
   }
 
   @Test
-  fun `built in search is declared as a googleSearch tool alongside functions`() {
-    val body = buildBody(
-      provider("gemini-3-pro-preview"),
-      defaultRequest("gemini-3-pro-preview").copy(builtInSearch = true)
-    )
-
-    val tools = body.getAsJsonArray("tools")
-    assertThat(tools.size()).isEqualTo(2)
-    assertThat(tools[0].asJsonObject.getAsJsonObject("googleSearch").size()).isEqualTo(0)
-    assertThat(tools[1].asJsonObject.has("functionDeclarations")).isTrue()
-    assertThat(
-      body.getAsJsonObject("toolConfig").get("includeServerSideToolInvocations").asBoolean
-    ).isTrue()
-  }
-
-  @Test
-  fun `models without tool combination support drop the built in search tool`() {
-    val body = buildBody(provider(), defaultRequest().copy(builtInSearch = true))
-
-    val tools = body.getAsJsonArray("tools")
-    assertThat(tools.size()).isEqualTo(1)
-    assertThat(tools[0].asJsonObject.has("functionDeclarations")).isTrue()
-    assertThat(body.has("toolConfig")).isFalse()
-  }
-
-  @Test
-  fun `built in search alone is sent even to models without tool combination`() {
-    val body = buildBody(
-      provider(),
-      defaultRequest().copy(tools = emptyList(), builtInSearch = true)
-    )
-
-    val tools = body.getAsJsonArray("tools")
-    assertThat(tools.size()).isEqualTo(1)
-    assertThat(tools[0].asJsonObject.has("googleSearch")).isTrue()
-    assertThat(body.has("toolConfig")).isFalse()
-  }
-
-  @Test
-  fun `the googleSearch tool is absent when built in search is off`() {
-    val body = buildBody(provider(), defaultRequest())
-
-    val tools = body.getAsJsonArray("tools")
-    assertThat(tools.size()).isEqualTo(1)
-    assertThat(tools[0].asJsonObject.has("functionDeclarations")).isTrue()
-    assertThat(body.has("toolConfig")).isFalse()
-  }
-
-  @Test
   fun `a request with no tools at all omits the tools array`() {
     val body = buildBody(provider(), defaultRequest().copy(tools = emptyList()))
     assertThat(body.has("tools")).isFalse()
+  }
+
+  @Test
+  fun `provider errors are reported with the message instead of the raw body`() {
+    val instance = provider()
+    val method = instance.javaClass.getDeclaredMethod("describe", Throwable::class.java)
+    method.isAccessible = true
+
+    val quota = HttpStatusException(
+      429,
+      """{"error":{"code":429,"message":"You exceeded your current quota","status":"RESOURCE_EXHAUSTED"}}"""
+    )
+    assertThat(method.invoke(instance, quota) as String)
+      .isEqualTo("HTTP 429: You exceeded your current quota")
+
+    val opaque = HttpStatusException(503, "<html>gateway</html>")
+    assertThat(method.invoke(instance, opaque) as String)
+      .isEqualTo("The provider rejected the request (HTTP 503).")
   }
 
   @Test
