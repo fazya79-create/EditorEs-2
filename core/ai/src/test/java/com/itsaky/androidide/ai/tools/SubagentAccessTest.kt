@@ -57,6 +57,22 @@ class SubagentAccessTest {
   }
 
   @Test
+  fun `the dispatch description names the tools each scope actually grants`() {
+    val description = DispatchSubagentTool(runner).spec.description
+
+    assertThat(description).contains("read_only: ${ReadFileTool.NAME}")
+    assertThat(description).doesNotContain("\$READ_ONLY_TOOLS")
+    assertThat(description).doesNotContain("\$FULL_TOOLS")
+
+    val readOnlyLine = description.lines().single { it.startsWith("- read_only:") }
+    assertThat(readOnlyLine).doesNotContain(RunShellTool.NAME)
+    assertThat(readOnlyLine).doesNotContain(WriteFileTool.NAME)
+
+    val fullLine = description.lines().single { it.startsWith("- full:") }
+    assertThat(fullLine).contains(RunShellTool.NAME)
+  }
+
+  @Test
   fun `a read-only sub-agent is offered no mutating tool`() {
     val offered = ToolAccess.forSubagent(ToolScope.READ_ONLY)
       .filter(ToolRegistry().specs())

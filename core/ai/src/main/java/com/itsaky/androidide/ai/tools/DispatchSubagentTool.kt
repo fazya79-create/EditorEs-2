@@ -33,8 +33,12 @@ class DispatchSubagentTool(private val runner: SubagentRunner) : AiTool {
         "symbol or researching a question before you act on it. Do not use it for a single " +
         "file read or one shell command, which are faster to do directly. The sub-agent cannot " +
         "see this conversation, so the 'prompt' must be self-contained and must state exactly " +
-        "what you want reported back. Choose tool_scope 'read_only' unless the sub-task genuinely " +
-        "has to change files or run commands.",
+        "what you want reported back.\n" +
+        "Tools the sub-agent gets for each scope:\n" +
+        "- read_only: ${READ_ONLY_TOOLS}. It cannot change files or run commands, so never ask " +
+        "it to build, compile, test or edit anything.\n" +
+        "- full: ${FULL_TOOLS}.\n" +
+        "Choose read_only unless the sub-task genuinely has to change something.",
     parametersSchemaJson = """
       {
         "type": "object",
@@ -101,6 +105,21 @@ class DispatchSubagentTool(private val runner: SubagentRunner) : AiTool {
   companion object {
 
     const val NAME = "dispatch_subagent"
+
+    private val BASE_TOOLS = listOf(
+      ReadFileTool(),
+      WriteFileTool(),
+      EditFileTool(),
+      RunShellTool(),
+      WebSearchTool(),
+      WebFetchTool()
+    ).map { it.spec }
+
+    private val READ_ONLY_TOOLS = names(ToolScope.READ_ONLY)
+    private val FULL_TOOLS = names(ToolScope.FULL)
+
+    private fun names(scope: ToolScope): String =
+      ToolAccess.forSubagent(scope).filter(BASE_TOOLS).joinToString(", ") { it.name }
 
     private const val PREVIEW_CHARS = 40
   }

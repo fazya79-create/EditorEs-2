@@ -24,11 +24,16 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.zip.GZIPInputStream
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 
 data class SseEvent(val name: String?, val data: String)
 
-class HttpStatusException(val status: Int, val body: String) :
-  RuntimeException("HTTP $status: ${body.take(MAX_BODY)}") {
+class HttpStatusException(
+  val status: Int,
+  val body: String,
+  val retryAfterSeconds: Double? = null
+) : RuntimeException("HTTP $status: ${body.take(MAX_BODY)}") {
 
   companion object {
     private const val MAX_BODY = 1024
@@ -137,7 +142,11 @@ object SseClient {
         val error = connection.errorStream?.use { stream ->
           InputStreamReader(decode(stream, connection.contentEncoding), Charsets.UTF_8).readText()
         } ?: ""
-        throw HttpStatusException(status, error)
+        throw HttpStatusException(
+          status,
+          error,
+          RetryPolicy.retryAfterSeconds(connection.getHeaderField("Retry-After"))
+        )
       }
 
       return SseConnection(
@@ -162,4 +171,34 @@ object SseClient {
     } else {
       stream
     }
+
+  // A transient gateway failure before any token has been produced is safe to repeat:
+  // nothing has been shown to the user and no tool has run yet.
+  suspend fun postWithRetry(
+    url: String,
+    headers: Map<String, String>,
+    body: String,
+    onRetry: (attempt: Int, delayMs: Long, error: Throwable) -> Unit = { _, _, _ -> }
+  ): SseConnection {
+    var attempt = 1
+    while (true) {
+      try {
+        return post(url, headers, body)
+      } catch (err: Throwable) {
+        if (err is CancellationException) {
+          throw err
+        }
+        if (attempt >= RetryPolicy.MAX_ATTEMPTS || !RetryPolicy.isRetryable(err)) {
+          throw err
+        }
+        val wait = RetryPolicy.delayMillis(
+          attempt,
+          (err as? HttpStatusException)?.retryAfterSeconds
+        )
+        onRetry(attempt, wait, err)
+        delay(wait)
+        attempt++
+      }
+    }
+  }
 }

@@ -75,6 +75,6 @@ class ReadFileTool : AiTool {
     const val NAME = "read_file"
 
     private const val MAX_FILE_SIZE = 1L * 1024 * 1024
-    private const val MAX_CHARS = 100_000
+    private const val MAX_CHARS = 50_000
   }
 }

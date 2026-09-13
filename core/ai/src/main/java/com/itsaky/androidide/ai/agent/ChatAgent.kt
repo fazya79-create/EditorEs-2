@@ -50,6 +50,13 @@ sealed interface AgentEvent {
 
   data class Failed(val message: String) : AgentEvent
 
+  data class Reconnecting(
+    val attempt: Int,
+    val maxAttempts: Int,
+    val delayMillis: Long,
+    val offline: Boolean
+  ) : AgentEvent
+
   data class Interrupted(val message: String, val partial: String) : AgentEvent
 
   data class ContextCompacted(
@@ -123,6 +130,15 @@ class ChatAgent(
 
           is ChatStreamEvent.ToolCallStarted,
           is ChatStreamEvent.ToolCallArgumentsDelta -> Unit
+
+          is ChatStreamEvent.Reconnecting -> emit(
+            AgentEvent.Reconnecting(
+              attempt = event.attempt,
+              maxAttempts = event.maxAttempts,
+              delayMillis = event.delayMillis,
+              offline = event.offline
+            )
+          )
         }
       }
 

@@ -428,6 +428,22 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
 
         is AgentEvent.Failed -> append(ChatEntry.Error(nextId(), event.message))
 
+        is AgentEvent.Reconnecting -> {
+          // The retry replays the request from scratch, so anything already streamed is
+          // dropped here rather than left to collide with the replacement text.
+          streamingId?.let { id ->
+            items.removeAll { it.id == id }
+            streamingId = null
+          }
+          streamed.setLength(0)
+          thinkingId?.let { id ->
+            items.removeAll { it.id == id }
+            thinkingId = null
+          }
+          thought.setLength(0)
+          showReconnecting(event)
+        }
+
         is AgentEvent.TodosUpdated -> showTodos(event.items)
 
         is AgentEvent.Interrupted -> {
@@ -584,6 +600,20 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     return true
   }
 
+  private fun showReconnecting(event: AgentEvent.Reconnecting) {
+    val existing = items.indexOfLast {
+      it is ChatEntry.Notice &&
+          (it.kind == NoticeKind.RECONNECTING || it.kind == NoticeKind.OFFLINE)
+    }
+    val id = if (existing >= 0) items.removeAt(existing).id else nextId()
+    items += ChatEntry.Notice(
+      id = id,
+      kind = if (event.offline) NoticeKind.OFFLINE else NoticeKind.RECONNECTING,
+      count = event.attempt
+    )
+    publish()
+  }
+
   private fun append(entry: ChatEntry) {
     items += entry
     publish()
@@ -692,18 +722,24 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     val childRegistry = ToolRegistry()
     val childGate = ToolGate(context, childRegistry, access, this)
 
+    val childTools = childRegistry.specs(context, access)
+
     appendSubagentEntry(request.description, scope)
 
     val child = ChatAgent(
       provider = provider,
       gate = childGate,
       model = config.model,
-      systemPrompt = SystemPrompt.buildForSubagent(searchAvailability, scope),
+      systemPrompt = SystemPrompt.buildForSubagent(
+        searchAvailability,
+        scope,
+        childTools.map { it.name }
+      ),
       thinkingLevel = AiPreferences.thinkingLevel,
       maxToolRounds = SUBAGENT_MAX_TOOL_ROUNDS,
       contextWindow = AiPreferences.contextWindowOf(config.kind),
       compactThresholdPercent = AiPreferences.effectiveCompactThreshold(),
-      tools = childRegistry.specs(context, access)
+      tools = childTools
     )
 
     val transcript = StringBuilder()

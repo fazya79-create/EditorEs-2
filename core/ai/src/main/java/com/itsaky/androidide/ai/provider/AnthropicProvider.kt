@@ -27,7 +27,10 @@ import com.itsaky.androidide.ai.model.ChatStreamEvent
 import com.itsaky.androidide.ai.model.StopReason
 import com.itsaky.androidide.ai.model.TokenUsage
 import com.itsaky.androidide.ai.model.ToolCall
+import com.itsaky.androidide.ai.net.Connectivity
+import com.itsaky.androidide.ai.net.ResilientStream
 import com.itsaky.androidide.ai.net.SseClient
+import com.itsaky.androidide.ai.net.StreamAttemptFailure
 import com.itsaky.androidide.ai.net.SseEvent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -49,39 +52,72 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
     var usage = TokenUsage()
 
     try {
-      SseClient.post(
-        url = "${config.baseUrl.trimEnd('/')}/messages",
-        headers = mapOf(
-          "x-api-key" to config.apiKey,
-          "anthropic-version" to API_VERSION
-        ),
-        body = buildBody(request).toString()
-      ).use { connection ->
-        while (isActive) {
-          val event = connection.next() ?: break
-          usage = mergeUsage(event, usage)
-          if (event.name == EVENT_MESSAGE_STOP) {
-            connection.markComplete()
-            break
+      ResilientStream.run(
+        isOnline = { config.context?.let { Connectivity.isOnline(it) } ?: true },
+        awaitOnline = { timeout ->
+          config.context?.let { Connectivity.awaitOnline(it, timeout) } ?: true
+        },
+        onReconnect = { notice ->
+          send(
+            ChatStreamEvent.Reconnecting(
+              attempt = notice.attempt,
+              maxAttempts = notice.maxAttempts,
+              delayMillis = notice.delayMillis,
+              offline = notice.offline,
+              reason = notice.reason
+            )
+          )
+        }
+      ) {
+        text.setLength(0)
+        reasoning.setLength(0)
+        blocks.clear()
+        stopReason = StopReason.END_TURN
+        usage = TokenUsage()
+
+        var produced = false
+        try {
+          SseClient.postWithRetry(
+            url = "${config.baseUrl.trimEnd('/')}/messages",
+            headers = mapOf(
+              "x-api-key" to config.apiKey,
+              "anthropic-version" to API_VERSION
+            ),
+            body = buildBody(request).toString()
+          ).use { connection ->
+            while (isActive) {
+              val event = connection.next() ?: break
+              usage = mergeUsage(event, usage)
+              if (event.name == EVENT_MESSAGE_STOP) {
+                connection.markComplete()
+                break
+              }
+              val reason = handleEvent(event, text, reasoning, blocks)
+              if (reason != null) {
+                stopReason = reason
+              }
+              produced = text.isNotEmpty() || reasoning.isNotEmpty() || blocks.isNotEmpty()
+            }
           }
-          val reason = handleEvent(event, text, reasoning, blocks)
-          if (reason != null) {
-            stopReason = reason
-          }
+        } catch (err: CancellationException) {
+          throw err
+        } catch (err: Throwable) {
+          throw StreamAttemptFailure(err, produced)
         }
       }
     } catch (err: CancellationException) {
       throw err
     } catch (err: Throwable) {
-      val message = err.message ?: "Request failed"
+      val cause = (err as? StreamAttemptFailure)?.error ?: err
+      val message = cause.message ?: "Request failed"
       if (text.isEmpty() && reasoning.isEmpty()) {
-        send(ChatStreamEvent.Failed(message, err))
+        send(ChatStreamEvent.Failed(message, cause))
       } else {
         send(
           ChatStreamEvent.Interrupted(
             message = message,
             partial = ChatMessage.assistant(text.toString(), reasoning = reasoning.toString()),
-            cause = err
+            cause = cause
           )
         )
       }

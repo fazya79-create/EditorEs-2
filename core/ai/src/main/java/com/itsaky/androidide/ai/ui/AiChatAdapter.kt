@@ -247,6 +247,11 @@ class AiChatAdapter(
 
             NoticeKind.SEARCH_KEY_MISSING ->
               context.getString(R.string.msg_ai_search_key_missing)
+
+            NoticeKind.RECONNECTING ->
+              context.getString(R.string.msg_ai_reconnecting, entry.count)
+
+            NoticeKind.OFFLINE -> context.getString(R.string.msg_ai_offline)
           }
           binding.root.setCardBackgroundColor(
             context.resolveAttr(com.google.android.material.R.attr.colorSurfaceContainerLow)

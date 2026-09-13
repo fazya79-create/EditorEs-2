@@ -85,7 +85,8 @@ object SystemPrompt {
 
   fun buildForSubagent(
     searchAvailability: SearchAvailability = SearchAvailability.THIRD_PARTY,
-    scope: ToolScope
+    scope: ToolScope,
+    toolNames: List<String> = emptyList()
   ): String = buildString {
     append(
       build(
@@ -97,6 +98,14 @@ object SystemPrompt {
     append("You are running as a sub-agent on one delegated task. You cannot see the ")
     append("conversation you were dispatched from and you cannot delegate further, so do not ")
     append("ask questions or wait for input: work with what the task gives you.\n")
+    if (toolNames.isNotEmpty()) {
+      append("The tools you have are: ")
+      append(toolNames.joinToString(", "))
+      append(". That is the complete set. Do the most useful part of the task that these ")
+      append("tools allow and report what you found, rather than refusing because some other ")
+      append("tool is missing. Only report a task as impossible when none of your tools can ")
+      append("make progress on it.\n")
+    }
     append("Your entire reply is the only thing the agent that dispatched you receives, and the ")
     append("user does not see it directly. End with a self-contained report of what you found or ")
     append("did, including the specific file paths, symbols and findings that the task asked ")

@@ -17,6 +17,7 @@
 
 package com.itsaky.androidide.ai.provider
 
+import android.content.Context
 import com.itsaky.androidide.ai.model.ChatRequest
 import com.itsaky.androidide.ai.model.ChatStreamEvent
 import kotlinx.coroutines.flow.Flow
@@ -32,7 +33,8 @@ data class ProviderConfig(
   val baseUrl: String,
   val apiKey: String,
   val model: String,
-  val promptCaching: Boolean = true
+  val promptCaching: Boolean = true,
+  val context: Context? = null
 )
 
 interface LlmProvider {

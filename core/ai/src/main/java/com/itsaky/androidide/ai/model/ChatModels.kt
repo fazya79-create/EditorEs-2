@@ -120,6 +120,14 @@ sealed interface ChatStreamEvent {
 
   data class Failed(val message: String, val cause: Throwable? = null) : ChatStreamEvent
 
+  data class Reconnecting(
+    val attempt: Int,
+    val maxAttempts: Int,
+    val delayMillis: Long,
+    val offline: Boolean,
+    val reason: String
+  ) : ChatStreamEvent
+
   data class Interrupted(
     val message: String,
     val partial: ChatMessage,

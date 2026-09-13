@@ -363,6 +363,7 @@ object AiPreferences {
     baseUrl = baseUrlOf(kind),
     apiKey = SecretStore(context).get(apiKeyPrefKey(kind)),
     model = modelOf(kind),
-    promptCaching = promptCaching
+    promptCaching = promptCaching,
+    context = context.applicationContext
   )
 }

@@ -71,8 +71,7 @@ sealed interface ChatEntry {
     val items: List<TodoItem>
   ) : ChatEntry
 
-  data class Subagent(
-    override val id: Long,
+  data class Subagent(    override val id: Long,
     val description: String,
     val scope: ToolScope,
     val state: SubagentState,
@@ -93,7 +92,9 @@ enum class SubagentState {
 enum class NoticeKind {
   COMPACTED,
   COMPACTION_FAILED,
-  SEARCH_KEY_MISSING
+  SEARCH_KEY_MISSING,
+  RECONNECTING,
+  OFFLINE
 }
 
 data class ContextUsage(val used: Int, val window: Int, val cached: Int = 0) {

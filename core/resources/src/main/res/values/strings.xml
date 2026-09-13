@@ -345,6 +345,8 @@
   <string name="title_ai_commands">Slash commands</string>
   <string name="msg_ai_unknown_command">Unknown command \'/%1$s\'. Available commands: %2$s</string>
   <string name="msg_ai_no_commands">Unknown command \'/%1$s\'. No commands are defined. Add markdown files under .androidide/commands in the project.</string>
+  <string name="msg_ai_reconnecting">Connection lost. Reconnecting\u2026 (attempt %1$d)</string>
+  <string name="msg_ai_offline">Waiting for the network. The reply resumes automatically once you are back online.</string>
   <string name="title_ai_subagent">Sub-agent</string>
   <string name="msg_ai_subagent_running">Sub-agent running · %1$s</string>
   <string name="msg_ai_subagent_done">Sub-agent finished · %1$s</string>
