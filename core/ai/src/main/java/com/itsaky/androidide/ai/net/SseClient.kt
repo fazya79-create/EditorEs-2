@@ -19,9 +19,11 @@ package com.itsaky.androidide.ai.net
 
 import java.io.BufferedReader
 import java.io.Closeable
+import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.zip.GZIPInputStream
 
 data class SseEvent(val name: String?, val data: String)
 
@@ -84,12 +86,22 @@ class SseConnection internal constructor(
 ) : Closeable {
 
   private val frames = SseFrameReader(reader)
+  private var exhausted = false
 
-  fun next(): SseEvent? = frames.next()
+  fun next(): SseEvent? = frames.next().also { if (it == null) exhausted = true }
+
+  fun markComplete() {
+    exhausted = true
+  }
 
   override fun close() {
     runCatching { reader.close() }
-    runCatching { connection.disconnect() }
+    // A fully drained response can go back to the keep-alive pool, which saves a TLS
+    // handshake on the next tool round. A stream abandoned early never will, so release
+    // the socket instead of holding it open.
+    if (!exhausted) {
+      runCatching { connection.disconnect() }
+    }
   }
 }
 
@@ -97,37 +109,57 @@ object SseClient {
 
   private const val CONNECT_TIMEOUT = 30_000
   private const val READ_TIMEOUT = 300_000
+  private const val STREAM_BUFFER = 16 * 1024
 
   fun post(url: String, headers: Map<String, String>, body: String): SseConnection {
+    val payload = body.toByteArray(Charsets.UTF_8)
     val connection = (URL(url).openConnection() as HttpURLConnection).apply {
       requestMethod = "POST"
       connectTimeout = CONNECT_TIMEOUT
       readTimeout = READ_TIMEOUT
       doOutput = true
       doInput = true
+      instanceFollowRedirects = true
       setRequestProperty("Content-Type", "application/json")
       setRequestProperty("Accept", "text/event-stream")
+      setRequestProperty("Accept-Encoding", "gzip")
+      setRequestProperty("Connection", "keep-alive")
+      setRequestProperty("Cache-Control", "no-cache")
+      setFixedLengthStreamingMode(payload.size)
       headers.forEach { (key, value) -> setRequestProperty(key, value) }
     }
 
     try {
-      connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+      connection.outputStream.use { it.write(payload) }
 
       val status = connection.responseCode
       if (status !in 200..299) {
         val error = connection.errorStream?.use { stream ->
-          InputStreamReader(stream, Charsets.UTF_8).readText()
+          InputStreamReader(decode(stream, connection.contentEncoding), Charsets.UTF_8).readText()
         } ?: ""
         throw HttpStatusException(status, error)
       }
 
       return SseConnection(
         connection,
-        BufferedReader(InputStreamReader(connection.inputStream, Charsets.UTF_8))
+        BufferedReader(
+          InputStreamReader(
+            decode(connection.inputStream, connection.contentEncoding),
+            Charsets.UTF_8
+          ),
+          STREAM_BUFFER
+        )
       )
     } catch (err: Throwable) {
       connection.disconnect()
       throw err
     }
   }
+
+  private fun decode(stream: InputStream, encoding: String?): InputStream =
+    if (encoding?.equals("gzip", ignoreCase = true) == true) {
+      GZIPInputStream(stream, STREAM_BUFFER)
+    } else {
+      stream
+    }
 }

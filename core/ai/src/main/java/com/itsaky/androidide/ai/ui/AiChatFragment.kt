@@ -41,6 +41,7 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
 
   private val viewModel by viewModels<AiChatViewModel>(ownerProducer = { requireActivity() })
   private val adapter by lazy { AiChatAdapter(viewModel::toggleExpanded, ::onRetryClicked) }
+  private val commandAdapter by lazy { CommandSuggestionAdapter(::onCommandPicked) }
 
   private var baseInputMargin = 0
   private var lastImeInset = 0
@@ -63,7 +64,13 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
         false
       }
     }
-    binding.input.doAfterTextChanged { updateSendButton() }
+    binding.commandList.layoutManager = LinearLayoutManager(requireContext())
+    binding.commandList.adapter = commandAdapter
+
+    binding.input.doAfterTextChanged {
+      updateSendButton()
+      updateCommandSuggestions()
+    }
 
     binding.approvalAccept.setOnClickListener {
       viewModel.resolveApproval(ApprovalDecision.APPROVED)
@@ -75,7 +82,6 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
     binding.newChat.setOnClickListener { viewModel.clear() }
     binding.history.setOnClickListener { showHistory() }
     binding.agentMode.setOnClickListener { toggleAgentMode() }
-    binding.commands.setOnClickListener { showCommands() }
 
     viewModel.entries.observe(viewLifecycleOwner) { entries ->
       val atBottom = isAtBottom()
@@ -89,13 +95,8 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
 
     viewModel.busy.observe(viewLifecycleOwner) { updateSendButton() }
 
-    viewModel.yoloMode.observe(viewLifecycleOwner) { enabled ->
-      binding.yoloBanner.visibility = if (enabled == true) View.VISIBLE else View.GONE
-    }
-
     viewModel.agentMode.observe(viewLifecycleOwner) { mode ->
       val plan = mode == AgentMode.PLAN
-      binding.planBanner.visibility = if (plan) View.VISIBLE else View.GONE
       binding.agentMode.setText(
         if (plan) {
           com.itsaky.androidide.resources.R.string.title_ai_mode_plan
@@ -137,26 +138,16 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
     viewModel.refreshAgentMode()
   }
 
-  private fun showCommands() {
-    val commands = viewModel.availableCommands()
-    val labels = commands
-      .map { command ->
-        if (command.description.isBlank()) {
-          "/${command.name}"
-        } else {
-          "/${command.name} — ${command.description}"
-        }
-      }
-      .toTypedArray()
+  private fun onCommandPicked(command: com.itsaky.androidide.ai.commands.SlashCommand) {
+    binding.input.setText("/${command.name} ")
+    binding.input.setSelection(binding.input.text?.length ?: 0)
+  }
 
-    DialogUtils.newMaterialDialogBuilder(requireContext())
-      .setTitle(com.itsaky.androidide.resources.R.string.title_ai_commands)
-      .setItems(labels) { _, index ->
-        binding.input.setText("/${commands[index].name} ")
-        binding.input.setSelection(binding.input.text?.length ?: 0)
-      }
-      .setNegativeButton(android.R.string.cancel, null)
-      .show()
+  private fun updateCommandSuggestions() {
+    val text = binding.input.text?.toString().orEmpty()
+    val matches = viewModel.suggestCommands(text)
+    commandAdapter.submitList(matches)
+    binding.commandSuggestions.visibility = if (matches.isEmpty()) View.GONE else View.VISIBLE
   }
 
   private fun toggleAgentMode() {    val next = if (viewModel.agentMode.value == AgentMode.PLAN) {

@@ -83,7 +83,7 @@ class ChatAgent(
     while (true) {
       val request = ChatRequest(
         model = model,
-        messages = messages.toList(),
+        messages = ToolResultTrimmer.trim(messages),
         tools = tools,
         systemPrompt = systemPrompt,
         thinkingLevel = thinkingLevel

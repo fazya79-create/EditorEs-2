@@ -84,6 +84,8 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   private var lastPrompt: String? = null
   private var lastSentPrompt: String? = null
   private var delegationsThisTurn = 0
+  private var commands: CommandRegistry? = null
+  private var commandsKey: String? = null
 
   val entries = MutableLiveData<List<ChatEntry>>(emptyList())
   val busy = MutableLiveData(false)
@@ -177,6 +179,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     history.clear()
     items.clear()
     registry = ToolRegistry()
+    commands = null
     lastPrompt = null
     lastSentPrompt = null
     sessionId = store.newSessionId()
@@ -639,9 +642,26 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
 
   fun availableCommands(): List<SlashCommand> = commandRegistry().all()
 
+  fun suggestCommands(input: String): List<SlashCommand> {
+    val text = input.trimStart()
+    if (!text.startsWith('/') || text.any { it.isWhitespace() }) {
+      return emptyList()
+    }
+    val prefix = text.drop(1).lowercase()
+    return commandRegistry().all().filter { it.name.startsWith(prefix) }
+  }
+
   private fun commandRegistry(): CommandRegistry {
     val projectDir = runCatching { WorkspacePaths.projectDir() }.getOrNull()
-    return CommandRegistry.load(projectDir)
+    val key = projectDir?.path.orEmpty()
+    val cached = commands
+    if (cached != null && commandsKey == key) {
+      return cached
+    }
+    return CommandRegistry.load(projectDir).also {
+      commands = it
+      commandsKey = key
+    }
   }
 
   private suspend fun runSubagent(

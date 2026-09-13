@@ -60,6 +60,7 @@ class GoogleProvider(private val config: ProviderConfig) : LlmProvider {
         while (isActive) {
           val event = connection.next() ?: break
           if (event.data == DONE) {
+            connection.markComplete()
             break
           }
           readUsage(event)?.let { usage = it }

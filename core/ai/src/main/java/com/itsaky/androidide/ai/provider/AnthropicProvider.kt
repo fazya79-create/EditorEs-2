@@ -61,6 +61,7 @@ class AnthropicProvider(private val config: ProviderConfig) : LlmProvider {
           val event = connection.next() ?: break
           usage = mergeUsage(event, usage)
           if (event.name == EVENT_MESSAGE_STOP) {
+            connection.markComplete()
             break
           }
           val reason = handleEvent(event, text, reasoning, blocks)

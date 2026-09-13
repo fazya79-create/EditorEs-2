@@ -41,13 +41,6 @@
       android:contentDescription="@string/action_ai_mode"
       android:text="@string/title_ai_mode_build" />
 
-    <com.google.android.material.button.MaterialButton
-      android:id="@+id/commands"
-      style="@style/Widget.Material3.Button.IconButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:contentDescription="@string/action_ai_commands"
-      app:icon="@drawable/ic_info" />
 
     <com.google.android.material.button.MaterialButton
       android:id="@+id/new_chat"
@@ -67,51 +60,7 @@
 
   </LinearLayout>
 
-  <com.google.android.material.textview.MaterialTextView
-    android:id="@+id/yolo_banner"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:background="?attr/colorErrorContainer"
-    android:drawablePadding="8dp"
-    android:paddingStart="12dp"
-    android:paddingTop="8dp"
-    android:paddingEnd="12dp"
-    android:paddingBottom="8dp"
-    android:text="@string/msg_ai_yolo_banner"
-    android:textColor="?attr/colorOnErrorContainer"
-    android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-    android:visibility="gone"
-    app:drawableStartCompat="@drawable/ic_alert"
-    app:drawableTint="?attr/colorOnErrorContainer"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/action_row"
-    tools:visibility="visible" />
 
-  <com.google.android.material.textview.MaterialTextView
-    android:id="@+id/plan_banner"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:background="?attr/colorTertiaryContainer"
-    android:drawablePadding="8dp"
-    android:paddingStart="12dp"
-    android:paddingTop="8dp"
-    android:paddingEnd="12dp"
-    android:paddingBottom="8dp"
-    android:text="@string/msg_ai_mode_plan_banner"
-    android:textColor="?attr/colorOnTertiaryContainer"
-    android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-    android:visibility="gone"
-    app:drawableStartCompat="@drawable/ic_info"
-    app:drawableTint="?attr/colorOnTertiaryContainer"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/yolo_banner"
-    tools:visibility="visible" />
 
   <com.google.android.material.textview.MaterialTextView
     android:id="@+id/empty_state"
@@ -139,7 +88,7 @@
     app:layout_constraintBottom_toTopOf="@id/context_usage"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/plan_banner" />
+    app:layout_constraintTop_toBottomOf="@id/action_row" />
 
   <LinearLayout
     android:id="@+id/approval_bar"
@@ -210,10 +159,32 @@
     android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
     android:textColor="?attr/colorOnSurfaceVariant"
     android:visibility="gone"
-    app:layout_constraintBottom_toTopOf="@id/approval_bar"
+    app:layout_constraintBottom_toTopOf="@id/command_suggestions"
     app:layout_constraintEnd_toEndOf="parent"
     tools:text="Context 82%"
     tools:visibility="visible" />
+
+  <com.google.android.material.card.MaterialCardView
+    android:id="@+id/command_suggestions"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="4dp"
+    android:visibility="gone"
+    app:cardElevation="3dp"
+    app:layout_constraintBottom_toTopOf="@id/approval_bar"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    tools:visibility="visible">
+
+    <androidx.recyclerview.widget.RecyclerView
+      android:id="@+id/command_list"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:maxHeight="220dp" />
+
+  </com.google.android.material.card.MaterialCardView>
 
   <LinearLayout
     android:id="@+id/input_row"
