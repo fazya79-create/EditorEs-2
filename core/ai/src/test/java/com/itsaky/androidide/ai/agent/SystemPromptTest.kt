@@ -23,6 +23,41 @@ import org.junit.Test
 class SystemPromptTest {
 
   @Test
+  fun `states that the project is CMake rather than Gradle`() {
+    val prompt = SystemPrompt.build()
+
+    assertThat(prompt).contains("CMake")
+    assertThat(prompt).contains("It does not build Android applications")
+    assertThat(prompt).contains("CMakeLists.txt")
+  }
+
+  @Test
+  fun `names the Gradle and Android files the assistant must not hunt for`() {
+    val prompt = SystemPrompt.build()
+
+    listOf(
+      "build.gradle",
+      "settings.gradle",
+      "AndroidManifest.xml",
+      "gradlew",
+      "src/main/java"
+    ).forEach { path ->
+      assertThat(prompt).contains(path)
+    }
+  }
+
+  @Test
+  fun `the CMake framing reaches sub-agents too`() {
+    val prompt = SystemPrompt.buildForSubagent(
+      scope = com.itsaky.androidide.ai.tools.ToolScope.READ_ONLY,
+      toolNames = listOf("read_file")
+    )
+
+    assertThat(prompt).contains("CMake")
+    assertThat(prompt).contains("It does not build Android applications")
+  }
+
+  @Test
   fun `includes defensive reverse engineering and anti cheat guidance`() {
     val prompt = SystemPrompt.build()
 
