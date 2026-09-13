@@ -53,7 +53,7 @@ class BundledSchemesTest {
       val scheme = SchemeParser { File(dir, it) }
         .parse(File(dir, file), name, props.getProperty("scheme.isDark", "false").toBoolean())
 
-      for (type in listOf("kt", "kts", "json", "log")) {
+      for (type in listOf("kt", "kts", "json", "log", "py", "xml", "properties")) {
         assertWithMessage("%s supports '%s'", dir.name, type)
           .that(scheme.getLanguageScheme(type))
           .isNotNull()

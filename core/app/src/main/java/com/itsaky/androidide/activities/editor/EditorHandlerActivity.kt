@@ -37,7 +37,10 @@ import com.itsaky.androidide.actions.FillMenuParams
 import com.itsaky.androidide.editor.language.treesitter.JsonLanguage
 import com.itsaky.androidide.editor.language.treesitter.KotlinLanguage
 import com.itsaky.androidide.editor.language.treesitter.LogLanguage
+import com.itsaky.androidide.editor.language.treesitter.PropertiesLanguage
+import com.itsaky.androidide.editor.language.treesitter.PythonLanguage
 import com.itsaky.androidide.editor.language.treesitter.TSLanguageRegistry
+import com.itsaky.androidide.editor.language.treesitter.XmlLanguage
 import com.itsaky.androidide.editor.schemes.IDEColorSchemeProvider
 import com.itsaky.androidide.editor.ui.IDEEditor
 import com.itsaky.androidide.eventbus.events.editor.DocumentChangeEvent
@@ -132,6 +135,9 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
       TSLanguageRegistry.instance.register(KotlinLanguage.TS_TYPE_KTS, KotlinLanguage.FACTORY)
       TSLanguageRegistry.instance.register(LogLanguage.TS_TYPE, LogLanguage.FACTORY)
       TSLanguageRegistry.instance.register(JsonLanguage.TS_TYPE, JsonLanguage.FACTORY)
+      TSLanguageRegistry.instance.register(PythonLanguage.TS_TYPE, PythonLanguage.FACTORY)
+      TSLanguageRegistry.instance.register(XmlLanguage.TS_TYPE, XmlLanguage.FACTORY)
+      TSLanguageRegistry.instance.register(PropertiesLanguage.TS_TYPE, PropertiesLanguage.FACTORY)
       IDEColorSchemeProvider.initIfNeeded()
     }
   }

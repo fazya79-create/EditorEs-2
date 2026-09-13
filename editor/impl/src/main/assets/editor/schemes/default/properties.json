@@ -1,0 +1,10 @@
+{
+  "types": ["properties"],
+  "styles": {
+    "property": "@field",
+    "string": { "fg": "@string", "maybeHexColor": true },
+    "escape": "@json.escape",
+    "operator": "@operator",
+    "comment": { "fg": "@comment", "italic": true }
+  }
+}

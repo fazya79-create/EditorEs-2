@@ -27,6 +27,7 @@ import com.itsaky.androidide.actions.editor.LongSelectAction
 import com.itsaky.androidide.actions.editor.PasteAction
 import com.itsaky.androidide.actions.editor.SelectAllAction
 import com.itsaky.androidide.actions.etc.FindActionMenu
+import com.itsaky.androidide.actions.etc.MarkdownPreviewAction
 import com.itsaky.androidide.actions.etc.ReloadColorSchemesAction
 import com.itsaky.androidide.actions.build.CmakeBuildAction
 import com.itsaky.androidide.actions.build.CmakeCleanBuildAction
@@ -65,6 +66,7 @@ class EditorActivityActions {
       registry.registerAction(SaveFileAction(context, order++))
       registry.registerAction(CmakeBuildAction(context, order++))
       registry.registerAction(CmakeCleanBuildAction(context, order++))
+      registry.registerAction(MarkdownPreviewAction(context, order++))
       registry.registerAction(FindActionMenu(context, order++))
       registry.registerAction(ReloadColorSchemesAction(context, order++))
 

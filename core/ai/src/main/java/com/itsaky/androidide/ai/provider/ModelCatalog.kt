@@ -22,6 +22,7 @@ import com.google.gson.JsonParser
 import com.itsaky.androidide.ai.net.HttpStatusException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.slf4j.LoggerFactory
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
@@ -33,6 +34,8 @@ data class ModelInfo(
 )
 
 object ModelCatalog {
+
+  private val log = LoggerFactory.getLogger(ModelCatalog::class.java)
 
   private const val CONNECT_TIMEOUT = 20_000
   private const val READ_TIMEOUT = 30_000
@@ -57,7 +60,11 @@ object ModelCatalog {
       ProviderKind.GOOGLE -> mapOf("x-goog-api-key" to config.apiKey)
     }
 
-    parse(config.kind, get(url, headers))
+    log.debug("Fetching model listing for {} from {}", config.kind, url)
+
+    parse(config.kind, get(url, headers)).also { models ->
+      log.debug("Parsed {} models from {}", models.size, url)
+    }
   }
 
   suspend fun detectContextWindow(
@@ -71,8 +78,13 @@ object ModelCatalog {
     val base = config.baseUrl.trimEnd('/')
     val encoded = URLEncoder.encode(model, Charsets.UTF_8.name())
     val headers = mapOf("Authorization" to "Bearer ${config.apiKey}")
+    val url = "$base/models/$encoded"
 
-    val body = runCatching { get("$base/models/$encoded", headers) }.getOrNull()
+    log.debug("Detecting context window for {} from {}", model, url)
+
+    val body = runCatching { get(url, headers) }
+      .onFailure { err -> log.debug("Context window lookup failed for {}: {}", url, err.toString()) }
+      .getOrNull()
       ?: return@withContext 0
 
     val entry = runCatching { JsonParser.parseString(body).asJsonObject }.getOrNull()
@@ -80,12 +92,15 @@ object ModelCatalog {
 
     val direct = openAiContextWindow(entry)
     if (direct > 0) {
+      log.debug("Detected context window {} for {} at {}", direct, model, url)
       return@withContext direct
     }
 
-    entry.getAsJsonObject("data")
+    val nested = entry.getAsJsonObject("data")
       ?.let { openAiContextWindow(it) }
       ?: 0
+    log.debug("Detected context window {} for {} at {}", nested, model, url)
+    nested
   }
 
   private fun get(url: String, headers: Map<String, String>): String {

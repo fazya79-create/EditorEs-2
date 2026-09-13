@@ -21,16 +21,18 @@ import android.content.Context
 import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.provider.AnthropicProvider
 import com.itsaky.androidide.ai.provider.ContextWindowSource
-import com.itsaky.androidide.ai.provider.ContextWindows
 import com.itsaky.androidide.ai.provider.GoogleProvider
 import com.itsaky.androidide.ai.provider.OpenAiProvider
 import com.itsaky.androidide.ai.provider.ProviderConfig
 import com.itsaky.androidide.ai.provider.ProviderKind
 import com.itsaky.androidide.ai.search.SearchProviderKind
 import com.itsaky.androidide.preferences.internal.prefManager
+import org.slf4j.LoggerFactory
 
 @Suppress("MemberVisibilityCanBePrivate")
 object AiPreferences {
+
+  private val log = LoggerFactory.getLogger(AiPreferences::class.java)
 
   const val PROVIDER = "ide.ai.provider"
   const val OPENAI_BASE_URL = "ide.ai.openai.baseUrl"
@@ -59,6 +61,9 @@ object AiPreferences {
   const val OPENAI_CONTEXT_WINDOW_DETECTED = "ide.ai.openai.contextWindow.detected"
   const val ANTHROPIC_CONTEXT_WINDOW_DETECTED = "ide.ai.anthropic.contextWindow.detected"
   const val GOOGLE_CONTEXT_WINDOW_DETECTED = "ide.ai.google.contextWindow.detected"
+  const val OPENAI_CONTEXT_WINDOW_ENDPOINT = "ide.ai.openai.contextWindow.endpoint"
+  const val ANTHROPIC_CONTEXT_WINDOW_ENDPOINT = "ide.ai.anthropic.contextWindow.endpoint"
+  const val GOOGLE_CONTEXT_WINDOW_ENDPOINT = "ide.ai.google.contextWindow.endpoint"
 
   const val SECRET_OPENAI_KEY = "openai.apiKey"
   const val SECRET_ANTHROPIC_KEY = "anthropic.apiKey"
@@ -75,7 +80,7 @@ object AiPreferences {
   const val DEFAULT_SHELL_TIMEOUT = 120
   const val DEFAULT_MAX_TOOL_ROUNDS = 25
   const val DEFAULT_COMPACT_THRESHOLD = 80
-  const val DEFAULT_CONTEXT_WINDOW = 200_000
+  const val DEFAULT_CONTEXT_WINDOW = 256_000
   const val DEFAULT_SEARCH_RESULT_LIMIT = 5
   const val UNLIMITED_TOOL_ROUNDS = 0
 
@@ -208,8 +213,39 @@ object AiPreferences {
     ProviderKind.GOOGLE -> GOOGLE_CONTEXT_WINDOW_DETECTED
   }
 
-  fun contextWindowOf(kind: ProviderKind): Int =
-    prefManager.getInt(contextWindowPrefKey(kind), DEFAULT_CONTEXT_WINDOW)
+  private fun contextWindowEndpointPrefKey(kind: ProviderKind): String = when (kind) {
+    ProviderKind.ANTHROPIC -> ANTHROPIC_CONTEXT_WINDOW_ENDPOINT
+    ProviderKind.OPENAI -> OPENAI_CONTEXT_WINDOW_ENDPOINT
+    ProviderKind.GOOGLE -> GOOGLE_CONTEXT_WINDOW_ENDPOINT
+  }
+
+  private fun contextWindowEndpointOf(kind: ProviderKind): String =
+    baseUrlOf(kind).trimEnd('/').lowercase()
+
+  private fun contextWindowMatchesCurrentRoute(kind: ProviderKind): Boolean {
+    val recordedModel = prefManager.getString(contextWindowModelPrefKey(kind), "")
+    if (recordedModel.isBlank() || recordedModel != modelOf(kind)) {
+      return false
+    }
+    val recordedEndpoint = prefManager.getString(contextWindowEndpointPrefKey(kind), "")
+    return recordedEndpoint.isNotBlank() && recordedEndpoint == contextWindowEndpointOf(kind)
+  }
+
+  fun contextWindowOf(kind: ProviderKind): Int {
+    val stored = prefManager.getInt(contextWindowPrefKey(kind), DEFAULT_CONTEXT_WINDOW)
+    if (contextWindowMatchesCurrentRoute(kind)) {
+      return stored
+    }
+
+    log.debug(
+      "Context window for {}/{} was recorded for another route; using {} instead of {}",
+      kind,
+      modelOf(kind),
+      DEFAULT_CONTEXT_WINDOW,
+      stored
+    )
+    return DEFAULT_CONTEXT_WINDOW
+  }
 
   fun setContextWindowOf(
     kind: ProviderKind,
@@ -221,14 +257,8 @@ object AiPreferences {
   }
 
   fun contextWindowSourceOf(kind: ProviderKind): ContextWindowSource {
-    val model = modelOf(kind)
-    val recordedFor = prefManager.getString(contextWindowModelPrefKey(kind), "")
-    if (recordedFor.isBlank() || recordedFor != model) {
-      return if (ContextWindows.of(kind, model) > 0) {
-        ContextWindowSource.DETECTED
-      } else {
-        ContextWindowSource.UNKNOWN
-      }
+    if (!contextWindowMatchesCurrentRoute(kind)) {
+      return ContextWindowSource.UNKNOWN
     }
     val stored = prefManager.getInt(
       contextWindowSourcePrefKey(kind),
@@ -243,18 +273,19 @@ object AiPreferences {
     source: ContextWindowSource
   ) {
     prefManager.putString(contextWindowModelPrefKey(kind), model)
+    prefManager.putString(contextWindowEndpointPrefKey(kind), contextWindowEndpointOf(kind))
     prefManager.putInt(contextWindowSourcePrefKey(kind), source.ordinal)
   }
 
   fun applyModelContextWindow(kind: ProviderKind, model: String, reported: Int): Int {
-    val window = reported.takeIf { it > 0 } ?: ContextWindows.of(kind, model)
-    if (window > 0) {
-      prefManager.putInt(contextWindowPrefKey(kind), window)
+    log.debug("Applying context window for {}/{}: reported={}", kind, model, reported)
+    if (reported > 0) {
+      prefManager.putInt(contextWindowPrefKey(kind), reported)
       recordContextWindowSource(kind, model, ContextWindowSource.DETECTED)
     } else {
       recordContextWindowSource(kind, model, ContextWindowSource.UNKNOWN)
     }
-    return window
+    return reported
   }
 
   fun effectiveCompactThreshold(): Int =

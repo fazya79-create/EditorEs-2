@@ -24,6 +24,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
+import com.itsaky.androidide.ai.ui.MarkdownRenderer
 import com.blankj.utilcode.util.SizeUtils
 import com.itsaky.androidide.activities.editor.BaseEditorActivity
 import com.itsaky.androidide.app.BaseApplication
@@ -182,6 +183,40 @@ class CodeEditorView(
     }
 
     searchLayout.beginSearchMode()
+  }
+
+  /**
+   * Whether the file of this editor can be shown as rendered Markdown.
+   */
+  fun isMarkdownFile(): Boolean {
+    val name = file?.name?.lowercase() ?: return false
+    return name.endsWith(".md") || name.endsWith(".markdown")
+  }
+
+  /**
+   * Whether the rendered Markdown preview is currently shown instead of the editor.
+   */
+  val isMarkdownPreviewVisible: Boolean
+    get() = _binding?.markdownPreviewContainer?.isVisible == true
+
+  /**
+   * Shows or hides the rendered Markdown preview of this editor's content.
+   */
+  fun setMarkdownPreviewVisible(visible: Boolean) {
+    val binding = _binding ?: return
+    if (visible && !isMarkdownFile()) {
+      return
+    }
+
+    if (visible) {
+      MarkdownRenderer.render(binding.markdownPreview, binding.editor.text.toString())
+    }
+
+    binding.markdownPreviewContainer.isVisible = visible
+    binding.editor.isVisible = !visible
+    if (visible) {
+      _searchLayout?.isVisible = false
+    }
   }
 
   /**

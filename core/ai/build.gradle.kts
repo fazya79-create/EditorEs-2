@@ -33,6 +33,7 @@ dependencies {
   implementation(libs.common.markwon.extStrikethrough)
   implementation(libs.common.markwon.extTables)
   implementation(libs.common.markwon.extTasklist)
+  implementation(libs.common.markwon.html)
   implementation(libs.common.markwon.linkify)
 
   implementation(libs.androidx.annotation)

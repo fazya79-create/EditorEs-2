@@ -1,0 +1,21 @@
+{
+  "types": ["py"],
+  "styles": {
+    "keyword": { "fg": "@keyword", "bold": true },
+    "operator": "@operator",
+    "function": "@func.decl",
+    "function.method": "@func.call",
+    "function.builtin": "@func.call",
+    "constructor": "@type",
+    "type": "@type",
+    "constant": "@constant",
+    "constant.builtin": "@keyword",
+    "property": "@field",
+    "variable": "@variable",
+    "number": "@number",
+    "string": { "fg": "@string", "maybeHexColor": true },
+    "escape": "@json.escape",
+    "punctuation.special": "@operator",
+    "comment": { "fg": "@comment", "italic": true }
+  }
+}

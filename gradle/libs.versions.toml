@@ -24,6 +24,9 @@ androidide-ts = { module = "com.itsaky.androidide.treesitter:android-tree-sitter
 androidide-ts-json = { module = "com.itsaky.androidide.treesitter:tree-sitter-json", version.ref = "tree-sitter" }
 androidide-ts-kotlin = { module = "com.itsaky.androidide.treesitter:tree-sitter-kotlin", version.ref = "tree-sitter" }
 androidide-ts-log = { module = "com.itsaky.androidide.treesitter:tree-sitter-log", version.ref = "tree-sitter" }
+androidide-ts-properties = { module = "com.itsaky.androidide.treesitter:tree-sitter-properties", version.ref = "tree-sitter" }
+androidide-ts-python = { module = "com.itsaky.androidide.treesitter:tree-sitter-python", version.ref = "tree-sitter" }
+androidide-ts-xml = { module = "com.itsaky.androidide.treesitter:tree-sitter-xml", version.ref = "tree-sitter" }
 
 # Common
 common-editor = { module = "io.github.rosemoe:editor", version.ref = "editor" }
@@ -41,6 +44,7 @@ common-markwon-core = { module = "io.noties.markwon:core", version.ref = "markwo
 common-markwon-extStrikethrough = { module = "io.noties.markwon:ext-strikethrough", version.ref = "markwon" }
 common-markwon-extTables = { module = "io.noties.markwon:ext-tables", version.ref = "markwon" }
 common-markwon-extTasklist = { module = "io.noties.markwon:ext-tasklist", version.ref = "markwon" }
+common-markwon-html = { module = "io.noties.markwon:html", version.ref = "markwon" }
 common-markwon-linkify = { module = "io.noties.markwon:linkify", version.ref = "markwon" }
 common-hiddenApiBypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version = "4.3" }
 common-shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }

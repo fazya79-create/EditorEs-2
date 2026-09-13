@@ -65,6 +65,9 @@
   "languages": [
     "@json.json",
     "@kotlin.json",
-    "@log.json"
+    "@log.json",
+    "@py.json",
+    "@xml.json",
+    "@properties.json"
   ]
 }

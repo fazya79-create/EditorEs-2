@@ -117,18 +117,42 @@ class ModelCatalogTest {
   }
 
   @Test
-  fun `a malformed body yields no models instead of failing`() {
-    assertThat(ModelCatalog.parse(ProviderKind.OPENAI, "not json")).isEmpty()
-    assertThat(ModelCatalog.parse(ProviderKind.GOOGLE, "{}")).isEmpty()
+  fun `a gateway listing keeps provider prefixed ids with their reported window`() {
+    val body = """
+      {
+        "object": "list",
+        "data": [
+          {"id": "high", "object": "model", "owned_by": "combo"},
+          {
+            "id": "cl/z-ai/glm-5.3",
+            "object": "model",
+            "owned_by": "cl",
+            "capabilities": {"contextWindow": 200000, "maxOutput": 128000},
+            "context_length": 200000,
+            "max_completion_tokens": 128000
+          },
+          {
+            "id": "cl/z-ai/glm-5.3-flash",
+            "object": "model",
+            "owned_by": "cl",
+            "capabilities": {"contextWindow": 1000000, "maxOutput": 131072},
+            "context_length": 1000000,
+            "max_completion_tokens": 131072
+          }
+        ]
+      }
+    """.trimIndent()
+
+    val windows = ModelCatalog.parse(ProviderKind.OPENAI, body).associate { it.id to it.contextWindow }
+
+    assertThat(windows["cl/z-ai/glm-5.3"]).isEqualTo(200_000)
+    assertThat(windows["cl/z-ai/glm-5.3-flash"]).isEqualTo(1_000_000)
+    assertThat(windows["high"]).isEqualTo(0)
   }
 
   @Test
-  fun `known families provide a window when the listing reports none`() {
-    assertThat(ContextWindows.of(ProviderKind.OPENAI, "gpt-4o-mini")).isEqualTo(128_000)
-    assertThat(ContextWindows.of(ProviderKind.OPENAI, "gpt-3.5-turbo")).isEqualTo(16_385)
-    assertThat(ContextWindows.of(ProviderKind.ANTHROPIC, "claude-opus-4-5")).isEqualTo(200_000)
-    assertThat(ContextWindows.of(ProviderKind.ANTHROPIC, "claude-sonnet-4-5")).isEqualTo(1_000_000)
-    assertThat(ContextWindows.of(ProviderKind.GOOGLE, "gemini-2.5-flash")).isEqualTo(1_048_576)
-    assertThat(ContextWindows.of(ProviderKind.OPENAI, "some-unknown-model")).isEqualTo(0)
+  fun `a malformed body yields no models instead of failing`() {
+    assertThat(ModelCatalog.parse(ProviderKind.OPENAI, "not json")).isEmpty()
+    assertThat(ModelCatalog.parse(ProviderKind.GOOGLE, "{}")).isEmpty()
   }
 }

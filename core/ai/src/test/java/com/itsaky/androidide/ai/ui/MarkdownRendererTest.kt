@@ -156,4 +156,22 @@ class MarkdownRendererTest {
       .getSpans(0, rendered.length, TableRowSpan::class.java)
     assertThat(rows).hasLength(2)
   }
+
+  @Test
+  fun `inline html is rendered instead of being shown as raw tags`() {
+    val rendered = render("A <b>bold</b> and <i>italic</i> word").toString()
+
+    assertThat(rendered).contains("bold")
+    assertThat(rendered).contains("italic")
+    assertThat(rendered).doesNotContain("<b>")
+    assertThat(rendered).doesNotContain("</i>")
+  }
+
+  @Test
+  fun `html block elements keep their text content`() {
+    val rendered = render("<div><p>inside a div</p></div>").toString()
+
+    assertThat(rendered).contains("inside a div")
+    assertThat(rendered).doesNotContain("<div>")
+  }
 }

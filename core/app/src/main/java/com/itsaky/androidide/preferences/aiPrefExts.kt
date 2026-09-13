@@ -469,6 +469,8 @@ private abstract class TextValuePreference : SimplePreference() {
 
   abstract fun setValue(value: String)
 
+  open fun onValueChanged(preference: Preference, previous: String, current: String) = Unit
+
   override fun onCreatePreference(context: Context): Preference {
     return super.onCreatePreference(context).also { it.summary = getValue() }
   }
@@ -485,8 +487,11 @@ private abstract class TextValuePreference : SimplePreference() {
       .setView(wrap(context, input))
       .setNegativeButton(android.R.string.cancel, null)
       .setPositiveButton(android.R.string.ok) { dialog, _ ->
+        val previous = getValue()
         setValue(input.text?.toString()?.trim().orEmpty())
-        preference.summary = getValue()
+        val current = getValue()
+        preference.summary = current
+        onValueChanged(preference, previous, current)
         dialog.dismiss()
       }
       .show()
@@ -567,11 +572,59 @@ private class AnthropicThinkingPreference(
     get() = ProviderKind.ANTHROPIC
 }
 
+private abstract class BaseUrlPreference : TextValuePreference() {
+
+  abstract val providerKind: ProviderKind
+
+  override fun onValueChanged(preference: Preference, previous: String, current: String) {
+    if (previous.trimEnd('/').equals(current.trimEnd('/'), ignoreCase = true)) {
+      return
+    }
+
+    val context = preference.context
+    val model = AiPreferences.modelOf(providerKind)
+    if (model.isBlank()) {
+      return
+    }
+
+    CoroutineScope(SupervisorJob() + Dispatchers.Main).launch {
+      val config = AiPreferences.providerConfig(context.applicationContext, providerKind)
+      if (config.apiKey.isBlank()) {
+        return@launch
+      }
+
+      val listed = runCatching { ModelCatalog.fetch(config) }
+        .getOrDefault(emptyList())
+        .firstOrNull { it.id == model }
+        ?.contextWindow
+        ?: 0
+
+      val reported = if (listed > 0) {
+        listed
+      } else {
+        runCatching { ModelCatalog.detectContextWindow(config, model) }.getOrDefault(0)
+      }
+
+      if (AiPreferences.baseUrlOf(providerKind) != current) {
+        return@launch
+      }
+
+      val resolved = AiPreferences.applyModelContextWindow(providerKind, model, reported)
+      if (resolved > 0) {
+        flashSuccess(context.getString(string.msg_ai_context_window_detected, model, resolved))
+      }
+    }
+  }
+}
+
 @Parcelize
 private class OpenAiBaseUrlPreference(
   override val key: String = AiPreferences.OPENAI_BASE_URL,
   override val title: Int = string.idepref_ai_base_url,
-) : TextValuePreference() {
+) : BaseUrlPreference() {
+
+  override val providerKind: ProviderKind
+    get() = ProviderKind.OPENAI
 
   override fun getValue(): String = AiPreferences.openAiBaseUrl
 
@@ -584,7 +637,10 @@ private class OpenAiBaseUrlPreference(
 private class AnthropicBaseUrlPreference(
   override val key: String = AiPreferences.ANTHROPIC_BASE_URL,
   override val title: Int = string.idepref_ai_base_url,
-) : TextValuePreference() {
+) : BaseUrlPreference() {
+
+  override val providerKind: ProviderKind
+    get() = ProviderKind.ANTHROPIC
 
   override fun getValue(): String = AiPreferences.anthropicBaseUrl
 
@@ -838,7 +894,10 @@ private class GoogleThinkingPreference(
 private class GoogleBaseUrlPreference(
   override val key: String = AiPreferences.GOOGLE_BASE_URL,
   override val title: Int = string.idepref_ai_base_url,
-) : TextValuePreference() {
+) : BaseUrlPreference() {
+
+  override val providerKind: ProviderKind
+    get() = ProviderKind.GOOGLE
 
   override fun getValue(): String = AiPreferences.googleBaseUrl
 

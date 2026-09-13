@@ -1,0 +1,12 @@
+{
+  "types": ["xml"],
+  "styles": {
+    "xml.tag": { "fg": "@xml.tag", "bold": true },
+    "attribute": "@attribute",
+    "string": { "fg": "@string", "maybeHexColor": true },
+    "xml.ref": "@xml.ref",
+    "ns_prefix": "@ns_prefix",
+    "keyword": { "fg": "@keyword", "bold": true },
+    "comment": { "fg": "@comment", "italic": true }
+  }
+}
