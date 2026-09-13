@@ -23,9 +23,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.itsaky.androidide.ai.agent.AgentEvent
+import com.itsaky.androidide.ai.agent.AgentMode
 import com.itsaky.androidide.ai.agent.ChatAgent
 import com.itsaky.androidide.ai.agent.SearchAvailability
+import com.itsaky.androidide.ai.agent.SubagentOutcome
+import com.itsaky.androidide.ai.agent.SubagentRequest
 import com.itsaky.androidide.ai.agent.SystemPrompt
+import com.itsaky.androidide.ai.commands.CommandRegistry
+import com.itsaky.androidide.ai.commands.CommandResolution
 import com.itsaky.androidide.ai.history.ChatHistoryStore
 import com.itsaky.androidide.ai.history.ChatSession
 import com.itsaky.androidide.ai.history.ChatSessionInfo
@@ -42,8 +47,12 @@ import com.itsaky.androidide.ai.provider.ProviderKind
 import com.itsaky.androidide.ai.tools.ApprovalDecision
 import com.itsaky.androidide.ai.tools.ToolApprovalRequest
 import com.itsaky.androidide.ai.tools.ToolApprover
+import com.itsaky.androidide.ai.tools.TodoItem
+import com.itsaky.androidide.ai.tools.ToolAccess
 import com.itsaky.androidide.ai.tools.ToolGate
 import com.itsaky.androidide.ai.tools.ToolRegistry
+import com.itsaky.androidide.ai.tools.ToolScope
+import com.itsaky.androidide.ai.tools.WorkspacePaths
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -59,6 +68,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   private val history = mutableListOf<ChatMessage>()
   private val items = mutableListOf<ChatEntry>()
   private val store = ChatHistoryStore(application)
+  private var registry = ToolRegistry()
 
   private var nextId = 0L
   private var turn: Job? = null
@@ -71,11 +81,14 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   private var titleGenerated = false
   private var deletedSessionId: String? = null
   private var lastPrompt: String? = null
+  private var lastSentPrompt: String? = null
+  private var delegationsThisTurn = 0
 
   val entries = MutableLiveData<List<ChatEntry>>(emptyList())
   val busy = MutableLiveData(false)
   val approvalRequest = MutableLiveData<ToolApprovalRequest?>(null)
   val yoloMode = MutableLiveData(AiPreferences.yoloMode)
+  val agentMode = MutableLiveData(AiPreferences.agentMode)
   val contextUsage = MutableLiveData<ContextUsage?>(null)
   val sessions = MutableLiveData<List<ChatSessionInfo>>(emptyList())
 
@@ -89,6 +102,15 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   fun setYoloMode(enabled: Boolean) {
     AiPreferences.yoloMode = enabled
     yoloMode.value = enabled
+  }
+
+  fun refreshAgentMode() {
+    agentMode.value = AiPreferences.agentMode
+  }
+
+  fun setAgentMode(mode: AgentMode) {
+    AiPreferences.agentMode = mode
+    agentMode.value = mode
   }
 
   fun clear() {
@@ -122,8 +144,10 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       history.clear()
       history += session.messages
       items.clear()
+      registry = ToolRegistry()
       items += entriesOf(session.messages)
       lastPrompt = null
+      lastSentPrompt = null
       sessionId = session.info.id
       sessionCreatedAt = session.info.createdAt
       sessionTitle = session.info.title
@@ -151,7 +175,9 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   private fun startNewSession() {
     history.clear()
     items.clear()
+    registry = ToolRegistry()
     lastPrompt = null
+    lastSentPrompt = null
     sessionId = store.newSessionId()
     sessionCreatedAt = System.currentTimeMillis()
     sessionTitle = ""
@@ -167,7 +193,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       return
     }
 
-    val index = history.indexOfLast { it.role == ChatRole.USER && it.text == prompt }
+    val index = history.indexOfLast { it.role == ChatRole.USER && it.text == lastSentPrompt }
     if (index >= 0) {
       while (history.size > index) {
         history.removeAt(history.size - 1)
@@ -191,6 +217,17 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     }
 
     val context = getApplication<Application>()
+    val prompt = when (val resolution = resolveCommand(message)) {
+      is CommandResolution.Expanded -> resolution.prompt
+      is CommandResolution.NotACommand -> message
+
+      is CommandResolution.Unknown -> {
+        append(ChatEntry.User(nextId(), message))
+        append(ChatEntry.Error(nextId(), unknownCommandMessage(context, resolution)))
+        return
+      }
+    }
+
     val config = AiPreferences.providerConfig(context)
     if (config.apiKey.isBlank()) {
       append(ChatEntry.User(nextId(), message))
@@ -205,13 +242,13 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       return
     }
 
-    history += ChatMessage.user(message)
+    history += ChatMessage.user(prompt)
     append(ChatEntry.User(nextId(), message))
     lastPrompt = message
+    lastSentPrompt = prompt
 
-    val tools = ToolRegistry.specs(context)
+    val access = AiPreferences.agentMode.access
     val searchAvailable = ToolRegistry.searchToolsAvailable(context)
-    val gate = ToolGate(context, this)
     val provider = createProvider(config)
 
     if (!searchAvailable) {
@@ -224,11 +261,19 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       SearchAvailability.UNAVAILABLE
     }
 
+    delegationsThisTurn = 0
+    registry = ToolRegistry(registry.todos()) { request ->
+      runSubagent(context, config, provider, searchAvailability, access, request)
+    }
+
+    val tools = registry.specs(context, access)
+    val gate = ToolGate(context, registry, access, this)
+
     val agent = ChatAgent(
       provider = provider,
       gate = gate,
       model = config.model,
-      systemPrompt = SystemPrompt.build(searchAvailability),
+      systemPrompt = SystemPrompt.build(searchAvailability, AiPreferences.agentMode),
       thinkingLevel = AiPreferences.thinkingLevel,
       maxToolRounds = AiPreferences.maxToolRounds,
       contextWindow = AiPreferences.contextWindowOf(config.kind),
@@ -243,6 +288,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       try {
         collect(agent)
         lastPrompt = null
+        lastSentPrompt = null
       } catch (err: CancellationException) {
         cancelled = true
         finishStreaming()
@@ -369,6 +415,8 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
         }
 
         is AgentEvent.Failed -> append(ChatEntry.Error(nextId(), event.message))
+
+        is AgentEvent.TodosUpdated -> showTodos(event.items)
 
         is AgentEvent.Interrupted -> {
           finishStreaming()
@@ -514,8 +562,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     publish()
   }
 
-  private fun updateTool(callId: String, transform: (ChatEntry.Tool) -> ChatEntry.Tool) {
-    val index = items.indexOfLast { it is ChatEntry.Tool && it.call.id == callId }
+  private fun updateTool(callId: String, transform: (ChatEntry.Tool) -> ChatEntry.Tool) {    val index = items.indexOfLast { it is ChatEntry.Tool && it.call.id == callId }
     if (index < 0) {
       return
     }
@@ -525,6 +572,165 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
 
   private fun append(entry: ChatEntry) {
     items += entry
+    publish()
+  }
+
+  private fun appendSubagentEntry(description: String, scope: ToolScope) {
+    append(
+      ChatEntry.Subagent(
+        id = nextId(),
+        description = description,
+        scope = scope,
+        state = SubagentState.RUNNING
+      )
+    )
+  }
+
+  private fun updateSubagentEntry(
+    description: String,
+    transform: (ChatEntry.Subagent) -> ChatEntry.Subagent
+  ) {
+    val index = items.indexOfLast {
+      it is ChatEntry.Subagent && it.description == description && it.state == SubagentState.RUNNING
+    }
+    if (index < 0) {
+      return
+    }
+    items[index] = transform(items[index] as ChatEntry.Subagent)
+    publishThrottled()
+  }
+
+  private fun finishSubagentEntry(
+    description: String,
+    summary: String,
+    toolCalls: Int,
+    failed: Boolean
+  ) {
+    updateSubagentEntry(description) { entry ->
+      entry.copy(
+        state = if (failed) SubagentState.FAILED else SubagentState.SUCCEEDED,
+        summary = summary,
+        toolCalls = toolCalls,
+        detail = ""
+      )
+    }
+    publish()
+  }
+
+  private fun resolveCommand(message: String): CommandResolution {
+    if (!message.startsWith('/')) {
+      return CommandResolution.NotACommand
+    }
+    val projectDir = runCatching { WorkspacePaths.projectDir() }.getOrNull()
+    return CommandRegistry.load(projectDir).resolve(message)
+  }
+
+  private suspend fun runSubagent(
+    context: Application,
+    config: ProviderConfig,
+    provider: LlmProvider,
+    searchAvailability: SearchAvailability,
+    parentAccess: ToolAccess,
+    request: SubagentRequest
+  ): SubagentOutcome {
+    if (delegationsThisTurn >= MAX_DELEGATIONS_PER_TURN) {
+      return SubagentOutcome(
+        text = "Delegation limit reached ($MAX_DELEGATIONS_PER_TURN sub-agents in one turn). " +
+            "Do the remaining work yourself.",
+        toolCalls = 0,
+        failed = true
+      )
+    }
+    delegationsThisTurn++
+
+    val scope = if (parentAccess.scope == ToolScope.READ_ONLY) {
+      ToolScope.READ_ONLY
+    } else {
+      request.scope
+    }
+    val access = ToolAccess.forSubagent(scope)
+
+    val childRegistry = ToolRegistry()
+    val childGate = ToolGate(context, childRegistry, access, this)
+
+    appendSubagentEntry(request.description, scope)
+
+    val child = ChatAgent(
+      provider = provider,
+      gate = childGate,
+      model = config.model,
+      systemPrompt = SystemPrompt.buildForSubagent(searchAvailability, scope),
+      thinkingLevel = AiPreferences.thinkingLevel,
+      maxToolRounds = SUBAGENT_MAX_TOOL_ROUNDS,
+      contextWindow = AiPreferences.contextWindowOf(config.kind),
+      compactThresholdPercent = AiPreferences.effectiveCompactThreshold(),
+      tools = childRegistry.specs(context, access)
+    )
+
+    val transcript = StringBuilder()
+    var toolCalls = 0
+    var failure: String? = null
+
+    child.run(listOf(ChatMessage.user(request.prompt))).collect { event ->
+      when (event) {
+        is AgentEvent.AssistantMessage ->
+          if (event.message.text.isNotBlank()) {
+            transcript.setLength(0)
+            transcript.append(event.message.text)
+          }
+
+        is AgentEvent.ToolStarted -> {
+          toolCalls++
+          updateSubagentEntry(request.description) { entry ->
+            entry.copy(toolCalls = toolCalls, detail = event.summary)
+          }
+        }
+
+        is AgentEvent.Failed -> failure = event.message
+        is AgentEvent.Interrupted -> failure = event.message
+        else -> Unit
+      }
+    }
+
+    val summary = transcript.toString().trim()
+    val failed = failure != null || summary.isEmpty()
+
+    finishSubagentEntry(
+      description = request.description,
+      summary = if (failed) failure.orEmpty() else summary,
+      toolCalls = toolCalls,
+      failed = failed
+    )
+
+    return SubagentOutcome(
+      text = if (failed) failure ?: "The sub-agent produced no result." else summary,
+      toolCalls = toolCalls,
+      failed = failed
+    )
+  }
+
+  private fun unknownCommandMessage(
+    context: Application,
+    resolution: CommandResolution.Unknown
+  ): String = if (resolution.available.isEmpty()) {
+    context.getString(
+      com.itsaky.androidide.resources.R.string.msg_ai_no_commands,
+      resolution.name
+    )
+  } else {
+    context.getString(
+      com.itsaky.androidide.resources.R.string.msg_ai_unknown_command,
+      resolution.name,
+      resolution.available.joinToString(", ") { "/$it" }
+    )
+  }
+
+  private fun showTodos(todos: List<TodoItem>) {
+    val existing = items.indexOfLast { it is ChatEntry.Todos }
+    val id = if (existing >= 0) items.removeAt(existing).id else nextId()
+    if (todos.isNotEmpty()) {
+      items += ChatEntry.Todos(id, todos)
+    }
     publish()
   }
 
@@ -564,5 +770,7 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   companion object {
 
     private const val STREAM_PUBLISH_INTERVAL_MS = 80L
+    private const val MAX_DELEGATIONS_PER_TURN = 3
+    private const val SUBAGENT_MAX_TOOL_ROUNDS = 12
   }
 }

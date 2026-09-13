@@ -27,6 +27,8 @@ import com.itsaky.androidide.ai.model.ToolCall
 import com.itsaky.androidide.ai.model.ToolResult
 import com.itsaky.androidide.ai.model.ToolSpec
 import com.itsaky.androidide.ai.provider.LlmProvider
+import com.itsaky.androidide.ai.tools.TodoItem
+import com.itsaky.androidide.ai.tools.TodoWriteTool
 import com.itsaky.androidide.ai.tools.ToolGate
 import com.itsaky.androidide.ai.tools.ToolRegistry
 import kotlinx.coroutines.flow.Flow
@@ -43,6 +45,8 @@ sealed interface AgentEvent {
   data class ToolStarted(val call: ToolCall, val summary: String) : AgentEvent
 
   data class ToolFinished(val call: ToolCall, val result: ToolResult) : AgentEvent
+
+  data class TodosUpdated(val items: List<TodoItem>) : AgentEvent
 
   data class Failed(val message: String) : AgentEvent
 
@@ -161,6 +165,9 @@ class ChatAgent(
         val result = gate.run(call)
         results += result
         emit(AgentEvent.ToolFinished(call, result))
+        if (call.name == TodoWriteTool.NAME && !result.isError) {
+          emit(AgentEvent.TodosUpdated(gate.todos()))
+        }
       }
 
       messages += ChatMessage.toolResults(results)
@@ -192,6 +199,8 @@ class ChatAgent(
     messages.clear()
     messages += ContextCompactor.asSummaryMessage(summary)
     messages += recent
+
+    gate.activeTodoSummary()?.let { messages += ChatMessage.user(it) }
 
     // The token count that triggered compaction describes the history that was just discarded.
     // Reporting an empty reading retires it until the next response measures the new history.

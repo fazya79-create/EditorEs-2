@@ -29,6 +29,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.itsaky.androidide.ai.databinding.FragmentAiChatBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiHistoryBinding
+import com.itsaky.androidide.ai.agent.AgentMode
 import com.itsaky.androidide.ai.history.ChatSessionInfo
 import com.itsaky.androidide.ai.tools.ApprovalDecision
 import com.itsaky.androidide.fragments.FragmentWithBinding
@@ -73,6 +74,7 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
 
     binding.newChat.setOnClickListener { viewModel.clear() }
     binding.history.setOnClickListener { showHistory() }
+    binding.agentMode.setOnClickListener { toggleAgentMode() }
 
     viewModel.entries.observe(viewLifecycleOwner) { entries ->
       val atBottom = isAtBottom()
@@ -88,6 +90,18 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
 
     viewModel.yoloMode.observe(viewLifecycleOwner) { enabled ->
       binding.yoloBanner.visibility = if (enabled == true) View.VISIBLE else View.GONE
+    }
+
+    viewModel.agentMode.observe(viewLifecycleOwner) { mode ->
+      val plan = mode == AgentMode.PLAN
+      binding.planBanner.visibility = if (plan) View.VISIBLE else View.GONE
+      binding.agentMode.setText(
+        if (plan) {
+          com.itsaky.androidide.resources.R.string.title_ai_mode_plan
+        } else {
+          com.itsaky.androidide.resources.R.string.title_ai_mode_build
+        }
+      )
     }
 
     viewModel.approvalRequest.observe(viewLifecycleOwner) { request ->
@@ -119,6 +133,16 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
   override fun onResume() {
     super.onResume()
     viewModel.refreshYoloMode()
+    viewModel.refreshAgentMode()
+  }
+
+  private fun toggleAgentMode() {
+    val next = if (viewModel.agentMode.value == AgentMode.PLAN) {
+      AgentMode.BUILD
+    } else {
+      AgentMode.PLAN
+    }
+    viewModel.setAgentMode(next)
   }
 
   private fun onRetryClicked() {

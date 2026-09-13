@@ -18,6 +18,7 @@
 package com.itsaky.androidide.ai.prefs
 
 import android.content.Context
+import com.itsaky.androidide.ai.agent.AgentMode
 import com.itsaky.androidide.ai.model.ThinkingLevel
 import com.itsaky.androidide.ai.provider.AnthropicProvider
 import com.itsaky.androidide.ai.provider.ContextWindowSource
@@ -42,6 +43,7 @@ object AiPreferences {
   const val GOOGLE_BASE_URL = "ide.ai.google.baseUrl"
   const val GOOGLE_MODEL = "ide.ai.google.model"
   const val YOLO_MODE = "ide.ai.yoloMode"
+  const val AGENT_MODE = "ide.ai.agentMode"
   const val SHELL_TIMEOUT = "ide.ai.shellTimeoutSeconds"
   const val OPENAI_THINKING = "ide.ai.openai.thinking"
   const val ANTHROPIC_THINKING = "ide.ai.anthropic.thinking"
@@ -136,6 +138,12 @@ object AiPreferences {
     get() = prefManager.getBoolean(YOLO_MODE, false)
     set(value) {
       prefManager.putBoolean(YOLO_MODE, value)
+    }
+
+  var agentMode: AgentMode
+    get() = AgentMode.fromOrdinal(prefManager.getInt(AGENT_MODE, AgentMode.BUILD.ordinal))
+    set(value) {
+      prefManager.putInt(AGENT_MODE, value.ordinal)
     }
 
   var promptCaching: Boolean

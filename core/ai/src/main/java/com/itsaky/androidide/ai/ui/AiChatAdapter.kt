@@ -25,9 +25,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.itsaky.androidide.ai.databinding.LayoutAiInterruptedBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiMessageBinding
+import com.itsaky.androidide.ai.databinding.LayoutAiSubagentBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiThinkingBinding
+import com.itsaky.androidide.ai.databinding.LayoutAiTodoItemBinding
+import com.itsaky.androidide.ai.databinding.LayoutAiTodosBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiToolCallBinding
 import com.itsaky.androidide.ai.tools.RunShellTool
+import com.itsaky.androidide.ai.tools.TodoStatus
 import com.itsaky.androidide.resources.R
 import com.itsaky.androidide.utils.resolveAttr
 
@@ -40,6 +44,8 @@ class AiChatAdapter(
     is ChatEntry.Tool -> TYPE_TOOL
     is ChatEntry.Thinking -> TYPE_THINKING
     is ChatEntry.Interrupted -> TYPE_INTERRUPTED
+    is ChatEntry.Todos -> TYPE_TODOS
+    is ChatEntry.Subagent -> TYPE_SUBAGENT
     else -> TYPE_MESSAGE
   }
 
@@ -61,6 +67,13 @@ class AiChatAdapter(
         onRetry
       )
 
+      TYPE_TODOS -> TodosViewHolder(LayoutAiTodosBinding.inflate(inflater, parent, false))
+
+      TYPE_SUBAGENT -> SubagentViewHolder(
+        LayoutAiSubagentBinding.inflate(inflater, parent, false),
+        onToggleExpanded
+      )
+
       else -> MessageViewHolder(LayoutAiMessageBinding.inflate(inflater, parent, false))
     }
   }
@@ -70,7 +83,105 @@ class AiChatAdapter(
       is ChatEntry.Tool -> (holder as ToolViewHolder).bind(entry)
       is ChatEntry.Thinking -> (holder as ThinkingViewHolder).bind(entry)
       is ChatEntry.Interrupted -> (holder as InterruptedViewHolder).bind(entry)
+      is ChatEntry.Todos -> (holder as TodosViewHolder).bind(entry)
+      is ChatEntry.Subagent -> (holder as SubagentViewHolder).bind(entry)
       else -> (holder as MessageViewHolder).bind(entry)
+    }
+  }
+
+  class SubagentViewHolder(
+    private val binding: LayoutAiSubagentBinding,
+    private val onToggleExpanded: (Long) -> Unit
+  ) : RecyclerView.ViewHolder(binding.root) {
+
+    fun bind(entry: ChatEntry.Subagent) {
+      val context = binding.root.context
+
+      binding.title.text = context.getString(
+        when (entry.state) {
+          SubagentState.RUNNING -> R.string.msg_ai_subagent_running
+          SubagentState.SUCCEEDED -> R.string.msg_ai_subagent_done
+          SubagentState.FAILED -> R.string.msg_ai_subagent_failed
+        },
+        entry.scope.wireValue
+      )
+      binding.description.text = entry.description
+
+      binding.stateIcon.text = when (entry.state) {
+        SubagentState.RUNNING -> ICON_RUNNING
+        SubagentState.SUCCEEDED -> ICON_OK
+        SubagentState.FAILED -> ICON_FAILED
+      }
+      binding.stateIcon.setTextColor(
+        context.resolveAttr(
+          when (entry.state) {
+            SubagentState.FAILED -> com.google.android.material.R.attr.colorError
+            SubagentState.SUCCEEDED -> com.google.android.material.R.attr.colorPrimary
+            else -> com.google.android.material.R.attr.colorOnSurfaceVariant
+          }
+        )
+      )
+
+      val status = when {
+        entry.state == SubagentState.RUNNING && entry.detail.isNotBlank() -> entry.detail
+        entry.toolCalls > 0 -> context.resources.getQuantityString(
+          R.plurals.msg_ai_subagent_tool_calls,
+          entry.toolCalls,
+          entry.toolCalls
+        )
+
+        else -> ""
+      }
+      binding.status.text = status
+      binding.status.visibility = if (status.isBlank()) View.GONE else View.VISIBLE
+
+      val hasSummary = entry.summary.isNotBlank()
+      binding.chevron.text = if (entry.expanded) CHEVRON_UP else CHEVRON_DOWN
+      binding.chevron.visibility = if (hasSummary) View.VISIBLE else View.INVISIBLE
+      binding.summary.visibility = if (hasSummary && entry.expanded) View.VISIBLE else View.GONE
+      if (hasSummary && entry.expanded) {
+        MarkdownRenderer.render(binding.summary, entry.summary)
+      }
+
+      binding.header.setOnClickListener { onToggleExpanded(entry.id) }
+    }
+  }
+
+  class TodosViewHolder(private val binding: LayoutAiTodosBinding) :
+    RecyclerView.ViewHolder(binding.root) {
+
+    fun bind(entry: ChatEntry.Todos) {
+      val context = binding.root.context
+      val done = entry.items.count { it.status == TodoStatus.COMPLETED }
+      binding.title.text = context.getString(
+        R.string.title_ai_todos,
+        done,
+        entry.items.size
+      )
+
+      val inflater = LayoutInflater.from(context)
+      binding.items.removeAllViews()
+      entry.items.forEach { item ->
+        val row = LayoutAiTodoItemBinding.inflate(inflater, binding.items, false)
+        row.marker.text = when (item.status) {
+          TodoStatus.COMPLETED -> MARKER_DONE
+          TodoStatus.IN_PROGRESS -> MARKER_ACTIVE
+          TodoStatus.CANCELLED -> MARKER_CANCELLED
+          TodoStatus.PENDING -> MARKER_PENDING
+        }
+        row.marker.setTextColor(
+          context.resolveAttr(
+            when (item.status) {
+              TodoStatus.COMPLETED -> com.google.android.material.R.attr.colorPrimary
+              TodoStatus.IN_PROGRESS -> com.google.android.material.R.attr.colorTertiary
+              else -> com.google.android.material.R.attr.colorOnSurfaceVariant
+            }
+          )
+        )
+        row.content.text = item.content
+        row.content.alpha = if (item.status == TodoStatus.CANCELLED) CANCELLED_ALPHA else 1f
+        binding.items.addView(row.root)
+      }
     }
   }
 
@@ -237,10 +348,18 @@ class AiChatAdapter(
     private const val TYPE_TOOL = 1
     private const val TYPE_THINKING = 2
     private const val TYPE_INTERRUPTED = 3
+    private const val TYPE_TODOS = 4
+    private const val TYPE_SUBAGENT = 5
 
     private const val ELLIPSIS = "\u2026"
     private const val CHEVRON_DOWN = "\u2304"
     private const val CHEVRON_UP = "\u2303"
+
+    private const val MARKER_DONE = "[x]"
+    private const val MARKER_ACTIVE = "[>]"
+    private const val MARKER_PENDING = "[ ]"
+    private const val MARKER_CANCELLED = "[~]"
+    private const val CANCELLED_ALPHA = 0.5f
 
     private const val ICON_RUNNING = "\u25CF"
     private const val ICON_PENDING = "\u25CB"

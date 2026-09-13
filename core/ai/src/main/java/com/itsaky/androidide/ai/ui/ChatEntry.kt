@@ -18,6 +18,8 @@
 package com.itsaky.androidide.ai.ui
 
 import com.itsaky.androidide.ai.model.ToolCall
+import com.itsaky.androidide.ai.tools.TodoItem
+import com.itsaky.androidide.ai.tools.ToolScope
 
 enum class ToolEntryState {
   RUNNING,
@@ -63,6 +65,28 @@ sealed interface ChatEntry {
     val kind: NoticeKind,
     val count: Int = 0
   ) : ChatEntry
+
+  data class Todos(
+    override val id: Long,
+    val items: List<TodoItem>
+  ) : ChatEntry
+
+  data class Subagent(
+    override val id: Long,
+    val description: String,
+    val scope: ToolScope,
+    val state: SubagentState,
+    val detail: String = "",
+    val summary: String = "",
+    val toolCalls: Int = 0,
+    val expanded: Boolean = false
+  ) : ChatEntry
+}
+
+enum class SubagentState {
+  RUNNING,
+  SUCCEEDED,
+  FAILED
 }
 
 enum class NoticeKind {

@@ -39,11 +39,23 @@ fun interface ToolApprover {
   suspend fun requestApproval(request: ToolApprovalRequest): ApprovalDecision
 }
 
-class ToolGate(private val context: Context, private val approver: ToolApprover) {
+class ToolGate(
+  private val context: Context,
+  private val registry: ToolRegistry = ToolRegistry(),
+  private val access: ToolAccess = ToolAccess.FULL,
+  private val approver: ToolApprover
+) {
 
   suspend fun run(call: ToolCall): ToolResult {
-    val tool = ToolRegistry.find(call.name)
+    val tool = registry.find(call.name)
       ?: return failure(call, "Unknown tool '${call.name}'.")
+
+    if (!access.permits(tool.spec)) {
+      return failure(
+        call,
+        "The tool '${call.name}' is not available in the current mode."
+      )
+    }
 
     val arguments = parseArguments(call.argumentsJson)
     val summary = runCatching { tool.describe(arguments) }.getOrElse { call.name }
@@ -72,13 +84,17 @@ class ToolGate(private val context: Context, private val approver: ToolApprover)
   }
 
   fun summarize(call: ToolCall): String {
-    val tool = ToolRegistry.find(call.name) ?: return call.name
+    val tool = registry.find(call.name) ?: return call.name
     return runCatching { tool.describe(parseArguments(call.argumentsJson)) }
       .getOrElse { call.name }
   }
 
   fun isMutating(call: ToolCall): Boolean =
-    ToolRegistry.find(call.name)?.spec?.mutating ?: true
+    registry.find(call.name)?.spec?.mutating ?: true
+
+  fun todos(): List<TodoItem> = registry.todos().read()
+
+  fun activeTodoSummary(): String? = registry.todos().activeSummary()
 
   private fun failure(call: ToolCall, message: String) = ToolResult(
     callId = call.id,

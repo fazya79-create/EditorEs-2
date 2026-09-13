@@ -31,7 +31,8 @@ class ToolSpecTest {
     assertThat(readOnly).containsExactly(
       ReadFileTool.NAME,
       WebSearchTool.NAME,
-      WebFetchTool.NAME
+      WebFetchTool.NAME,
+      TodoWriteTool.NAME
     )
     assertThat(mutating).containsExactly(
       WriteFileTool.NAME,

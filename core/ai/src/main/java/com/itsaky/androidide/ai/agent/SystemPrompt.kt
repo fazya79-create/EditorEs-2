@@ -18,6 +18,7 @@
 package com.itsaky.androidide.ai.agent
 
 import com.itsaky.androidide.projects.IProjectManager
+import com.itsaky.androidide.ai.tools.ToolScope
 
 enum class SearchAvailability {
   THIRD_PARTY,
@@ -26,7 +27,10 @@ enum class SearchAvailability {
 
 object SystemPrompt {
 
-  fun build(searchAvailability: SearchAvailability = SearchAvailability.THIRD_PARTY): String {
+  fun build(
+    searchAvailability: SearchAvailability = SearchAvailability.THIRD_PARTY,
+    mode: AgentMode = AgentMode.BUILD
+  ): String {
     val projectDir = runCatching { IProjectManager.getInstance().projectDirPath }
       .getOrNull()
       .orEmpty()
@@ -68,7 +72,34 @@ object SystemPrompt {
       append("alternatives.\n")
       append("- Mutating tool calls may require the user's approval and can be rejected. If a call ")
       append("is rejected, stop and ask the user how to proceed.\n")
+      if (mode == AgentMode.PLAN) {
+        append("- You are in Plan mode. The tools that write files or run commands have been ")
+        append("withheld from this conversation, so you cannot change anything. Investigate with ")
+        append("the tools you do have and answer with a plan the user can review. Do not claim to ")
+        append("have made a change, and if the user asks for one, explain that they need to switch ")
+        append("to Build mode first.\n")
+      }
       append("- Keep answers concise and reference files by their relative paths.")
     }
+  }
+
+  fun buildForSubagent(
+    searchAvailability: SearchAvailability = SearchAvailability.THIRD_PARTY,
+    scope: ToolScope
+  ): String = buildString {
+    append(
+      build(
+        searchAvailability,
+        if (scope == ToolScope.READ_ONLY) AgentMode.PLAN else AgentMode.BUILD
+      )
+    )
+    append("\n\n")
+    append("You are running as a sub-agent on one delegated task. You cannot see the ")
+    append("conversation you were dispatched from and you cannot delegate further, so do not ")
+    append("ask questions or wait for input: work with what the task gives you.\n")
+    append("Your entire reply is the only thing the agent that dispatched you receives, and the ")
+    append("user does not see it directly. End with a self-contained report of what you found or ")
+    append("did, including the specific file paths, symbols and findings that the task asked ")
+    append("for. If you could not finish, say exactly what is missing and why.")
   }
 }

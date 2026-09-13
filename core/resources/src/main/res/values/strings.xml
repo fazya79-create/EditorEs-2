@@ -336,6 +336,21 @@
   <string name="msg_ai_empty">Ask the assistant to explain, find or change code in the project. It can read and write files and run shell commands, and will ask before making changes.</string>
   <string name="msg_ai_missing_api_key">No API key is configured. Add one in Preferences &gt; AI assistant.</string>
   <string name="msg_ai_yolo_banner">YOLO mode is on: tool calls run without asking</string>
+  <string name="title_ai_todos">Plan (%1$d/%2$d done)</string>
+  <string name="title_ai_mode_build">Build</string>
+  <string name="title_ai_mode_plan">Plan</string>
+  <string name="msg_ai_mode_plan_banner">Plan mode: the assistant can read and search, but cannot edit files or run commands</string>
+  <string name="action_ai_mode">Agent mode</string>
+  <string name="msg_ai_unknown_command">Unknown command \'/%1$s\'. Available commands: %2$s</string>
+  <string name="msg_ai_no_commands">Unknown command \'/%1$s\'. No commands are defined. Add markdown files under .androidide/commands in the project.</string>
+  <string name="title_ai_subagent">Sub-agent</string>
+  <string name="msg_ai_subagent_running">Sub-agent running · %1$s</string>
+  <string name="msg_ai_subagent_done">Sub-agent finished · %1$s</string>
+  <string name="msg_ai_subagent_failed">Sub-agent failed · %1$s</string>
+  <plurals name="msg_ai_subagent_tool_calls">
+    <item quantity="one">%1$d tool call</item>
+    <item quantity="other">%1$d tool calls</item>
+  </plurals>
   <string name="msg_ai_awaiting_approval">Waiting for your approval</string>
   <string name="msg_ai_tool_rejected">Rejected</string>
   <string name="title_ai_approval">Allow this action?</string>
