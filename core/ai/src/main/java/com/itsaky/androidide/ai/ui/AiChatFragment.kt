@@ -75,6 +75,7 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
     binding.newChat.setOnClickListener { viewModel.clear() }
     binding.history.setOnClickListener { showHistory() }
     binding.agentMode.setOnClickListener { toggleAgentMode() }
+    binding.commands.setOnClickListener { showCommands() }
 
     viewModel.entries.observe(viewLifecycleOwner) { entries ->
       val atBottom = isAtBottom()
@@ -136,8 +137,29 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
     viewModel.refreshAgentMode()
   }
 
-  private fun toggleAgentMode() {
-    val next = if (viewModel.agentMode.value == AgentMode.PLAN) {
+  private fun showCommands() {
+    val commands = viewModel.availableCommands()
+    val labels = commands
+      .map { command ->
+        if (command.description.isBlank()) {
+          "/${command.name}"
+        } else {
+          "/${command.name} — ${command.description}"
+        }
+      }
+      .toTypedArray()
+
+    DialogUtils.newMaterialDialogBuilder(requireContext())
+      .setTitle(com.itsaky.androidide.resources.R.string.title_ai_commands)
+      .setItems(labels) { _, index ->
+        binding.input.setText("/${commands[index].name} ")
+        binding.input.setSelection(binding.input.text?.length ?: 0)
+      }
+      .setNegativeButton(android.R.string.cancel, null)
+      .show()
+  }
+
+  private fun toggleAgentMode() {    val next = if (viewModel.agentMode.value == AgentMode.PLAN) {
       AgentMode.BUILD
     } else {
       AgentMode.PLAN

@@ -31,6 +31,7 @@ import com.itsaky.androidide.ai.agent.SubagentRequest
 import com.itsaky.androidide.ai.agent.SystemPrompt
 import com.itsaky.androidide.ai.commands.CommandRegistry
 import com.itsaky.androidide.ai.commands.CommandResolution
+import com.itsaky.androidide.ai.commands.SlashCommand
 import com.itsaky.androidide.ai.history.ChatHistoryStore
 import com.itsaky.androidide.ai.history.ChatSession
 import com.itsaky.androidide.ai.history.ChatSessionInfo
@@ -323,8 +324,13 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     val deferred = CompletableDeferred<ApprovalDecision>()
     pendingApproval = deferred
 
-    updateTool(request.call.id) { entry ->
+    val known = updateTool(request.call.id) { entry ->
       entry.copy(state = ToolEntryState.AWAITING_APPROVAL)
+    }
+    if (!known) {
+      updateSubagentEntry { entry ->
+        entry.copy(detail = request.summary, awaitingApproval = true)
+      }
     }
     approvalRequest.postValue(request)
 
@@ -333,6 +339,9 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     } finally {
       pendingApproval = null
       approvalRequest.postValue(null)
+      if (!known) {
+        updateSubagentEntry { entry -> entry.copy(awaitingApproval = false) }
+      }
     }
   }
 
@@ -562,12 +571,14 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     publish()
   }
 
-  private fun updateTool(callId: String, transform: (ChatEntry.Tool) -> ChatEntry.Tool) {    val index = items.indexOfLast { it is ChatEntry.Tool && it.call.id == callId }
+  private fun updateTool(callId: String, transform: (ChatEntry.Tool) -> ChatEntry.Tool): Boolean {
+    val index = items.indexOfLast { it is ChatEntry.Tool && it.call.id == callId }
     if (index < 0) {
-      return
+      return false
     }
     items[index] = transform(items[index] as ChatEntry.Tool)
     publish()
+    return true
   }
 
   private fun append(entry: ChatEntry) {
@@ -587,11 +598,13 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   }
 
   private fun updateSubagentEntry(
-    description: String,
+    description: String? = null,
     transform: (ChatEntry.Subagent) -> ChatEntry.Subagent
   ) {
     val index = items.indexOfLast {
-      it is ChatEntry.Subagent && it.description == description && it.state == SubagentState.RUNNING
+      it is ChatEntry.Subagent &&
+          it.state == SubagentState.RUNNING &&
+          (description == null || it.description == description)
     }
     if (index < 0) {
       return
@@ -621,8 +634,14 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     if (!message.startsWith('/')) {
       return CommandResolution.NotACommand
     }
+    return commandRegistry().resolve(message)
+  }
+
+  fun availableCommands(): List<SlashCommand> = commandRegistry().all()
+
+  private fun commandRegistry(): CommandRegistry {
     val projectDir = runCatching { WorkspacePaths.projectDir() }.getOrNull()
-    return CommandRegistry.load(projectDir).resolve(message)
+    return CommandRegistry.load(projectDir)
   }
 
   private suspend fun runSubagent(

@@ -79,6 +79,7 @@ sealed interface ChatEntry {
     val detail: String = "",
     val summary: String = "",
     val toolCalls: Int = 0,
+    val awaitingApproval: Boolean = false,
     val expanded: Boolean = false
   ) : ChatEntry
 }

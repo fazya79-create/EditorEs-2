@@ -42,6 +42,14 @@
       android:text="@string/title_ai_mode_build" />
 
     <com.google.android.material.button.MaterialButton
+      android:id="@+id/commands"
+      style="@style/Widget.Material3.Button.IconButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:contentDescription="@string/action_ai_commands"
+      app:icon="@drawable/ic_info" />
+
+    <com.google.android.material.button.MaterialButton
       android:id="@+id/new_chat"
       style="@style/Widget.Material3.Button.IconButton"
       android:layout_width="wrap_content"

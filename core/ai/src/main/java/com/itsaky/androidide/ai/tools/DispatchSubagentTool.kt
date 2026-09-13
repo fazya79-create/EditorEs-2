@@ -56,7 +56,7 @@ class DispatchSubagentTool(private val runner: SubagentRunner) : AiTool {
         "required": ["description", "prompt"]
       }
     """.trimIndent(),
-    mutating = true
+    mutating = false
   )
 
   override fun describe(arguments: JsonObject): String {

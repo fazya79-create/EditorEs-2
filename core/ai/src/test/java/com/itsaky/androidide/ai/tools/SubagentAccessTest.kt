@@ -50,6 +50,13 @@ class SubagentAccessTest {
   }
 
   @Test
+  fun `delegation does not consume a mutation approval of its own`() {
+    val dispatch = DispatchSubagentTool(runner)
+
+    assertThat(dispatch.spec.mutating).isFalse()
+  }
+
+  @Test
   fun `a read-only sub-agent is offered no mutating tool`() {
     val offered = ToolAccess.forSubagent(ToolScope.READ_ONLY)
       .filter(ToolRegistry().specs())

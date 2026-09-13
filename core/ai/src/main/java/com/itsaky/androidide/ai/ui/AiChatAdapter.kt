@@ -123,6 +123,7 @@ class AiChatAdapter(
       )
 
       val status = when {
+        entry.awaitingApproval -> context.getString(R.string.msg_ai_awaiting_approval)
         entry.state == SubagentState.RUNNING && entry.detail.isNotBlank() -> entry.detail
         entry.toolCalls > 0 -> context.resources.getQuantityString(
           R.plurals.msg_ai_subagent_tool_calls,
