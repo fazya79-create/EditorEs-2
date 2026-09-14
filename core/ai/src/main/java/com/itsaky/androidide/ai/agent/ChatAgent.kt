@@ -31,6 +31,9 @@ import com.itsaky.androidide.ai.tools.TodoItem
 import com.itsaky.androidide.ai.tools.TodoWriteTool
 import com.itsaky.androidide.ai.tools.ToolGate
 import com.itsaky.androidide.ai.tools.ToolRegistry
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -175,22 +178,71 @@ class ChatAgent(
         return@flow
       }
 
-      val results = mutableListOf<ToolResult>()
-      for (call in assistant.toolCalls) {
-        emit(AgentEvent.ToolStarted(call, gate.summarize(call)))
-        val result = gate.run(call)
-        results += result
-        emit(AgentEvent.ToolFinished(call, result))
-        if (call.name == TodoWriteTool.NAME && !result.isError) {
-          emit(AgentEvent.TodosUpdated(gate.todos()))
-        }
-      }
+      val results = executeToolCalls(assistant.toolCalls) { emit(it) }
 
       messages += ChatMessage.toolResults(results)
       round++
 
       compactIfNeeded(usage, messages).forEach { emit(it) }
     }
+  }
+
+  private suspend fun executeToolCalls(
+    calls: List<ToolCall>,
+    emit: suspend (AgentEvent) -> Unit
+  ): List<ToolResult> {
+    val results = arrayOfNulls<ToolResult>(calls.size)
+    var index = 0
+
+    while (index < calls.size) {
+      val batch = parallelBatchAt(calls, index)
+
+      if (batch <= 1) {
+        val call = calls[index]
+        emit(AgentEvent.ToolStarted(call, gate.summarize(call)))
+        val result = gate.run(call)
+        results[index] = result
+        emit(AgentEvent.ToolFinished(call, result))
+        if (call.name == TodoWriteTool.NAME && !result.isError) {
+          emit(AgentEvent.TodosUpdated(gate.todos()))
+        }
+        index++
+        continue
+      }
+
+      val group = calls.subList(index, index + batch)
+      group.forEach { call -> emit(AgentEvent.ToolStarted(call, gate.summarize(call))) }
+
+      val completed = coroutineScope {
+        group.map { call -> async { gate.run(call) } }.awaitAll()
+      }
+
+      completed.forEachIndexed { offset, result ->
+        results[index + offset] = result
+        emit(AgentEvent.ToolFinished(group[offset], result))
+      }
+
+      index += batch
+    }
+
+    return results.map { requireNotNull(it) }
+  }
+
+  private fun parallelBatchAt(calls: List<ToolCall>, start: Int): Int {
+    if (!gate.isParallelSafe(calls[start])) {
+      return 1
+    }
+    var end = start
+    while (end < calls.size && gate.isParallelSafe(calls[end])) {
+      end++
+    }
+    return end - start
+  }
+
+  suspend fun compactNow(history: List<ChatMessage>): List<AgentEvent> {
+    val messages = history.toMutableList()
+    val events = compact(messages)
+    return events.ifEmpty { listOf(AgentEvent.CompactionFailed) }
   }
 
   private suspend fun compactIfNeeded(

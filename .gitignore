@@ -80,3 +80,5 @@ lint/tmp/
 
 # renamed at configure time by composite-builds/build-deps/logback-core
 composite-builds/external/logback-android/logback-core/src/main/java/module-info.java.exclude
+
+.kotlin/

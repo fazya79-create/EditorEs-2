@@ -21,20 +21,27 @@ import android.content.Context
 import com.itsaky.androidide.ai.agent.SubagentRunner
 import com.itsaky.androidide.ai.model.ToolSpec
 import com.itsaky.androidide.ai.prefs.AiPreferences
+import com.itsaky.androidide.ai.skills.SkillRegistry
 
 class ToolRegistry(
   private val todoStore: TodoStore = TodoStore(),
+  skills: (() -> SkillRegistry)? = null,
   subagentRunner: SubagentRunner? = null
 ) {
 
   private val tools: Map<String, AiTool> = buildList {
     add(ReadFileTool())
+    add(GlobTool())
+    add(GrepTool())
     add(WriteFileTool())
     add(EditFileTool())
     add(RunShellTool())
     add(WebSearchTool())
     add(WebFetchTool())
     add(TodoWriteTool(todoStore))
+    if (skills != null) {
+      add(SkillTool(skills))
+    }
     if (subagentRunner != null) {
       add(DispatchSubagentTool(subagentRunner))
     }

@@ -55,6 +55,25 @@ class EditFileTool : AiTool {
   override fun describe(arguments: JsonObject): String =
     "Edit ${arguments.get("path")?.asStringOrNull() ?: "<missing path>"}"
 
+  override fun preview(arguments: JsonObject): String {
+    val path = arguments.get("path")?.asStringOrNull() ?: return ""
+    val oldText = arguments.get("old_text")?.asStringOrNull() ?: return ""
+    val newText = arguments.get("new_text")?.asStringOrNull() ?: return ""
+
+    return runCatching {
+      val file = WorkspacePaths.resolve(path)
+      if (!file.isFile) {
+        return@runCatching ""
+      }
+      val content = file.readText()
+      val at = content.indexOf(oldText)
+      if (at < 0) {
+        return@runCatching ""
+      }
+      UnifiedDiff.render(content, content.replaceRange(at, at + oldText.length, newText))
+    }.getOrDefault("")
+  }
+
   override suspend fun execute(context: Context, arguments: JsonObject): String =
     withContext(Dispatchers.IO) {
       val path = arguments.get("path")?.asStringOrNull()

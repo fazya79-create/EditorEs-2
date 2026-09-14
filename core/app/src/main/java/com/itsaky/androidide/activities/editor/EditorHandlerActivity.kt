@@ -51,6 +51,9 @@ import com.itsaky.androidide.models.FileExtension
 import com.itsaky.androidide.models.OpenedFile
 import com.itsaky.androidide.models.OpenedFilesCache
 import com.itsaky.androidide.models.Range
+import com.itsaky.androidide.ai.agent.EditorContext
+import com.itsaky.androidide.ai.agent.EditorContextRegistry
+import com.itsaky.androidide.ai.agent.EditorSelection
 import com.itsaky.androidide.projects.ClangFormat
 import com.itsaky.androidide.projects.IProjectManager
 import com.itsaky.androidide.tasks.executeAsync
@@ -96,12 +99,15 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
 
   override fun preDestroy() {
     super.preDestroy()
+    EditorContextRegistry.install(null)
     TSLanguageRegistry.instance.destroy()
     editorViewModel.removeAllFiles()
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    EditorContextRegistry.install { currentEditorContext() }
 
     editorViewModel._displayedFile.observe(
       this) { this.content.editorContainer.displayedChild = it }
@@ -568,6 +574,38 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
       val editor = getEditorForFile(it)?.editor ?: return@mapNotNull null
       OpenedFile(it.absolutePath, editor.cursorLSPRange)
     }
+
+  private fun currentEditorContext(): EditorContext? {
+    val editor = getCurrentEditor()?.editor ?: return null
+    val file = editor.file ?: return null
+
+    val selection = runCatching {
+      val cursor = editor.cursor
+      if (cursor == null || !cursor.isSelected) {
+        null
+      } else {
+        EditorSelection(
+          startLine = cursor.leftLine + 1,
+          endLine = cursor.rightLine + 1,
+          text = editor.text.substring(cursor.left, cursor.right)
+        )
+      }
+    }.getOrNull()
+
+    return EditorContext(
+      filePath = relativeToProject(file),
+      selection = selection,
+      openFiles = runCatching {
+        editorViewModel.getOpenedFiles().map { relativeToProject(it) }
+      }.getOrDefault(emptyList())
+    )
+  }
+
+  private fun relativeToProject(file: File): String = runCatching {
+    val root = IProjectManager.getInstance().projectDir.canonicalFile.path
+    val path = file.canonicalFile.path
+    if (path.startsWith("$root${File.separator}")) path.substring(root.length + 1) else path
+  }.getOrDefault(file.absolutePath)
 
   private fun notifyFilesUnsaved(unsavedEditors: List<CodeEditorView?>, invokeAfter: Runnable) {
     if (isDestroying) {

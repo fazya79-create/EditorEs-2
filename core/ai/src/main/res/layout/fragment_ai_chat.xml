@@ -43,6 +43,24 @@
 
 
     <com.google.android.material.button.MaterialButton
+      android:id="@+id/subagents"
+      style="@style/Widget.Material3.Button.IconButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:contentDescription="@string/action_ai_subagents"
+      android:visibility="gone"
+      app:icon="@drawable/ic_bash_commands"
+      tools:visibility="visible" />
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/skills"
+      style="@style/Widget.Material3.Button.IconButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:contentDescription="@string/action_ai_skills"
+      app:icon="@drawable/ic_code" />
+
+    <com.google.android.material.button.MaterialButton
       android:id="@+id/new_chat"
       style="@style/Widget.Material3.Button.IconButton"
       android:layout_width="wrap_content"
@@ -123,6 +141,28 @@
       android:fontFamily="monospace"
       android:textAppearance="@style/TextAppearance.Material3.BodySmall"
       tools:text="Run: ./gradlew assembleDebug" />
+
+    <androidx.core.widget.NestedScrollView
+      android:id="@+id/approval_preview_scroll"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="6dp"
+      android:background="?attr/colorSurfaceContainerLowest"
+      android:maxHeight="200dp"
+      android:visibility="gone"
+      tools:visibility="visible">
+
+      <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/approval_preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:padding="8dp"
+        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+        android:textIsSelectable="true"
+        tools:text="- old line&#10;+ new line" />
+
+    </androidx.core.widget.NestedScrollView>
 
     <LinearLayout
       android:layout_width="match_parent"

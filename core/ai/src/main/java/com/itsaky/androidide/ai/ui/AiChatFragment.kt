@@ -17,6 +17,7 @@
 
 package com.itsaky.androidide.ai.ui
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,12 +25,19 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.view.inputmethod.EditorInfo
 import androidx.core.view.marginBottom
 import androidx.core.view.updateLayoutParams
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.tabs.TabLayout
 import com.itsaky.androidide.ai.databinding.FragmentAiChatBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiHistoryBinding
+import com.itsaky.androidide.ai.databinding.LayoutAiSkillUrlBinding
+import com.itsaky.androidide.ai.databinding.LayoutAiSkillsBinding
+import com.itsaky.androidide.ai.databinding.LayoutAiSubagentsBinding
 import com.itsaky.androidide.ai.agent.AgentMode
+import com.itsaky.androidide.ai.agent.SubagentSession
 import com.itsaky.androidide.ai.history.ChatSessionInfo
 import com.itsaky.androidide.ai.tools.ApprovalDecision
 import com.itsaky.androidide.fragments.FragmentWithBinding
@@ -45,6 +53,14 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
 
   private var baseInputMargin = 0
   private var lastImeInset = 0
+
+  private val pickSkillArchive = registerForActivityResult(
+    ActivityResultContracts.OpenDocument()
+  ) { uri -> uri?.let { installSkillArchive(it) } }
+
+  private val pickSkillFolder = registerForActivityResult(
+    ActivityResultContracts.OpenDocumentTree()
+  ) { uri -> uri?.let { installSkillFolder(it) } }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
@@ -81,6 +97,8 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
 
     binding.newChat.setOnClickListener { viewModel.clear() }
     binding.history.setOnClickListener { showHistory() }
+    binding.subagents.setOnClickListener { showSubagents() }
+    binding.skills.setOnClickListener { showSkills() }
     binding.agentMode.setOnClickListener { toggleAgentMode() }
 
     viewModel.entries.observe(viewLifecycleOwner) { entries ->
@@ -94,6 +112,10 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
     }
 
     viewModel.busy.observe(viewLifecycleOwner) { updateSendButton() }
+
+    viewModel.subagents.observe(viewLifecycleOwner) { sessions ->
+      binding.subagents.visibility = if (sessions.isEmpty()) View.GONE else View.VISIBLE
+    }
 
     viewModel.agentMode.observe(viewLifecycleOwner) { mode ->
       val plan = mode == AgentMode.PLAN
@@ -109,6 +131,14 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
     viewModel.approvalRequest.observe(viewLifecycleOwner) { request ->
       binding.approvalBar.visibility = if (request == null) View.GONE else View.VISIBLE
       binding.approvalSummary.text = request?.summary.orEmpty()
+
+      val preview = request?.preview.orEmpty()
+      binding.approvalPreviewScroll.visibility =
+        if (preview.isBlank()) View.GONE else View.VISIBLE
+      binding.approvalPreview.text = preview
+      if (preview.isNotBlank()) {
+        binding.approvalPreviewScroll.scrollTo(0, 0)
+      }
     }
 
     viewModel.contextUsage.observe(viewLifecycleOwner) { usage ->
@@ -191,8 +221,203 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
     dialog.show()
   }
 
-  private fun confirmDeleteSession(info: ChatSessionInfo) {
-    val title = info.title.ifBlank {
+  private fun showSubagents() {
+    val panelBinding = LayoutAiSubagentsBinding.inflate(LayoutInflater.from(requireContext()))
+    val dialog = DialogUtils.newMaterialDialogBuilder(requireContext())
+      .setTitle(com.itsaky.androidide.resources.R.string.title_ai_subagents)
+      .setView(panelBinding.root)
+      .setNegativeButton(android.R.string.cancel, null)
+      .create()
+
+    val activityAdapter = SubagentActivityAdapter()
+    panelBinding.subagentActivity.layoutManager = LinearLayoutManager(requireContext())
+    panelBinding.subagentActivity.adapter = activityAdapter
+    panelBinding.subagentActivity.itemAnimator = null
+
+    val panel = SubagentPanel(panelBinding, activityAdapter)
+
+    panelBinding.subagentTabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+      override fun onTabSelected(tab: TabLayout.Tab) {
+        panel.select(tab.tag as? Long ?: return)
+      }
+
+      override fun onTabUnselected(tab: TabLayout.Tab) = Unit
+
+      override fun onTabReselected(tab: TabLayout.Tab) = Unit
+    })
+
+    val observer = Observer<List<SubagentSession>> { sessions -> panel.submit(sessions) }
+    viewModel.subagents.observe(viewLifecycleOwner, observer)
+
+    dialog.setOnDismissListener { viewModel.subagents.removeObserver(observer) }
+    dialog.show()
+  }
+
+  private fun showSkills() {
+    viewModel.refreshSkills()
+
+    val panel = LayoutAiSkillsBinding.inflate(LayoutInflater.from(requireContext()))
+    val dialog = DialogUtils.newMaterialDialogBuilder(requireContext())
+      .setTitle(com.itsaky.androidide.resources.R.string.title_ai_skills)
+      .setView(panel.root)
+      .setNegativeButton(android.R.string.cancel, null)
+      .create()
+
+    val adapter = AiSkillAdapter(
+      onDelete = { skill -> confirmDeleteSkill(skill) },
+      onSelect = { skill -> showSkillDetail(skill) }
+    )
+    panel.skillList.layoutManager = LinearLayoutManager(requireContext())
+    panel.skillList.adapter = adapter
+
+    panel.addFromStorage.setOnClickListener { promptStorageSource() }
+    panel.addFromUrl.setOnClickListener { promptSkillUrl() }
+
+    val listObserver = Observer<List<com.itsaky.androidide.ai.skills.Skill>> { skills ->
+      adapter.submitList(skills)
+      panel.skillsEmpty.visibility = if (skills.isEmpty()) View.VISIBLE else View.GONE
+    }
+    val busyObserver = Observer<Boolean> { busy ->
+      panel.skillProgress.visibility = if (busy) View.VISIBLE else View.GONE
+      panel.addFromStorage.isEnabled = !busy
+      panel.addFromUrl.isEnabled = !busy
+      if (busy) {
+        panel.skillStatus.visibility = View.VISIBLE
+        panel.skillStatus.setText(com.itsaky.androidide.resources.R.string.msg_ai_skill_installing)
+      }
+    }
+    val messageObserver = Observer<SkillMessage?> { message ->
+      if (message == null) {
+        return@Observer
+      }
+      panel.skillStatus.visibility = View.VISIBLE
+      panel.skillStatus.text = skillMessageText(message)
+      viewModel.consumeSkillMessage()
+    }
+
+    viewModel.skillList.observe(viewLifecycleOwner, listObserver)
+    viewModel.skillBusy.observe(viewLifecycleOwner, busyObserver)
+    viewModel.skillMessage.observe(viewLifecycleOwner, messageObserver)
+
+    dialog.setOnDismissListener {
+      viewModel.skillList.removeObserver(listObserver)
+      viewModel.skillBusy.removeObserver(busyObserver)
+      viewModel.skillMessage.removeObserver(messageObserver)
+    }
+    dialog.show()
+  }
+
+  private fun skillMessageText(message: SkillMessage): String = when (message) {
+    is SkillMessage.Installed -> resources.getQuantityString(
+      com.itsaky.androidide.resources.R.plurals.msg_ai_skill_installed,
+      message.names.size,
+      message.names.size
+    ) + ": " + message.names.joinToString(", ")
+
+    is SkillMessage.Failed -> getString(
+      com.itsaky.androidide.resources.R.string.msg_ai_skill_install_failed,
+      message.reason
+    )
+
+    is SkillMessage.Deleted -> getString(
+      com.itsaky.androidide.resources.R.string.msg_ai_skill_deleted,
+      message.name
+    )
+
+    SkillMessage.ReadOnly ->
+      getString(com.itsaky.androidide.resources.R.string.msg_ai_skill_builtin_readonly)
+  }
+
+  private fun promptStorageSource() {
+    val options = arrayOf(
+      getString(com.itsaky.androidide.resources.R.string.action_ai_skill_pick_folder),
+      getString(com.itsaky.androidide.resources.R.string.action_ai_skill_pick_zip)
+    )
+    DialogUtils.newMaterialDialogBuilder(requireContext())
+      .setTitle(com.itsaky.androidide.resources.R.string.action_ai_skill_add_storage)
+      .setItems(options) { d, which ->
+        d.dismiss()
+        if (which == 0) {
+          pickSkillFolder.launch(null)
+        } else {
+          pickSkillArchive.launch(arrayOf("application/zip", "application/octet-stream", "*/*"))
+        }
+      }
+      .setNegativeButton(android.R.string.cancel, null)
+      .show()
+  }
+
+  private fun promptSkillUrl() {
+    val urlBinding = LayoutAiSkillUrlBinding.inflate(LayoutInflater.from(requireContext()))
+    DialogUtils.newMaterialDialogBuilder(requireContext())
+      .setTitle(com.itsaky.androidide.resources.R.string.title_ai_skill_add_url)
+      .setView(urlBinding.root)
+      .setNegativeButton(android.R.string.cancel, null)
+      .setPositiveButton(com.itsaky.androidide.resources.R.string.action_ai_skill_install) { d, _ ->
+        val url = urlBinding.urlInput.text?.toString().orEmpty().trim()
+        d.dismiss()
+        if (url.isNotEmpty()) {
+          viewModel.installSkillFromUrl(url)
+        }
+      }
+      .show()
+  }
+
+  private fun confirmDeleteSkill(skill: com.itsaky.androidide.ai.skills.Skill) {
+    DialogUtils.newYesNoDialog(
+      context = requireContext(),
+      title = getString(com.itsaky.androidide.resources.R.string.title_confirm_delete),
+      message = getString(
+        com.itsaky.androidide.resources.R.string.msg_ai_skill_confirm_delete,
+        skill.name
+      ),
+      positiveClickListener = { d, _ ->
+        d.dismiss()
+        viewModel.deleteSkill(skill)
+      }
+    ) { d, _ -> d.dismiss() }.show()
+  }
+
+  private fun showSkillDetail(skill: com.itsaky.androidide.ai.skills.Skill) {
+    DialogUtils.newMaterialDialogBuilder(requireContext())
+      .setTitle(skill.name)
+      .setMessage(
+        buildString {
+          if (skill.description.isNotBlank()) {
+            append(skill.description).append("\n\n")
+          }
+          if (skill.license.isNotBlank()) {
+            append("License: ").append(skill.license).append('\n')
+          }
+          if (skill.compatibility.isNotBlank()) {
+            append("Requires: ").append(skill.compatibility).append('\n')
+          }
+          if (skill.origin.isNotBlank()) {
+            append("Source: ").append(skill.origin).append('\n')
+          }
+          if (skill.resources.isNotEmpty()) {
+            append("Files: ").append(skill.resources.joinToString(", "))
+          }
+        }.trim()
+      )
+      .setPositiveButton(android.R.string.ok, null)
+      .show()
+  }
+
+  private fun installSkillFolder(tree: Uri) {
+    val context = requireContext().applicationContext
+    viewModel.installSkillFromTree(context, tree)
+  }
+
+  private fun installSkillArchive(uri: Uri) {
+    val context = requireContext().applicationContext
+    viewModel.installSkillFromZip(
+      open = { context.contentResolver.openInputStream(uri) ?: error("Cannot read that file.") },
+      origin = uri.lastPathSegment.orEmpty()
+    )
+  }
+
+  private fun confirmDeleteSession(info: ChatSessionInfo) {    val title = info.title.ifBlank {
       getString(com.itsaky.androidide.resources.R.string.msg_ai_history_untitled)
     }
     DialogUtils.newYesNoDialog(

@@ -21,6 +21,7 @@ import android.content.Context
 import com.itsaky.androidide.ai.model.ToolCall
 import com.itsaky.androidide.ai.model.ToolResult
 import com.itsaky.androidide.ai.prefs.AiPreferences
+import kotlinx.coroutines.CancellationException
 import org.slf4j.LoggerFactory
 
 enum class ApprovalDecision {
@@ -31,7 +32,8 @@ enum class ApprovalDecision {
 data class ToolApprovalRequest(
   val call: ToolCall,
   val summary: String,
-  val mutating: Boolean
+  val mutating: Boolean,
+  val preview: String = ""
 )
 
 fun interface ToolApprover {
@@ -61,8 +63,14 @@ class ToolGate(
     val summary = runCatching { tool.describe(arguments) }.getOrElse { call.name }
 
     if (tool.spec.mutating && !AiPreferences.yoloMode) {
+      val preview = runCatching { tool.preview(arguments) }.getOrDefault("")
       val decision = approver.requestApproval(
-        ToolApprovalRequest(call = call, summary = summary, mutating = true)
+        ToolApprovalRequest(
+          call = call,
+          summary = summary,
+          mutating = true,
+          preview = preview
+        )
       )
       if (decision == ApprovalDecision.REJECTED) {
         return failure(call, "The user rejected this tool call.")
@@ -77,10 +85,17 @@ class ToolGate(
       )
     } catch (err: ToolException) {
       failure(call, err.message ?: "The tool call failed.")
+    } catch (err: CancellationException) {
+      throw err
     } catch (err: Throwable) {
       log.error("Tool '{}' failed", call.name, err)
       failure(call, err.message ?: "The tool call failed unexpectedly.")
     }
+  }
+
+  fun isParallelSafe(call: ToolCall): Boolean {
+    val tool = registry.find(call.name) ?: return false
+    return tool.spec.parallelSafe && access.permits(tool.spec)
   }
 
   fun summarize(call: ToolCall): String {

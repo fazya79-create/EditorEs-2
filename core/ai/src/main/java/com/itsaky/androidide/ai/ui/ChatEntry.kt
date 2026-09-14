@@ -71,7 +71,9 @@ sealed interface ChatEntry {
     val items: List<TodoItem>
   ) : ChatEntry
 
-  data class Subagent(    override val id: Long,
+  data class Subagent(
+    override val id: Long,
+    val delegationId: Long,
     val description: String,
     val scope: ToolScope,
     val state: SubagentState,

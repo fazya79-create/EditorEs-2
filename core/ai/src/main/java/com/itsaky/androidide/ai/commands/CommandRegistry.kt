@@ -48,6 +48,7 @@ class CommandRegistry(private val commands: Map<String, SlashCommand>) {
     fun load(projectDir: File?): CommandRegistry {
       val merged = LinkedHashMap<String, SlashCommand>()
       BuiltInCommands.all().forEach { merged[it.name] = it }
+      LocalCommands.all().forEach { merged[it.name] = it }
       fromProject(projectDir).forEach { merged[it.name] = it }
       return CommandRegistry(merged)
     }

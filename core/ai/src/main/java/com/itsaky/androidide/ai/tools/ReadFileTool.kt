@@ -41,7 +41,8 @@ class ReadFileTool : AiTool {
         "required": ["path"]
       }
     """.trimIndent(),
-    mutating = false
+    mutating = false,
+    parallelSafe = true
   )
 
   override fun describe(arguments: JsonObject): String =

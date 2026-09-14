@@ -29,5 +29,7 @@ interface AiTool {
 
   fun describe(arguments: JsonObject): String
 
+  fun preview(arguments: JsonObject): String = ""
+
   suspend fun execute(context: Context, arguments: JsonObject): String
 }

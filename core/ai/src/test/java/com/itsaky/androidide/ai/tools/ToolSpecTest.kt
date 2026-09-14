@@ -30,6 +30,8 @@ class ToolSpecTest {
 
     assertThat(readOnly).containsExactly(
       ReadFileTool.NAME,
+      GlobTool.NAME,
+      GrepTool.NAME,
       WebSearchTool.NAME,
       WebFetchTool.NAME,
       TodoWriteTool.NAME
@@ -39,6 +41,21 @@ class ToolSpecTest {
       EditFileTool.NAME,
       RunShellTool.NAME
     )
+  }
+
+  @Test
+  fun `only tools without shared mutable state are marked parallel safe`() {
+    val parallel = ToolRegistry.specs().filter { it.parallelSafe }.map { it.name }.toSet()
+
+    assertThat(parallel).containsExactly(
+      ReadFileTool.NAME,
+      GlobTool.NAME,
+      GrepTool.NAME,
+      WebSearchTool.NAME,
+      WebFetchTool.NAME
+    )
+    assertThat(parallel).doesNotContain(TodoWriteTool.NAME)
+    assertThat(ToolRegistry.specs().none { it.mutating && it.parallelSafe }).isTrue()
   }
 
   @Test

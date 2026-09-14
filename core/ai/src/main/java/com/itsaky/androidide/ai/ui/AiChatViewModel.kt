@@ -28,7 +28,22 @@ import com.itsaky.androidide.ai.agent.ChatAgent
 import com.itsaky.androidide.ai.agent.SearchAvailability
 import com.itsaky.androidide.ai.agent.SubagentOutcome
 import com.itsaky.androidide.ai.agent.SubagentRequest
+import com.itsaky.androidide.ai.agent.SubagentActivityKind
+import com.itsaky.androidide.ai.agent.SubagentMonitor
+import com.itsaky.androidide.ai.agent.SubagentSession
+import com.itsaky.androidide.ai.agent.SubagentStatus
 import com.itsaky.androidide.ai.agent.SystemPrompt
+import com.itsaky.androidide.ai.agent.ContextCompactor
+import com.itsaky.androidide.ai.agent.EditorContextRegistry
+import com.itsaky.androidide.ai.agent.ProjectInstructions
+import com.itsaky.androidide.ai.commands.LocalCommands
+import com.itsaky.androidide.ai.skills.BundledSkills
+import com.itsaky.androidide.ai.skills.Skill
+import com.itsaky.androidide.ai.skills.SkillInstallResult
+import com.itsaky.androidide.ai.skills.SkillInstaller
+import com.itsaky.androidide.ai.skills.SkillRegistry
+import com.itsaky.androidide.ai.skills.SkillStore
+import com.itsaky.androidide.ai.skills.SkillTreeCopier
 import com.itsaky.androidide.ai.commands.CommandRegistry
 import com.itsaky.androidide.ai.commands.CommandResolution
 import com.itsaky.androidide.ai.commands.SlashCommand
@@ -62,6 +77,10 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import com.itsaky.androidide.ai.provider.OpenAiProvider
 
 class AiChatViewModel(application: Application) : AndroidViewModel(application), ToolApprover {
@@ -76,6 +95,8 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   private var pendingApproval: CompletableDeferred<ApprovalDecision>? = null
   private var pendingPublish: Job? = null
   private var lastPublish = 0L
+  private var pendingSubagentPublish: Job? = null
+  private var lastSubagentPublish = 0L
   private var sessionId = store.newSessionId()
   private var sessionCreatedAt = System.currentTimeMillis()
   private var sessionTitle = ""
@@ -83,9 +104,19 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   private var deletedSessionId: String? = null
   private var lastPrompt: String? = null
   private var lastSentPrompt: String? = null
-  private var delegationsThisTurn = 0
+  private val delegationsThisTurn = AtomicInteger(0)
+  private val nextDelegationId = AtomicLong(0)
   private var commands: CommandRegistry? = null
   private var commandsKey: String? = null
+  private var skills: SkillRegistry? = null
+  private var skillsKey: String? = null
+  private var instructions: String? = null
+  private var instructionsKey: String? = null
+
+  private val monitor = SubagentMonitor { publishSubagentsThrottled() }
+  private val skillStore = SkillStore(application)
+  private val skillInstaller = SkillInstaller(skillStore)
+  private val approvalTurnstile = Mutex()
 
   val entries = MutableLiveData<List<ChatEntry>>(emptyList())
   val busy = MutableLiveData(false)
@@ -94,6 +125,10 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   val agentMode = MutableLiveData(AiPreferences.agentMode)
   val contextUsage = MutableLiveData<ContextUsage?>(null)
   val sessions = MutableLiveData<List<ChatSessionInfo>>(emptyList())
+  val subagents = MutableLiveData<List<SubagentSession>>(emptyList())
+  val skillList = MutableLiveData<List<Skill>>(emptyList())
+  val skillBusy = MutableLiveData(false)
+  val skillMessage = MutableLiveData<SkillMessage?>(null)
 
   val isBusy: Boolean
     get() = busy.value == true
@@ -148,6 +183,8 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       history += session.messages
       items.clear()
       registry = ToolRegistry()
+      monitor.clear()
+      publishSubagents()
       items += entriesOf(session.messages)
       lastPrompt = null
       lastSentPrompt = null
@@ -179,7 +216,13 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     history.clear()
     items.clear()
     registry = ToolRegistry()
+    monitor.clear()
+    publishSubagents()
     commands = null
+    skills = null
+    skillsKey = null
+    instructions = null
+    instructionsKey = null
     lastPrompt = null
     lastSentPrompt = null
     sessionId = store.newSessionId()
@@ -221,6 +264,12 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     }
 
     val context = getApplication<Application>()
+    if (LocalCommands.isCompact(message)) {
+      append(ChatEntry.User(nextId(), message))
+      compactNow()
+      return
+    }
+
     val prompt = when (val resolution = resolveCommand(message)) {
       is CommandResolution.Expanded -> resolution.prompt
       is CommandResolution.NotACommand -> message
@@ -265,10 +314,20 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       SearchAvailability.UNAVAILABLE
     }
 
-    delegationsThisTurn = 0
-    registry = ToolRegistry(registry.todos()) { request ->
-      runSubagent(context, config, provider, searchAvailability, access, request)
-    }
+    delegationsThisTurn.set(0)
+    monitor.clear()
+    publishSubagents()
+
+    val skills = skillRegistry()
+    val instructions = projectInstructions()
+
+    registry = ToolRegistry(
+      todoStore = registry.todos(),
+      subagentRunner = { request ->
+        runSubagent(context, config, provider, searchAvailability, access, request)
+      },
+      skills = { skillRegistry() }
+    )
 
     val tools = registry.specs(context, access)
     val gate = ToolGate(context, registry, access, this)
@@ -277,7 +336,13 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       provider = provider,
       gate = gate,
       model = config.model,
-      systemPrompt = SystemPrompt.build(searchAvailability, AiPreferences.agentMode),
+      systemPrompt = SystemPrompt.build(
+        searchAvailability = searchAvailability,
+        mode = AiPreferences.agentMode,
+        skills = skills.all(),
+        instructions = instructions,
+        editor = EditorContextRegistry.current()
+      ),
       thinkingLevel = AiPreferences.thinkingLevel,
       maxToolRounds = AiPreferences.maxToolRounds,
       contextWindow = AiPreferences.contextWindowOf(config.kind),
@@ -324,6 +389,10 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
   }
 
   override suspend fun requestApproval(request: ToolApprovalRequest): ApprovalDecision {
+    return approvalTurnstile.withLock { awaitApproval(request) }
+  }
+
+  private suspend fun awaitApproval(request: ToolApprovalRequest): ApprovalDecision {
     val deferred = CompletableDeferred<ApprovalDecision>()
     pendingApproval = deferred
 
@@ -331,9 +400,10 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       entry.copy(state = ToolEntryState.AWAITING_APPROVAL)
     }
     if (!known) {
-      updateSubagentEntry { entry ->
+      updateRunningSubagentEntries { entry ->
         entry.copy(detail = request.summary, awaitingApproval = true)
       }
+      monitor.setAwaitingApproval(true)
     }
     approvalRequest.postValue(request)
 
@@ -343,7 +413,8 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
       pendingApproval = null
       approvalRequest.postValue(null)
       if (!known) {
-        updateSubagentEntry { entry -> entry.copy(awaitingApproval = false) }
+        updateRunningSubagentEntries { entry -> entry.copy(awaitingApproval = false) }
+        monitor.setAwaitingApproval(false)
       }
     }
   }
@@ -583,12 +654,25 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
         entry.copy(streaming = false)
       } else if (entry is ChatEntry.Tool && entry.state == ToolEntryState.RUNNING) {
         entry.copy(state = ToolEntryState.FAILED, output = "Cancelled.")
+      } else if (entry is ChatEntry.Subagent && entry.state == SubagentState.RUNNING) {
+        entry.copy(
+          state = SubagentState.FAILED,
+          detail = "",
+          awaitingApproval = false,
+          summary = cancelledMessage()
+        )
       } else {
         entry
       }
     }
+    monitor.finishRunning(SubagentStatus.FAILED, cancelledMessage())
+    publishSubagents()
     publish()
   }
+
+  private fun cancelledMessage(): String = getApplication<Application>().getString(
+    com.itsaky.androidide.resources.R.string.msg_ai_subagent_cancelled
+  )
 
   private fun updateTool(callId: String, transform: (ChatEntry.Tool) -> ChatEntry.Tool): Boolean {
     val index = items.indexOfLast { it is ChatEntry.Tool && it.call.id == callId }
@@ -619,26 +703,29 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     publish()
   }
 
-  private fun appendSubagentEntry(description: String, scope: ToolScope) {
+  private fun appendSubagentEntry(
+    delegationId: Long,
+    description: String,
+    scope: ToolScope
+  ): Long {
+    val id = nextId()
     append(
       ChatEntry.Subagent(
-        id = nextId(),
+        id = id,
+        delegationId = delegationId,
         description = description,
         scope = scope,
         state = SubagentState.RUNNING
       )
     )
+    return id
   }
 
   private fun updateSubagentEntry(
-    description: String? = null,
+    entryId: Long,
     transform: (ChatEntry.Subagent) -> ChatEntry.Subagent
   ) {
-    val index = items.indexOfLast {
-      it is ChatEntry.Subagent &&
-          it.state == SubagentState.RUNNING &&
-          (description == null || it.description == description)
-    }
+    val index = items.indexOfFirst { it is ChatEntry.Subagent && it.id == entryId }
     if (index < 0) {
       return
     }
@@ -646,21 +733,203 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     publishThrottled()
   }
 
+  private fun updateRunningSubagentEntries(
+    transform: (ChatEntry.Subagent) -> ChatEntry.Subagent
+  ) {
+    var changed = false
+    items.forEachIndexed { index, entry ->
+      if (entry is ChatEntry.Subagent && entry.state == SubagentState.RUNNING) {
+        items[index] = transform(entry)
+        changed = true
+      }
+    }
+    if (changed) {
+      publishThrottled()
+    }
+  }
+
   private fun finishSubagentEntry(
-    description: String,
+    entryId: Long,
     summary: String,
     toolCalls: Int,
     failed: Boolean
   ) {
-    updateSubagentEntry(description) { entry ->
+    updateSubagentEntry(entryId) { entry ->
       entry.copy(
         state = if (failed) SubagentState.FAILED else SubagentState.SUCCEEDED,
         summary = summary,
         toolCalls = toolCalls,
-        detail = ""
+        detail = "",
+        awaitingApproval = false
       )
     }
     publish()
+  }
+
+  private fun skillRegistry(): SkillRegistry {
+    val projectDir = runCatching { WorkspacePaths.projectDir() }.getOrNull()
+    val key = projectDir?.path.orEmpty()
+    val cached = skills
+    if (cached != null && skillsKey == key) {
+      return cached
+    }
+    val merged = SkillRegistry.merge(
+      project = SkillRegistry.load(projectDir),
+      installed = skillStore.installed(),
+      bundled = BundledSkills.load(getApplication(), bundledVersion())
+    )
+    return merged.also {
+      skills = it
+      skillsKey = key
+    }
+  }
+
+  private fun bundledVersion(): String = runCatching {
+    val context = getApplication<Application>()
+    val info = context.packageManager.getPackageInfo(context.packageName, 0)
+    "${info.versionName}:${info.lastUpdateTime}"
+  }.getOrDefault("fallback")
+
+  fun refreshSkills() {
+    viewModelScope.launch {
+      val loaded = withContext(Dispatchers.IO) {
+        skills = null
+        skillsKey = null
+        skillRegistry().all()
+      }
+      skillList.value = loaded
+    }
+  }
+
+  fun installSkillFromUrl(url: String) {
+    runSkillInstall { skillInstaller.installFromUrl(url) }
+  }
+
+  fun installSkillFromTree(context: android.content.Context, tree: android.net.Uri) {
+    runSkillInstall {
+      val staging = skillStore.newStagingDir()
+      try {
+        val copied = SkillTreeCopier.copyTree(context, tree, staging)
+        if (copied == 0) {
+          SkillInstallResult.Failed("Nothing could be read from that folder.")
+        } else {
+          skillInstaller.installFromDirectory(staging)
+        }
+      } finally {
+        staging.deleteRecursively()
+      }
+    }
+  }
+
+  fun installSkillFromZip(open: () -> java.io.InputStream, origin: String) {
+    runSkillInstall { open().use { skillInstaller.installFromZip(it, origin) } }
+  }
+
+  private fun runSkillInstall(block: suspend () -> SkillInstallResult) {
+    if (skillBusy.value == true) {
+      return
+    }
+    skillBusy.value = true
+    viewModelScope.launch {
+      val result = withContext(Dispatchers.IO) {
+        runCatching { block() }.getOrElse { err ->
+          SkillInstallResult.Failed(err.message ?: "The install failed.")
+        }
+      }
+      skillBusy.value = false
+      skillMessage.value = when (result) {
+        is SkillInstallResult.Installed -> SkillMessage.Installed(result.names)
+        is SkillInstallResult.Failed -> SkillMessage.Failed(result.reason)
+      }
+      skillStore.clearStaging()
+      refreshSkills()
+    }
+  }
+
+  fun deleteSkill(skill: Skill) {
+    if (!skill.source.canDelete) {
+      skillMessage.value = SkillMessage.ReadOnly
+      return
+    }
+    viewModelScope.launch {
+      val deleted = withContext(Dispatchers.IO) { skillStore.delete(skill.name) }
+      if (deleted) {
+        skillMessage.value = SkillMessage.Deleted(skill.name)
+      }
+      refreshSkills()
+    }
+  }
+
+  fun consumeSkillMessage() {
+    skillMessage.value = null
+  }
+
+  private fun projectInstructions(): String {
+    val projectDir = runCatching { WorkspacePaths.projectDir() }.getOrNull()
+    val key = projectDir?.path.orEmpty()
+    val cached = instructions
+    if (cached != null && instructionsKey == key) {
+      return cached
+    }
+    return ProjectInstructions.load(projectDir).also {
+      instructions = it
+      instructionsKey = key
+    }
+  }
+
+  fun compactNow() {
+    if (isBusy) {
+      return
+    }
+    if (history.size <= ContextCompactor.KEEP_RECENT_MESSAGES) {
+      append(ChatEntry.Notice(nextId(), NoticeKind.COMPACTION_FAILED, 0))
+      return
+    }
+
+    val context = getApplication<Application>()
+    val config = AiPreferences.providerConfig(context)
+    if (config.apiKey.isBlank()) {
+      append(
+        ChatEntry.Error(
+          nextId(),
+          context.getString(com.itsaky.androidide.resources.R.string.msg_ai_missing_api_key)
+        )
+      )
+      return
+    }
+
+    val provider = createProvider(config)
+    val agent = ChatAgent(
+      provider = provider,
+      gate = ToolGate(context, ToolRegistry(), ToolAccess.FULL, this),
+      model = config.model,
+      systemPrompt = "",
+      contextWindow = AiPreferences.contextWindowOf(config.kind)
+    )
+
+    busy.value = true
+    turn = viewModelScope.launch {
+      try {
+        agent.compactNow(history.toList()).forEach { event ->
+          when (event) {
+            is AgentEvent.ContextCompacted -> {
+              history.clear()
+              history += event.history
+              append(ChatEntry.Notice(nextId(), NoticeKind.COMPACTED, event.replaced))
+            }
+
+            AgentEvent.CompactionFailed ->
+              append(ChatEntry.Notice(nextId(), NoticeKind.COMPACTION_FAILED, 0))
+
+            is AgentEvent.UsageUpdated -> contextUsage.postValue(null)
+            else -> Unit
+          }
+        }
+        persist()
+      } finally {
+        busy.postValue(false)
+      }
+    }
   }
 
   private fun resolveCommand(message: String): CommandResolution {
@@ -702,7 +971,9 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     parentAccess: ToolAccess,
     request: SubagentRequest
   ): SubagentOutcome {
-    if (delegationsThisTurn >= MAX_DELEGATIONS_PER_TURN) {
+    val claimed = delegationsThisTurn.incrementAndGet()
+    if (claimed > MAX_DELEGATIONS_PER_TURN) {
+      delegationsThisTurn.decrementAndGet()
       return SubagentOutcome(
         text = "Delegation limit reached ($MAX_DELEGATIONS_PER_TURN sub-agents in one turn). " +
             "Do the remaining work yourself.",
@@ -710,7 +981,6 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
         failed = true
       )
     }
-    delegationsThisTurn++
 
     val scope = if (parentAccess.scope == ToolScope.READ_ONLY) {
       ToolScope.READ_ONLY
@@ -719,21 +989,25 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     }
     val access = ToolAccess.forSubagent(scope)
 
-    val childRegistry = ToolRegistry()
+    val childRegistry = ToolRegistry(skills = { skillRegistry() })
     val childGate = ToolGate(context, childRegistry, access, this)
 
     val childTools = childRegistry.specs(context, access)
 
-    appendSubagentEntry(request.description, scope)
+    val delegationId = nextDelegationId.getAndIncrement()
+    val entryId = appendSubagentEntry(delegationId, request.description, scope)
+    monitor.start(delegationId, request.description, request.prompt, scope)
 
     val child = ChatAgent(
       provider = provider,
       gate = childGate,
       model = config.model,
       systemPrompt = SystemPrompt.buildForSubagent(
-        searchAvailability,
-        scope,
-        childTools.map { it.name }
+        searchAvailability = searchAvailability,
+        scope = scope,
+        toolNames = childTools.map { it.name },
+        skills = skillRegistry().all(),
+        instructions = projectInstructions()
       ),
       thinkingLevel = AiPreferences.thinkingLevel,
       maxToolRounds = SUBAGENT_MAX_TOOL_ROUNDS,
@@ -754,34 +1028,79 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
             transcript.append(event.message.text)
           }
 
+        is AgentEvent.TextDelta ->
+          monitor.appendStream(delegationId, SubagentActivityKind.MESSAGE, event.text)
+
+        is AgentEvent.ReasoningDelta ->
+          monitor.appendStream(delegationId, SubagentActivityKind.REASONING, event.text)
+
         is AgentEvent.ToolStarted -> {
           toolCalls++
-          updateSubagentEntry(request.description) { entry ->
+          monitor.record(
+            delegationId,
+            SubagentActivityKind.TOOL_STARTED,
+            title = event.call.name,
+            text = event.summary
+          )
+          monitor.update(delegationId) { it.copy(toolCalls = toolCalls) }
+          updateSubagentEntry(entryId) { entry ->
             entry.copy(toolCalls = toolCalls, detail = event.summary)
           }
         }
 
-        is AgentEvent.Failed -> failure = event.message
-        is AgentEvent.Interrupted -> failure = event.message
+        is AgentEvent.ToolFinished -> monitor.record(
+          delegationId,
+          SubagentActivityKind.TOOL_FINISHED,
+          title = event.call.name,
+          text = event.result.content,
+          isError = event.result.isError
+        )
+
+        is AgentEvent.Failed -> {
+          failure = event.message
+          monitor.record(
+            delegationId,
+            SubagentActivityKind.NOTICE,
+            text = event.message,
+            isError = true
+          )
+        }
+
+        is AgentEvent.Interrupted -> {
+          failure = event.message
+          monitor.record(
+            delegationId,
+            SubagentActivityKind.NOTICE,
+            text = event.message,
+            isError = true
+          )
+        }
+
         else -> Unit
       }
     }
 
     val summary = transcript.toString().trim()
     val failed = failure != null || summary.isEmpty()
+    val reported = if (failed) failure ?: "The sub-agent produced no result." else summary
+
+    monitor.update(delegationId) { session ->
+      session.copy(
+        status = if (failed) SubagentStatus.FAILED else SubagentStatus.SUCCEEDED,
+        awaitingApproval = false,
+        toolCalls = toolCalls,
+        summary = reported
+      )
+    }
 
     finishSubagentEntry(
-      description = request.description,
+      entryId = entryId,
       summary = if (failed) failure.orEmpty() else summary,
       toolCalls = toolCalls,
       failed = failed
     )
 
-    return SubagentOutcome(
-      text = if (failed) failure ?: "The sub-agent produced no result." else summary,
-      toolCalls = toolCalls,
-      failed = failed
-    )
+    return SubagentOutcome(text = reported, toolCalls = toolCalls, failed = failed)
   }
 
   private fun unknownCommandMessage(
@@ -840,12 +1159,34 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application),
     entries.postValue(items.toList())
   }
 
+  private fun publishSubagentsThrottled() {
+    val now = SystemClock.uptimeMillis()
+    if (now - lastSubagentPublish < STREAM_PUBLISH_INTERVAL_MS) {
+      if (pendingSubagentPublish == null) {
+        pendingSubagentPublish = viewModelScope.launch {
+          delay(STREAM_PUBLISH_INTERVAL_MS)
+          pendingSubagentPublish = null
+          publishSubagents()
+        }
+      }
+      return
+    }
+    publishSubagents()
+  }
+
+  private fun publishSubagents() {
+    pendingSubagentPublish?.cancel()
+    pendingSubagentPublish = null
+    lastSubagentPublish = SystemClock.uptimeMillis()
+    subagents.postValue(monitor.snapshot())
+  }
+
   private fun nextId(): Long = nextId++
 
   companion object {
 
     private const val STREAM_PUBLISH_INTERVAL_MS = 80L
-    private const val MAX_DELEGATIONS_PER_TURN = 3
+    private const val MAX_DELEGATIONS_PER_TURN = 6
     private const val SUBAGENT_MAX_TOOL_ROUNDS = 12
   }
 }

@@ -79,7 +79,8 @@ data class ToolSpec(
   val name: String,
   val description: String,
   val parametersSchemaJson: String,
-  val mutating: Boolean
+  val mutating: Boolean,
+  val parallelSafe: Boolean = false
 )
 
 enum class StopReason {

@@ -52,7 +52,8 @@ class WebSearchTool : AiTool {
         "required": ["query"]
       }
     """.trimIndent(),
-    mutating = false
+    mutating = false,
+    parallelSafe = true
   )
 
   override fun describe(arguments: JsonObject): String =

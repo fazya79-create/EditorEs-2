@@ -56,6 +56,20 @@ class WriteFileTool : AiTool {
     return "Write $length characters to $path"
   }
 
+  override fun preview(arguments: JsonObject): String {
+    val path = arguments.get("path")?.asStringOrNull() ?: return ""
+    val content = arguments.get("content")?.asStringOrNull() ?: return ""
+
+    return runCatching {
+      val file = WorkspacePaths.resolve(path)
+      if (file.isFile) {
+        UnifiedDiff.render(file.readText(), content)
+      } else {
+        UnifiedDiff.render("", content)
+      }
+    }.getOrDefault("")
+  }
+
   override suspend fun execute(context: Context, arguments: JsonObject): String =
     withContext(Dispatchers.IO) {
       val path = arguments.get("path")?.asStringOrNull()

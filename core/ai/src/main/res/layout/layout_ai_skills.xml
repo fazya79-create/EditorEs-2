@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~  This file is part of AndroidIDE.
+  ~
+  ~  AndroidIDE is free software: you can redistribute it and/or modify
+  ~  it under the terms of the GNU General Public License as published by
+  ~  the Free Software Foundation, either version 3 of the License, or
+  ~  (at your option) any later version.
+  ~
+  ~  AndroidIDE is distributed in the hope that it will be useful,
+  ~  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~  GNU General Public License for more details.
+  ~
+  ~  You should have received a copy of the GNU General Public License
+  ~   along with AndroidIDE.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:minHeight="280dp"
+  android:orientation="vertical">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/add_from_storage"
+      style="@style/Widget.Material3.Button.TextButton"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="@string/action_ai_skill_add_storage" />
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/add_from_url"
+      style="@style/Widget.Material3.Button.TextButton"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="@string/action_ai_skill_add_url" />
+
+  </LinearLayout>
+
+  <com.google.android.material.progressindicator.LinearProgressIndicator
+    android:id="@+id/skill_progress"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:indeterminate="true"
+    android:visibility="gone"
+    tools:visibility="visible" />
+
+  <com.google.android.material.textview.MaterialTextView
+    android:id="@+id/skill_status"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginBottom="4dp"
+    android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+    android:textColor="?attr/colorOnSurfaceVariant"
+    android:visibility="gone"
+    tools:text="Installed 3 skills"
+    tools:visibility="visible" />
+
+  <FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:minHeight="220dp">
+
+    <androidx.recyclerview.widget.RecyclerView
+      android:id="@+id/skill_list"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:clipToPadding="false"
+      android:paddingBottom="8dp" />
+
+    <com.google.android.material.textview.MaterialTextView
+      android:id="@+id/skills_empty"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:gravity="center"
+      android:padding="24dp"
+      android:text="@string/msg_ai_skills_empty"
+      android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+      android:textColor="?attr/colorOnSurfaceVariant"
+      android:visibility="gone"
+      tools:visibility="visible" />
+
+  </FrameLayout>
+
+</LinearLayout>

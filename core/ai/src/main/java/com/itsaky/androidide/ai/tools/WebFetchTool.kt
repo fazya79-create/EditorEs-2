@@ -49,7 +49,8 @@ class WebFetchTool : AiTool {
         "required": ["url"]
       }
     """.trimIndent(),
-    mutating = false
+    mutating = false,
+    parallelSafe = true
   )
 
   override fun describe(arguments: JsonObject): String =

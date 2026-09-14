@@ -60,7 +60,8 @@ class DispatchSubagentTool(private val runner: SubagentRunner) : AiTool {
         "required": ["description", "prompt"]
       }
     """.trimIndent(),
-    mutating = false
+    mutating = false,
+    parallelSafe = true
   )
 
   override fun describe(arguments: JsonObject): String {
@@ -108,6 +109,8 @@ class DispatchSubagentTool(private val runner: SubagentRunner) : AiTool {
 
     private val BASE_TOOLS = listOf(
       ReadFileTool(),
+      GlobTool(),
+      GrepTool(),
       WriteFileTool(),
       EditFileTool(),
       RunShellTool(),
