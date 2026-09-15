@@ -32,6 +32,9 @@ class ToolSpecTest {
       ReadFileTool.NAME,
       GlobTool.NAME,
       GrepTool.NAME,
+      FindSymbolTool.DEFINITION_NAME,
+      FindSymbolTool.REFERENCES_NAME,
+      DocumentSymbolsTool.NAME,
       WebSearchTool.NAME,
       WebFetchTool.NAME,
       TodoWriteTool.NAME
@@ -39,7 +42,8 @@ class ToolSpecTest {
     assertThat(mutating).containsExactly(
       WriteFileTool.NAME,
       EditFileTool.NAME,
-      RunShellTool.NAME
+      RunShellTool.NAME,
+      BuildProjectTool.NAME
     )
   }
 
@@ -51,10 +55,14 @@ class ToolSpecTest {
       ReadFileTool.NAME,
       GlobTool.NAME,
       GrepTool.NAME,
+      FindSymbolTool.DEFINITION_NAME,
+      FindSymbolTool.REFERENCES_NAME,
+      DocumentSymbolsTool.NAME,
       WebSearchTool.NAME,
       WebFetchTool.NAME
     )
     assertThat(parallel).doesNotContain(TodoWriteTool.NAME)
+    assertThat(parallel).doesNotContain(BuildProjectTool.NAME)
     assertThat(ToolRegistry.specs().none { it.mutating && it.parallelSafe }).isTrue()
   }
 

@@ -32,14 +32,18 @@
  */
 package com.itsaky.androidide.lsp.api
 
+import com.itsaky.androidide.lsp.models.CodeActionItem
+import com.itsaky.androidide.lsp.models.CodeActionParams
 import com.itsaky.androidide.lsp.models.CodeFormatResult
 import com.itsaky.androidide.lsp.models.CompletionParams
 import com.itsaky.androidide.lsp.models.CompletionResult
 import com.itsaky.androidide.lsp.models.DefinitionParams
 import com.itsaky.androidide.lsp.models.DefinitionResult
 import com.itsaky.androidide.lsp.models.DiagnosticResult
+import com.itsaky.androidide.lsp.models.DocumentSymbolResult
 import com.itsaky.androidide.lsp.models.ExpandSelectionParams
 import com.itsaky.androidide.lsp.models.FormatCodeParams
+import com.itsaky.androidide.lsp.models.HoverResult
 import com.itsaky.androidide.lsp.models.LSPFailure
 import com.itsaky.androidide.lsp.models.ReferenceParams
 import com.itsaky.androidide.lsp.models.ReferenceResult
@@ -141,6 +145,31 @@ interface ILanguageServer {
    * @return The signature help.
    */
   suspend fun signatureHelp(params: SignatureHelpParams): SignatureHelp
+
+  /**
+   * List the symbols declared by the given file, for an outline or a jump-to-symbol picker.
+   *
+   * @param file The file to outline.
+   * @return The declared symbols, or [DocumentSymbolResult.EMPTY] when the server cannot
+   * provide them.
+   */
+  suspend fun documentSymbols(file: Path): DocumentSymbolResult = DocumentSymbolResult.EMPTY
+
+  /**
+   * Describe the symbol at the given position, typically its type and documentation.
+   *
+   * @param params The params identifying the position to describe.
+   * @return The description, or [HoverResult.EMPTY] when there is nothing to show.
+   */
+  suspend fun hover(params: DefinitionParams): HoverResult = HoverResult.EMPTY
+
+  /**
+   * Compute the quick fixes and refactorings the server offers for the given range.
+   *
+   * @param params The params identifying the file and range to act on.
+   * @return The available actions, or an empty list when the server offers none.
+   */
+  suspend fun codeActions(params: CodeActionParams): List<CodeActionItem> = emptyList()
 
   /**
    * Analyze the given file and provide diagnostics from the analyze result.

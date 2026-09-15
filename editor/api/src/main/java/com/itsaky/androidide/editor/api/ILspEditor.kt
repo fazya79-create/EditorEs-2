@@ -66,6 +66,12 @@ interface ILspEditor {
    */
   fun findReferences()
 
+  /**
+   * If any language server is set, asks it to describe the token at the cursor position and shows
+   * the description in a popup window.
+   */
+  fun showHover()
+
   /** Ensures that all the windows are dismissed. */
   fun ensureWindowsDismissed()
 }

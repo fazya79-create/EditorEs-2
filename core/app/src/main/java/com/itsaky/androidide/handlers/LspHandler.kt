@@ -17,9 +17,11 @@
 
 package com.itsaky.androidide.handlers
 
+import com.itsaky.androidide.ai.agent.SymbolIndexRegistry
 import com.itsaky.androidide.app.BaseApplication
 import com.itsaky.androidide.lsp.api.ILanguageClient
 import com.itsaky.androidide.lsp.api.ILanguageServerRegistry
+import com.itsaky.androidide.lsp.cpp.ClangdSymbolIndex
 import com.itsaky.androidide.lsp.cpp.CppLanguageServer
 
 /**
@@ -33,6 +35,7 @@ object LspHandler {
       getServer(CppLanguageServer.SERVER_ID)
         ?: register(CppLanguageServer(BaseApplication.getBaseInstance()))
     }
+    SymbolIndexRegistry.install(ClangdSymbolIndex)
   }
   
   fun connectClient(client: ILanguageClient) {
@@ -43,6 +46,7 @@ object LspHandler {
     if (isConfigurationChange) {
       return
     }
+    SymbolIndexRegistry.install(null)
     ILanguageServerRegistry.getDefault().destroy()
   }
 }

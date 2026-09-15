@@ -28,7 +28,11 @@ import com.itsaky.androidide.eventbus.events.editor.DocumentOpenEvent
 import com.itsaky.androidide.lsp.api.ILanguageClient
 import com.itsaky.androidide.lsp.api.ILanguageServer
 import com.itsaky.androidide.lsp.api.IServerSettings
+import com.itsaky.androidide.lsp.models.CodeActionItem
+import com.itsaky.androidide.lsp.models.CodeActionKind
+import com.itsaky.androidide.lsp.models.CodeActionParams
 import com.itsaky.androidide.lsp.models.CodeFormatResult
+import com.itsaky.androidide.lsp.models.Command
 import com.itsaky.androidide.lsp.models.CompletionItem
 import com.itsaky.androidide.lsp.models.CompletionItemKind
 import com.itsaky.androidide.lsp.models.CompletionParams
@@ -38,14 +42,22 @@ import com.itsaky.androidide.lsp.models.DefinitionResult
 import com.itsaky.androidide.lsp.models.DiagnosticItem
 import com.itsaky.androidide.lsp.models.DiagnosticResult
 import com.itsaky.androidide.lsp.models.DiagnosticSeverity
+import com.itsaky.androidide.lsp.models.DocumentChange
+import com.itsaky.androidide.lsp.models.DocumentSymbol
+import com.itsaky.androidide.lsp.models.DocumentSymbolResult
 import com.itsaky.androidide.lsp.models.ExpandSelectionParams
 import com.itsaky.androidide.lsp.models.FormatCodeParams
+import com.itsaky.androidide.lsp.models.HoverResult
 import com.itsaky.androidide.lsp.models.InsertTextFormat
 import com.itsaky.androidide.lsp.models.LSPFailure
+import com.itsaky.androidide.lsp.models.MarkupContent
+import com.itsaky.androidide.lsp.models.MarkupKind
+import com.itsaky.androidide.lsp.models.ParameterInformation
 import com.itsaky.androidide.lsp.models.ReferenceParams
 import com.itsaky.androidide.lsp.models.ReferenceResult
 import com.itsaky.androidide.lsp.models.SignatureHelp
 import com.itsaky.androidide.lsp.models.SignatureHelpParams
+import com.itsaky.androidide.lsp.models.SignatureInformation
 import com.itsaky.androidide.lsp.models.SnippetDescription
 import com.itsaky.androidide.lsp.models.TextEdit
 import com.itsaky.androidide.models.Location
@@ -68,6 +80,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.eclipse.lsp4j.CodeActionContext
 import org.eclipse.lsp4j.DidChangeTextDocumentParams
 import org.eclipse.lsp4j.DidCloseTextDocumentParams
 import org.eclipse.lsp4j.DidOpenTextDocumentParams
@@ -141,6 +154,8 @@ class CppLanguageServer(
 
     private const val REQUEST_TIMEOUT_SECONDS = 20L
     private const val DIAGNOSTICS_WAIT_MS = 3000L
+
+    private val EMPTY_SIGNATURE_HELP = SignatureHelp(emptyList(), -1, -1)
 
     /**
      * Compile flags clangd uses for files that are not covered by a compilation database (i.e.
@@ -303,8 +318,261 @@ class CppLanguageServer(
     return params.selection
   }
 
-  override suspend fun signatureHelp(params: SignatureHelpParams): SignatureHelp {
-    return SignatureHelp(emptyList(), -1, -1)
+  override suspend fun signatureHelp(params: SignatureHelpParams): SignatureHelp =
+    withContext(Dispatchers.IO) {
+      val file = params.file.toFile()
+      val server = ensureStarted(rootFor(file)) ?: return@withContext EMPTY_SIGNATURE_HELP
+      try {
+        val uri = file.toURI().toString()
+        syncDocument(file, uri, null)
+        val lspParams = org.eclipse.lsp4j.SignatureHelpParams(
+          TextDocumentIdentifier(uri),
+          org.eclipse.lsp4j.Position(params.position.line, params.position.column)
+        )
+        val help = server.textDocumentService.signatureHelp(lspParams)
+          .get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+          ?: return@withContext EMPTY_SIGNATURE_HELP
+
+        val signatures = (help.signatures ?: emptyList()).map { signature ->
+          SignatureInformation(
+            label = signature.label.orEmpty(),
+            documentation = markup(signature.documentation),
+            parameters = (signature.parameters ?: emptyList()).map { parameter ->
+              ParameterInformation(
+                label = parameterLabel(parameter, signature.label.orEmpty()),
+                documentation = markup(parameter.documentation)
+              )
+            }
+          )
+        }
+
+        SignatureHelp(signatures, help.activeSignature ?: -1, help.activeParameter ?: -1)
+      } catch (error: Throwable) {
+        log.error("clangd signature help failed", error)
+        EMPTY_SIGNATURE_HELP
+      }
+    }
+
+  override suspend fun documentSymbols(file: Path): DocumentSymbolResult =
+    withContext(Dispatchers.IO) {
+      val ioFile = file.toFile()
+      val server = ensureStarted(rootFor(ioFile)) ?: return@withContext DocumentSymbolResult.EMPTY
+      try {
+        val uri = ioFile.toURI().toString()
+        syncDocument(ioFile, uri, null)
+        val lspParams = org.eclipse.lsp4j.DocumentSymbolParams(TextDocumentIdentifier(uri))
+        val symbols = server.textDocumentService.documentSymbol(lspParams)
+          .get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+          ?: return@withContext DocumentSymbolResult.EMPTY
+
+        val flattened = mutableListOf<DocumentSymbol>()
+        symbols.forEach { either ->
+          when {
+            either.isLeft -> either.left?.let { info ->
+              mapLocation(info.location)?.let { location ->
+                flattened += DocumentSymbol(
+                  name = info.name.orEmpty(),
+                  kind = symbolKind(info.kind),
+                  detail = "",
+                  range = location.range,
+                  container = info.containerName.orEmpty()
+                )
+              }
+            }
+
+            else -> either.right?.let { collectSymbols(it, "", flattened) }
+          }
+        }
+        DocumentSymbolResult(flattened)
+      } catch (error: Throwable) {
+        log.error("clangd document symbols failed", error)
+        DocumentSymbolResult.EMPTY
+      }
+    }
+
+  override suspend fun hover(params: DefinitionParams): HoverResult = withContext(Dispatchers.IO) {
+    val file = params.file.toFile()
+    val server = ensureStarted(rootFor(file)) ?: return@withContext HoverResult.EMPTY
+    try {
+      val uri = file.toURI().toString()
+      syncDocument(file, uri, null)
+      val lspParams = org.eclipse.lsp4j.HoverParams(
+        TextDocumentIdentifier(uri),
+        org.eclipse.lsp4j.Position(params.position.line, params.position.column)
+      )
+      val hover = server.textDocumentService.hover(lspParams)
+        .get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        ?: return@withContext HoverResult.EMPTY
+
+      HoverResult(hoverText(hover.contents))
+    } catch (error: Throwable) {
+      log.error("clangd hover failed", error)
+      HoverResult.EMPTY
+    }
+  }
+
+  override suspend fun codeActions(params: CodeActionParams): List<CodeActionItem> =
+    withContext(Dispatchers.IO) {
+      val file = params.file.toFile()
+      val server = ensureStarted(rootFor(file)) ?: return@withContext emptyList()
+      try {
+        val uri = file.toURI().toString()
+        syncDocument(file, uri, null)
+
+        val range = org.eclipse.lsp4j.Range(
+          org.eclipse.lsp4j.Position(params.range.start.line, params.range.start.column),
+          org.eclipse.lsp4j.Position(params.range.end.line, params.range.end.column)
+        )
+
+        // clangd only offers a fix when the request carries the diagnostic it belongs to, so the
+        // diagnostics already reported for this file are replayed back to it here.
+        val context = CodeActionContext(diagnosticsIn(uri, params.range))
+        val lspParams = org.eclipse.lsp4j.CodeActionParams(
+          TextDocumentIdentifier(uri),
+          range,
+          context
+        )
+
+        val actions = server.textDocumentService.codeAction(lspParams)
+          .get(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+          ?: return@withContext emptyList()
+
+        actions.mapNotNull { either ->
+          if (either.isLeft) null else either.right?.let(::mapCodeAction)
+        }
+      } catch (error: Throwable) {
+        log.error("clangd code actions failed", error)
+        emptyList()
+      }
+    }
+
+  private fun mapCodeAction(action: org.eclipse.lsp4j.CodeAction): CodeActionItem? {
+    val changes = action.edit?.changes ?: return null
+    val documentChanges = changes.mapNotNull { (uri, edits) ->
+      val path = runCatching { Paths.get(URI(uri)) }.getOrNull() ?: return@mapNotNull null
+      val mapped = edits.mapNotNull { mapTextEdit(it) }
+      if (mapped.isEmpty()) null else DocumentChange(path, mapped)
+    }
+
+    if (documentChanges.isEmpty()) {
+      return null
+    }
+
+    return CodeActionItem(
+      title = action.title.orEmpty(),
+      changes = documentChanges,
+      kind = CodeActionKind.QuickFix,
+      command = Command("", "")
+    )
+  }
+
+  /**
+   * clangd matches a code action against the exact diagnostic it was reported for, so only the
+   * diagnostics overlapping the requested range are sent back.
+   */
+  private fun diagnosticsIn(
+    uri: String,
+    range: Range
+  ): List<org.eclipse.lsp4j.Diagnostic> {
+    val items = diagnostics[diagnosticsKey(uri)] ?: return emptyList()
+    return items.filter { item -> overlaps(item.range, range) }
+      .map { item ->
+        org.eclipse.lsp4j.Diagnostic(
+          org.eclipse.lsp4j.Range(
+            org.eclipse.lsp4j.Position(item.range.start.line, item.range.start.column),
+            org.eclipse.lsp4j.Position(item.range.end.line, item.range.end.column)
+          ),
+          item.message
+        ).also { diagnostic ->
+          diagnostic.source = item.source.ifEmpty { null }
+          if (item.code.isNotEmpty()) {
+            diagnostic.code = org.eclipse.lsp4j.jsonrpc.messages.Either.forLeft(item.code)
+          }
+        }
+      }
+  }
+
+  private fun overlaps(a: Range, b: Range): Boolean {
+    val startsAfter = a.start.line > b.end.line ||
+        (a.start.line == b.end.line && a.start.column > b.end.column)
+    val endsBefore = a.end.line < b.start.line ||
+        (a.end.line == b.start.line && a.end.column < b.start.column)
+    return !startsAfter && !endsBefore
+  }
+
+  private fun collectSymbols(    symbol: org.eclipse.lsp4j.DocumentSymbol,
+    container: String,
+    into: MutableList<DocumentSymbol>
+  ) {
+    val range = symbol.selectionRange ?: symbol.range
+    into += DocumentSymbol(
+      name = symbol.name.orEmpty(),
+      kind = symbolKind(symbol.kind),
+      detail = symbol.detail.orEmpty(),
+      range = Range(
+        Position(range.start.line, range.start.character),
+        Position(range.end.line, range.end.character)
+      ),
+      container = container
+    )
+
+    val nested = if (container.isEmpty()) symbol.name.orEmpty() else "$container::${symbol.name}"
+    symbol.children?.forEach { child -> collectSymbols(child, nested, into) }
+  }
+
+  private fun symbolKind(kind: org.eclipse.lsp4j.SymbolKind?): String =
+    kind?.name?.lowercase() ?: "symbol"
+
+  private fun markup(
+    documentation: org.eclipse.lsp4j.jsonrpc.messages.Either<String, org.eclipse.lsp4j.MarkupContent>?
+  ): MarkupContent = when {
+    documentation == null -> MarkupContent()
+    documentation.isLeft -> MarkupContent(documentation.left.orEmpty(), MarkupKind.PLAIN)
+    else -> MarkupContent(
+      documentation.right?.value.orEmpty(),
+      if (documentation.right?.kind == "markdown") MarkupKind.MARKDOWN else MarkupKind.PLAIN
+    )
+  }
+
+  /**
+   * clangd may report a parameter either as literal text or as a pair of offsets into the
+   * signature label; the offsets have to be resolved against that label.
+   */
+  private fun parameterLabel(
+    parameter: org.eclipse.lsp4j.ParameterInformation,
+    signatureLabel: String
+  ): String {
+    val label = parameter.label ?: return ""
+    if (label.isLeft) {
+      return label.left.orEmpty()
+    }
+    val range = label.right ?: return ""
+    val start = range.first ?: return ""
+    val end = range.second ?: return ""
+    return if (start in 0..end && end <= signatureLabel.length) {
+      signatureLabel.substring(start, end)
+    } else {
+      ""
+    }
+  }
+
+  private fun hoverText(
+    contents: org.eclipse.lsp4j.jsonrpc.messages.Either<
+        List<org.eclipse.lsp4j.jsonrpc.messages.Either<String, org.eclipse.lsp4j.MarkedString>>,
+        org.eclipse.lsp4j.MarkupContent>?
+  ): String {
+    if (contents == null) {
+      return ""
+    }
+    if (contents.isRight) {
+      return contents.right?.value.orEmpty().trim()
+    }
+    return (contents.left ?: emptyList()).joinToString("\n") { entry ->
+      when {
+        entry.isLeft -> entry.left.orEmpty()
+        else -> entry.right?.value.orEmpty()
+      }
+    }.trim()
   }
 
   override suspend fun analyze(file: Path): DiagnosticResult = withContext(Dispatchers.IO) {

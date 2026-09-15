@@ -30,14 +30,11 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.tabs.TabLayout
 import com.itsaky.androidide.ai.databinding.FragmentAiChatBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiHistoryBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiSkillUrlBinding
 import com.itsaky.androidide.ai.databinding.LayoutAiSkillsBinding
-import com.itsaky.androidide.ai.databinding.LayoutAiSubagentsBinding
 import com.itsaky.androidide.ai.agent.AgentMode
-import com.itsaky.androidide.ai.agent.SubagentSession
 import com.itsaky.androidide.ai.history.ChatSessionInfo
 import com.itsaky.androidide.ai.tools.ApprovalDecision
 import com.itsaky.androidide.fragments.FragmentWithBinding
@@ -97,7 +94,6 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
 
     binding.newChat.setOnClickListener { viewModel.clear() }
     binding.history.setOnClickListener { showHistory() }
-    binding.subagents.setOnClickListener { showSubagents() }
     binding.skills.setOnClickListener { showSkills() }
     binding.agentMode.setOnClickListener { toggleAgentMode() }
 
@@ -112,10 +108,6 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
     }
 
     viewModel.busy.observe(viewLifecycleOwner) { updateSendButton() }
-
-    viewModel.subagents.observe(viewLifecycleOwner) { sessions ->
-      binding.subagents.visibility = if (sessions.isEmpty()) View.GONE else View.VISIBLE
-    }
 
     viewModel.agentMode.observe(viewLifecycleOwner) { mode ->
       val plan = mode == AgentMode.PLAN
@@ -218,38 +210,6 @@ class AiChatFragment : FragmentWithBinding<FragmentAiChatBinding>(FragmentAiChat
     }
 
     dialog.setOnDismissListener { viewModel.sessions.removeObservers(viewLifecycleOwner) }
-    dialog.show()
-  }
-
-  private fun showSubagents() {
-    val panelBinding = LayoutAiSubagentsBinding.inflate(LayoutInflater.from(requireContext()))
-    val dialog = DialogUtils.newMaterialDialogBuilder(requireContext())
-      .setTitle(com.itsaky.androidide.resources.R.string.title_ai_subagents)
-      .setView(panelBinding.root)
-      .setNegativeButton(android.R.string.cancel, null)
-      .create()
-
-    val activityAdapter = SubagentActivityAdapter()
-    panelBinding.subagentActivity.layoutManager = LinearLayoutManager(requireContext())
-    panelBinding.subagentActivity.adapter = activityAdapter
-    panelBinding.subagentActivity.itemAnimator = null
-
-    val panel = SubagentPanel(panelBinding, activityAdapter)
-
-    panelBinding.subagentTabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-      override fun onTabSelected(tab: TabLayout.Tab) {
-        panel.select(tab.tag as? Long ?: return)
-      }
-
-      override fun onTabUnselected(tab: TabLayout.Tab) = Unit
-
-      override fun onTabReselected(tab: TabLayout.Tab) = Unit
-    })
-
-    val observer = Observer<List<SubagentSession>> { sessions -> panel.submit(sessions) }
-    viewModel.subagents.observe(viewLifecycleOwner, observer)
-
-    dialog.setOnDismissListener { viewModel.subagents.removeObserver(observer) }
     dialog.show()
   }
 

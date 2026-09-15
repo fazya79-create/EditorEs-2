@@ -54,6 +54,7 @@ import com.itsaky.androidide.lsp.api.ILanguageServer
 import com.itsaky.androidide.lsp.models.Command
 import com.itsaky.androidide.lsp.models.DefinitionParams
 import com.itsaky.androidide.lsp.models.DefinitionResult
+import com.itsaky.androidide.lsp.models.HoverResult
 import com.itsaky.androidide.lsp.models.ReferenceParams
 import com.itsaky.androidide.lsp.models.ReferenceResult
 import com.itsaky.androidide.lsp.models.ShowDocumentParams
@@ -109,6 +110,7 @@ open class IDEEditor @JvmOverloads constructor(
 
   private var _actionsMenu: EditorActionsMenu? = null
   private var _diagnosticWindow: DiagnosticWindow? = null
+  private var _hoverWindow: HoverWindow? = null
   private var fileVersion = 0
   internal var isModified = false
 
@@ -158,6 +160,14 @@ open class IDEEditor @JvmOverloads constructor(
   val diagnosticWindow: DiagnosticWindow
     get() {
       return _diagnosticWindow ?: DiagnosticWindow(this).also { _diagnosticWindow = it }
+    }
+
+  /**
+   * The hover window for the editor.
+   */
+  val hoverWindow: HoverWindow
+    get() {
+      return _hoverWindow ?: HoverWindow(this).also { _hoverWindow = it }
     }
 
   companion object {
@@ -276,9 +286,43 @@ open class IDEEditor @JvmOverloads constructor(
     }?.logError("references request")
   }
 
+  override fun showHover() {
+    if (isReleased) {
+      return
+    }
+    val languageServer = this.languageServer ?: return
+    val file = file ?: return
+
+    launchCancellableAsyncWithProgress(string.msg_loading_hover) { _, cancelChecker ->
+      val result = safeGet("hover request") {
+        val params = DefinitionParams(file.toPath(), cursorLSPPosition, cancelChecker)
+        languageServer.hover(params)
+      }
+
+      onHoverResult(result)
+    }?.logError("hover request")
+  }
+
+  protected open suspend fun onHoverResult(result: HoverResult?) = withContext(Dispatchers.Main) {
+    if (isReleased) {
+      return@withContext
+    }
+
+    if (result == null || result.isEmpty) {
+      flashError(string.msg_no_hover)
+      return@withContext
+    }
+
+    hoverWindow.showContent(result.content)
+  }
+
   override fun ensureWindowsDismissed() {
     if (_diagnosticWindow?.isShowing == true) {
       _diagnosticWindow?.dismiss()
+    }
+
+    if (_hoverWindow?.isShowing == true) {
+      _hoverWindow?.dismiss()
     }
 
     if (_actionsMenu?.isShowing == true) {
@@ -318,6 +362,7 @@ open class IDEEditor @JvmOverloads constructor(
 
     _actionsMenu = null
     _diagnosticWindow = null
+    _hoverWindow = null
 
     languageServer = null
     languageClient = null

@@ -75,4 +75,22 @@ class SystemPromptTest {
     assertThat(prompt).doesNotContain("Use web_search when you need information")
   }
 
+  @Test
+  fun `the task list must be updated one item at a time`() {
+    val prompt = SystemPrompt.build()
+
+    assertThat(prompt).contains("update it step by step while you work, never in one batch")
+    assertThat(prompt).contains("mark it completed as soon as that single item is done")
+  }
+
+  @Test
+  fun `a sub-agent without the todo tool is not told to keep a task list`() {
+    val prompt = SystemPrompt.buildForSubagent(
+      scope = com.itsaky.androidide.ai.tools.ToolScope.READ_ONLY,
+      toolNames = listOf("read_file")
+    )
+
+    assertThat(prompt).doesNotContain("update it step by step while you work")
+  }
+
 }

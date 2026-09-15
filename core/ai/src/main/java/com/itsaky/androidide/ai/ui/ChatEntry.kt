@@ -73,7 +73,6 @@ sealed interface ChatEntry {
 
   data class Subagent(
     override val id: Long,
-    val delegationId: Long,
     val description: String,
     val scope: ToolScope,
     val state: SubagentState,

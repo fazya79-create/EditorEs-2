@@ -36,6 +36,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.slf4j.LoggerFactory
 
 sealed interface AgentEvent {
 
@@ -194,27 +195,18 @@ class ChatAgent(
     val results = arrayOfNulls<ToolResult>(calls.size)
     var index = 0
 
+    log.debug("Tool round: {}", calls.joinToString(", ") { it.name })
+
     while (index < calls.size) {
       val batch = parallelBatchAt(calls, index)
-
-      if (batch <= 1) {
-        val call = calls[index]
-        emit(AgentEvent.ToolStarted(call, gate.summarize(call)))
-        val result = gate.run(call)
-        results[index] = result
-        emit(AgentEvent.ToolFinished(call, result))
-        if (call.name == TodoWriteTool.NAME && !result.isError) {
-          emit(AgentEvent.TodosUpdated(gate.todos()))
-        }
-        index++
-        continue
-      }
-
       val group = calls.subList(index, index + batch)
+
       group.forEach { call -> emit(AgentEvent.ToolStarted(call, gate.summarize(call))) }
 
-      val completed = coroutineScope {
-        group.map { call -> async { gate.run(call) } }.awaitAll()
+      val completed = if (batch == 1) {
+        listOf(gate.run(group.first()))
+      } else {
+        coroutineScope { group.map { call -> async { gate.run(call) } }.awaitAll() }
       }
 
       completed.forEachIndexed { offset, result ->
@@ -222,10 +214,26 @@ class ChatAgent(
         emit(AgentEvent.ToolFinished(group[offset], result))
       }
 
+      if (group.indices.any { offset -> wroteTodos(group[offset], completed[offset]) }) {
+        emitTodos(emit)
+      }
+
       index += batch
     }
 
     return results.map { requireNotNull(it) }
+  }
+
+  private fun wroteTodos(call: ToolCall, result: ToolResult): Boolean =
+    call.name == TodoWriteTool.NAME && !result.isError
+
+  private suspend fun emitTodos(emit: suspend (AgentEvent) -> Unit) {
+    val todos = gate.todos()
+    log.debug(
+      "Task list updated: {}",
+      todos.joinToString(", ") { "${it.id}=${it.status.wireValue}" }
+    )
+    emit(AgentEvent.TodosUpdated(todos))
   }
 
   private fun parallelBatchAt(calls: List<ToolCall>, start: Int): Int {
@@ -306,5 +314,7 @@ class ChatAgent(
     const val DEFAULT_MAX_TOOL_ROUNDS = 12
 
     private const val SUMMARY_MAX_TOKENS = 2048
+
+    private val log = LoggerFactory.getLogger(ChatAgent::class.java)
   }
 }

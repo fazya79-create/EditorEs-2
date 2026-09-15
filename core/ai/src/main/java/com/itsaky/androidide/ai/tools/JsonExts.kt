@@ -27,6 +27,14 @@ internal fun JsonElement.asStringOrNull(): String? =
 internal fun JsonElement.asBooleanOrNull(): Boolean? =
   if (isJsonPrimitive && asJsonPrimitive.isBoolean) asBoolean else null
 
+// Models routinely send numeric arguments as strings, so accept both spellings.
+internal fun JsonElement.asIntOrNull(): Int? = when {
+  !isJsonPrimitive -> null
+  asJsonPrimitive.isNumber -> asInt
+  asJsonPrimitive.isString -> asString.trim().toIntOrNull()
+  else -> null
+}
+
 internal fun parseArguments(json: String): JsonObject =
   runCatching { JsonParser.parseString(json) }
     .getOrNull()

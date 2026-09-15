@@ -23,9 +23,12 @@ import com.itsaky.androidide.actions.ActionItem.Location.EDITOR_TOOLBAR
 import com.itsaky.androidide.actions.ActionsRegistry
 import com.itsaky.androidide.actions.editor.CopyAction
 import com.itsaky.androidide.actions.editor.CutAction
+import com.itsaky.androidide.actions.editor.GoToSymbolAction
 import com.itsaky.androidide.actions.editor.LongSelectAction
 import com.itsaky.androidide.actions.editor.PasteAction
+import com.itsaky.androidide.actions.editor.QuickFixAction
 import com.itsaky.androidide.actions.editor.SelectAllAction
+import com.itsaky.androidide.actions.editor.ShowHoverAction
 import com.itsaky.androidide.actions.etc.FindActionMenu
 import com.itsaky.androidide.actions.etc.MarkdownPreviewAction
 import com.itsaky.androidide.actions.etc.ReloadColorSchemesAction
@@ -77,6 +80,9 @@ class EditorActivityActions {
       registry.registerAction(CopyAction(context, order++))
       registry.registerAction(PasteAction(context, order++))
       registry.registerAction(FormatCodeAction(context, order++))
+      registry.registerAction(GoToSymbolAction(context, order++))
+      registry.registerAction(ShowHoverAction(context, order++))
+      registry.registerAction(QuickFixAction(context, order++))
 
       // file tab actions
       registry.registerAction(CloseFileAction(context, order++))

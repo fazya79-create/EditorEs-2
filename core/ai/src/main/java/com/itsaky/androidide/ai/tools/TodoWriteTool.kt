@@ -30,7 +30,13 @@ class TodoWriteTool(private val store: TodoStore) : AiTool {
         "when you want the user to see your plan. Call it with no arguments to read the current " +
         "list. Writing replaces the whole list, so always send every item back. Keep exactly one " +
         "item in_progress at a time and mark an item completed only once the work is actually " +
-        "done and verified, never because you intend to do it.",
+        "done and verified, never because you intend to do it. Update the list one step at a " +
+        "time, as a separate call of its own: mark an item in_progress before you start it, and " +
+        "call this tool again to mark it completed the moment that item is finished, before you " +
+        "begin the next one. Never batch several status changes into one call at the end of the " +
+        "work, and never leave a finished item sitting at in_progress while you move on: the " +
+        "user watches this list to follow your progress, so a list that only changes once at " +
+        "the start and once at the end is worse than no list at all.",
     parametersSchemaJson = """
       {
         "type": "object",

@@ -38,6 +38,14 @@
   <string name="msg_finding_references">Finding references…</string>
   <string name="msg_finding_definition">Finding definition…</string>
   <string name="msg_no_definition">Definition not found</string>
+  <string name="msg_loading_hover">Looking up symbol…</string>
+  <string name="msg_no_hover">Nothing to show for this symbol</string>
+  <string name="title_go_to_symbol">Go to symbol</string>
+  <string name="msg_loading_symbols">Listing symbols…</string>
+  <string name="msg_no_symbols">No symbols found in this file</string>
+  <string name="title_show_hover">Show info</string>
+  <string name="title_quick_fix">Quick fix</string>
+  <string name="msg_no_quick_fixes">No quick fixes available here</string>
 
   <!-- Build Tools Installation -->
   <string name="msg_no_references">No references found</string>
@@ -381,20 +389,6 @@
   <string name="msg_ai_skill_deleted">Deleted %1$s</string>
   <string name="msg_ai_skill_builtin_readonly">Built-in and project skills cannot be deleted here.</string>
   <string name="msg_ai_skill_confirm_delete">Delete the skill \'%1$s\'?</string>
-  <string name="action_ai_subagents">Sub-agents</string>
-  <string name="title_ai_subagents">Sub-agents</string>
-  <string name="msg_ai_subagents_empty">No sub-agents have been dispatched in this conversation yet.</string>
-  <string name="msg_ai_subagent_activity_empty">This sub-agent has not reported anything yet.</string>
-  <string name="msg_ai_subagent_state_running">Running</string>
-  <string name="msg_ai_subagent_state_succeeded">Completed</string>
-  <string name="msg_ai_subagent_state_failed">Failed</string>
-  <string name="msg_ai_subagent_scope">Scope: %1$s</string>
-  <string name="title_ai_subagent_task">Task</string>
-  <string name="title_ai_subagent_thinking">Thinking</string>
-  <string name="title_ai_subagent_message">Reply</string>
-  <string name="title_ai_subagent_tool_started">Running %1$s</string>
-  <string name="title_ai_subagent_tool_finished">Finished %1$s</string>
-  <string name="title_ai_subagent_notice">Notice</string>
   <string name="msg_ai_tool_rejected">Rejected</string>
   <string name="title_ai_approval">Allow this action?</string>
   <string name="title_ai_interrupted">Interrupted</string>

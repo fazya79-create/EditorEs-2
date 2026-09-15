@@ -43,16 +43,6 @@
 
 
     <com.google.android.material.button.MaterialButton
-      android:id="@+id/subagents"
-      style="@style/Widget.Material3.Button.IconButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:contentDescription="@string/action_ai_subagents"
-      android:visibility="gone"
-      app:icon="@drawable/ic_bash_commands"
-      tools:visibility="visible" />
-
-    <com.google.android.material.button.MaterialButton
       android:id="@+id/skills"
       style="@style/Widget.Material3.Button.IconButton"
       android:layout_width="wrap_content"

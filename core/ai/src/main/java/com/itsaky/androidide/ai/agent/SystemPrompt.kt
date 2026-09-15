@@ -20,6 +20,7 @@ package com.itsaky.androidide.ai.agent
 import com.itsaky.androidide.projects.IProjectManager
 import com.itsaky.androidide.ai.skills.Skill
 import com.itsaky.androidide.ai.tools.SkillTool
+import com.itsaky.androidide.ai.tools.TodoWriteTool
 import com.itsaky.androidide.ai.tools.ToolScope
 
 enum class SearchAvailability {
@@ -34,7 +35,8 @@ object SystemPrompt {
     mode: AgentMode = AgentMode.BUILD,
     skills: List<Skill> = emptyList(),
     instructions: String = "",
-    editor: EditorContext? = null
+    editor: EditorContext? = null,
+    todos: Boolean = true
   ): String {
     val projectDir = runCatching { IProjectManager.getInstance().projectDirPath }
       .getOrNull()
@@ -88,6 +90,16 @@ object SystemPrompt {
       append("alternatives.\n")
       append("- Mutating tool calls may require the user's approval and can be rejected. If a call ")
       append("is rejected, stop and ask the user how to proceed.\n")
+      if (todos) {
+        append("- When you keep a task list with ")
+        append(TodoWriteTool.NAME)
+        append(", update it step by step while you work, never in one batch at the end. Mark an ")
+        append("item in_progress before you start it, and call ")
+        append(TodoWriteTool.NAME)
+        append(" again to mark it completed as soon as that single item is done, before ")
+        append("starting the next one. The user follows your progress through this list, so ")
+        append("each item has to be checked off on its own as it finishes.\n")
+      }
       if (mode == AgentMode.PLAN) {
         append("- You are in Plan mode. The tools that write files or run commands have been ")
         append("withheld from this conversation, so you cannot change anything. Investigate with ")
@@ -172,7 +184,8 @@ object SystemPrompt {
         searchAvailability,
         if (scope == ToolScope.READ_ONLY) AgentMode.PLAN else AgentMode.BUILD,
         skills = skills.filter { SkillTool.NAME in toolNames },
-        instructions = instructions
+        instructions = instructions,
+        todos = TodoWriteTool.NAME in toolNames
       )
     )
     append("\n\n")

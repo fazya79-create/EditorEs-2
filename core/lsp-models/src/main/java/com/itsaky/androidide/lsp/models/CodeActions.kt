@@ -18,7 +18,14 @@
 package com.itsaky.androidide.lsp.models
 
 import com.itsaky.androidide.lsp.models.CodeActionKind.None
+import com.itsaky.androidide.models.Range
 import java.nio.file.Path
+
+/**
+ * Identifies the region a code action is requested for. The server matches this against the
+ * diagnostics it reported, so the range should cover the symbol or the diagnostic under the cursor.
+ */
+data class CodeActionParams(val file: Path, val range: Range)
 
 /**
  * Parameter provided to the language client in order to perform a code action.
